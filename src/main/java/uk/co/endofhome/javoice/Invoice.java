@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public class Invoice {
     private final LocalDate date;
     private final Customer customer;
-    private final String orderNumber;
+    public final String orderNumber;
     private final Sequence<String> itemLines;
     private final String customerReference;
 
