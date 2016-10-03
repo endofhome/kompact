@@ -9,9 +9,9 @@ public class Invoice {
     public final LocalDate date;
     public final Customer customer;
     public final String orderNumber;
-    private final Sequence<String> itemLines;
+    public final Sequence<ItemLine> itemLines;
 
-    public Invoice(String invoiceNumber, LocalDate date, Customer customer, String orderNumber, Sequence<String> itemLines) {
+    public Invoice(String invoiceNumber, LocalDate date, Customer customer, String orderNumber, Sequence<ItemLine> itemLines) {
         this.number = invoiceNumber;
         this.date = date;
         this.customer = customer;

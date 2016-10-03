@@ -14,6 +14,7 @@ import java.time.LocalDate;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
+import static junit.framework.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class InvoiceFileActionsTest {
@@ -85,5 +86,15 @@ public class InvoiceFileActionsTest {
         String invoiceNumber = invoiceFileActions.getInvoiceNumberFrom(updatedSheet);
 
         assertThat(invoiceNumber, is("INV-999"));
+    }
+
+    @Test
+    public void can_set_one_item_line() throws IOException {
+        HSSFSheet invoiceSheet = invoiceFileActions.getSheetFromPath("data/INV-001.xls");
+        ItemLine singleItemLine = new ItemLine(3.0, "Magic beans", 3.0);
+        Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "some customer", sequence(singleItemLine));
+        ItemLine updatedItemLine = invoiceFileActions.setItemLine(invoiceSheet, invoice, 17);
+
+        assertEquals(updatedItemLine, singleItemLine);
     }
 }

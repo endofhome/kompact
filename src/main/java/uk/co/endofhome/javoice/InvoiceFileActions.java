@@ -1,6 +1,7 @@
 package uk.co.endofhome.javoice;
 
 import com.googlecode.totallylazy.Sequence;
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
@@ -99,7 +100,19 @@ public class InvoiceFileActions {
         return invoiceSheet.getRow(3).getCell(11).getStringCellValue();
     }
 
-    private Invoice buildInvoice(String invoiceNumber, Sequence<String> customerDetails, Sequence<String> orderRefs, Sequence<String> itemLines) {
+    public ItemLine setItemLine(HSSFSheet invoiceSheet, Invoice invoice, int itemLineNumber) {
+        ItemLine itemLineDetails = invoice.itemLines.get(0);
+        HSSFCell quantityCell = invoiceSheet.getRow(itemLineNumber).getCell(3);
+        HSSFCell descriptionCell = invoiceSheet.getRow(itemLineNumber).getCell(4);
+        HSSFCell unitPriceCell = invoiceSheet.getRow(itemLineNumber).getCell(10);
+
+        quantityCell.setCellValue(itemLineDetails.quantity);
+        descriptionCell.setCellValue(itemLineDetails.description);
+        unitPriceCell.setCellValue(itemLineDetails.unitPrice);
+        return new ItemLine(itemLineDetails.quantity, itemLineDetails.description, itemLineDetails.unitPrice);
+    }
+
+    private Invoice buildInvoice(String invoiceNumber, Sequence<String> customerDetails, Sequence<String> orderRefs, Sequence<ItemLine> itemLines) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy").withLocale(Locale.getDefault());
         LocalDate invoiceDate = LocalDate.parse(orderRefs.get(0), formatter);
         Customer customer = new Customer(customerDetails.get(0), customerDetails.get(1), customerDetails.get(2), customerDetails.get(3), customerDetails.get(4), "");
