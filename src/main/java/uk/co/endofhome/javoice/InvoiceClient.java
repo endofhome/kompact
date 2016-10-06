@@ -1,13 +1,10 @@
 package uk.co.endofhome.javoice;
 
 import com.googlecode.totallylazy.Sequence;
-import com.sun.tools.internal.ws.wsdl.document.jaxws.Exception;
-import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.ss.usermodel.Row;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -21,12 +18,12 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 import static uk.co.endofhome.javoice.Invoice.ITEM_LINES_START_AT;
 import static uk.co.endofhome.javoice.Invoice.MAX_ITEM_LINES;
 
-public class InvoiceFileActions {
+public class InvoiceClient {
     public final String rootPath;
     public final HSSFWorkbook workBook;
     private final HSSFSheet sheet;
 
-    public InvoiceFileActions(HSSFWorkbook workBook) {
+    public InvoiceClient(HSSFWorkbook workBook) {
         this.rootPath = "data/";
         this.workBook = workBook;
         this.sheet = workBook.getSheetAt(2);

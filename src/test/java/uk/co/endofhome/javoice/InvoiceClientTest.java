@@ -17,9 +17,9 @@ import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static junit.framework.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class InvoiceFileActionsTest {
+public class InvoiceClientTest {
     private Customer customer = new Customer("Milford", "Herbalist St.", "New York", "NY-1010", "12345", "ACC-1967");
-    private InvoiceFileActions invoiceFileActions;
+    private InvoiceClient invoiceClient;
     private File file;
     private NPOIFSFileSystem fs;
     private HSSFWorkbook workbook;
@@ -29,7 +29,7 @@ public class InvoiceFileActionsTest {
         file = new File("data/test.xls");
         fs = new NPOIFSFileSystem(file);
         workbook = new HSSFWorkbook(fs.getRoot(), true);
-        invoiceFileActions = new InvoiceFileActions(workbook);
+        invoiceClient = new InvoiceClient(workbook);
     }
 
     @After
@@ -40,7 +40,7 @@ public class InvoiceFileActionsTest {
     @Test
     public void can_write_out_a_file() throws IOException {
         Invoice invoice = new Invoice("INV-001", LocalDate.now(), customer, "cust ref", sequence());
-        Invoice writtenInvoice = invoiceFileActions.writeFile(invoiceFileActions.rootPath, invoice);
+        Invoice writtenInvoice = invoiceClient.writeFile(invoiceClient.rootPath, invoice);
 
         // TODO: read the written file and test some of the fields.
         assertThat(writtenInvoice.number, is("INV-001"));
@@ -48,16 +48,16 @@ public class InvoiceFileActionsTest {
 
     @Test
     public void can_read_in_a_file() throws IOException {
-        Invoice invoiceFromFileSystem = invoiceFileActions.readFile("data/INV-001.xls");
+        Invoice invoiceFromFileSystem = invoiceClient.readFile("data/INV-001.xls");
         assertThat(invoiceFromFileSystem.number, is("15-000040"));
     }
 
     @Test
     public void can_set_customer_section() throws IOException {
-        HSSFSheet invoiceSheet = invoiceFileActions.getSheetFromPath("data/INV-001.xls");
+        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
         Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "anything", sequence());
-        HSSFSheet updatedSheet = invoiceFileActions.setCustomerSection(invoiceSheet, invoice);
-        Sequence<String> customerDetails = invoiceFileActions.getCustomerSectionFrom(updatedSheet);
+        HSSFSheet updatedSheet = invoiceClient.setCustomerSection(invoiceSheet, invoice);
+        Sequence<String> customerDetails = invoiceClient.getCustomerSectionFrom(updatedSheet);
 
         assertThat(customerDetails.get(0), is("Milford"));
         assertThat(customerDetails.get(1), is("Herbalist St."));
@@ -68,10 +68,10 @@ public class InvoiceFileActionsTest {
 
     @Test
     public void can_set_order_refs_section() throws IOException {
-        HSSFSheet invoiceSheet = invoiceFileActions.getSheetFromPath("data/INV-001.xls");
+        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
         Invoice invoice = new Invoice("some invoice number", LocalDate.of(2017, 03, 19), customer, "Bob", sequence());
-        HSSFSheet updatedSheet = invoiceFileActions.setOrderRefsSection(invoiceSheet, invoice);
-        Sequence<String> orderRefsDetails = invoiceFileActions.getOrderRefsSectionFrom(updatedSheet);
+        HSSFSheet updatedSheet = invoiceClient.setOrderRefsSection(invoiceSheet, invoice);
+        Sequence<String> orderRefsDetails = invoiceClient.getOrderRefsSectionFrom(updatedSheet);
 
         assertThat(orderRefsDetails.get(0), is("19/03/2017"));
         assertThat(orderRefsDetails.get(1), is("Bob"));
@@ -80,27 +80,27 @@ public class InvoiceFileActionsTest {
 
     @Test
     public void can_set_invoice_number() throws IOException {
-        HSSFSheet invoiceSheet = invoiceFileActions.getSheetFromPath("data/INV-001.xls");
+        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
         Invoice invoice = new Invoice("INV-999", LocalDate.now(), customer, "some customer ref", sequence());
-        HSSFSheet updatedSheet = invoiceFileActions.setInvoiceNumber(invoiceSheet, invoice);
-        String invoiceNumber = invoiceFileActions.getInvoiceNumberFrom(updatedSheet);
+        HSSFSheet updatedSheet = invoiceClient.setInvoiceNumber(invoiceSheet, invoice);
+        String invoiceNumber = invoiceClient.getInvoiceNumberFrom(updatedSheet);
 
         assertThat(invoiceNumber, is("INV-999"));
     }
 
     @Test
     public void can_set_one_item_line() throws IOException {
-        HSSFSheet invoiceSheet = invoiceFileActions.getSheetFromPath("data/INV-001.xls");
+        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
         ItemLine singleItemLine = new ItemLine(3.0, "Magic beans", 3.0);
         Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "some customer ref", sequence(singleItemLine));
-        ItemLine updatedItemLine = invoiceFileActions.setItemLine(invoiceSheet, invoice, 0);
+        ItemLine updatedItemLine = invoiceClient.setItemLine(invoiceSheet, invoice, 0);
 
         assertEquals(updatedItemLine, singleItemLine);
     }
 
     @Test
     public void can_set_multiple_item_lines() throws IOException {
-        HSSFSheet invoiceSheet = invoiceFileActions.getSheetFromPath("data/INV-001.xls");
+        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
         ItemLine firstItemLine = new ItemLine(3.0, "Magic beans", 3.0);
         ItemLine secondItemLine = new ItemLine(1.5, "Golden tickets", 100.0);
         ItemLine thirdItemLine = new ItemLine(0.5, "Super foods", 19.0);
@@ -113,7 +113,7 @@ public class InvoiceFileActionsTest {
                 "some customer ref",
                 actualItemLines
         );
-        Sequence<ItemLine> updatedItemLines = invoiceFileActions.setItemLines(invoiceSheet, invoice);
+        Sequence<ItemLine> updatedItemLines = invoiceClient.setItemLines(invoiceSheet, invoice);
 
         assertEquals(updatedItemLines, actualItemLines);
     }
