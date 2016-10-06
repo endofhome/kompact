@@ -22,12 +22,14 @@ public class InvoiceClientTest {
     private File file;
     private NPOIFSFileSystem fs;
     private HSSFWorkbook workbook;
+    private HSSFSheet sheet;
 
     @Before
     public void set_up() throws IOException {
         file = new File("data/test.xls");
         fs = new NPOIFSFileSystem(file);
         workbook = new HSSFWorkbook(fs.getRoot(), true);
+        sheet = workbook.getSheetAt(2);
         invoiceClient = new InvoiceClient(workbook);
     }
 
@@ -38,17 +40,20 @@ public class InvoiceClientTest {
 
     @Test
     public void can_write_out_a_file() throws IOException {
-        Invoice invoice = new Invoice("INV-001", LocalDate.now(), customer, "cust ref", sequence());
-        Invoice writtenInvoice = invoiceClient.writeFile(invoiceClient.rootPath, invoice);
-
-        // TODO: read the written file and test some of the fields.
-        assertThat(writtenInvoice.number, is("INV-001"));
-    }
-
-    @Test
-    public void can_read_in_a_file() throws IOException {
+        ItemLine itemLine = new ItemLine(3.0, "Green bottles", 10.0);
+        Invoice invoice = new Invoice("INV-001", LocalDate.now(), customer, "cust ref", sequence(itemLine));
+        invoiceClient.setCustomerSection(sheet, invoice);
+        invoiceClient.setInvoiceNumber(sheet, invoice);
+        invoiceClient.setOrderRefsSection(sheet, invoice);
+        invoiceClient.setItemLines(sheet, invoice);
+        invoiceClient.writeFile(invoiceClient.rootPath, invoice);
         Invoice invoiceFromFileSystem = invoiceClient.readFile("data/INV-001.xls");
-        assertThat(invoiceFromFileSystem.number, is("15-000040"));
+
+        assertThat(invoiceFromFileSystem.date, is(LocalDate.now()));
+        assertThat(invoiceFromFileSystem.number, is("INV-001"));
+        assertThat(invoiceFromFileSystem.customer.name, is("Milford"));
+        assertThat(invoiceFromFileSystem.orderNumber, is("cust ref"));
+        assertThat(invoiceFromFileSystem.itemLines.get(0).description, is("Green bottles"));
     }
 
     @Test

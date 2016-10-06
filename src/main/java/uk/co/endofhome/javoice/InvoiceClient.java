@@ -21,12 +21,10 @@ import static uk.co.endofhome.javoice.Invoice.MAX_ITEM_LINES;
 public class InvoiceClient {
     public final String rootPath;
     public final HSSFWorkbook workBook;
-    private final HSSFSheet sheet;
 
     public InvoiceClient(HSSFWorkbook workBook) {
         this.rootPath = "data/";
         this.workBook = workBook;
-        this.sheet = workBook.getSheetAt(2);
     }
 
     public Invoice writeFile(String filePath, Invoice invoice) throws IOException {
@@ -45,8 +43,8 @@ public class InvoiceClient {
         Sequence<String> customerDetails = getCustomerSectionFrom(invoiceSheet);
         Sequence<String> orderRefs = getOrderRefsSectionFrom(invoiceSheet);
         String invoiceNumber = getInvoiceNumberFrom(invoiceSheet);
-//        getItemLinesFrom(invoiceSheet);
-        return buildInvoice(invoiceNumber, customerDetails, orderRefs, sequence());
+        Sequence<ItemLine> itemLines = getItemLinesFrom(invoiceSheet);
+        return buildInvoice(invoiceNumber, customerDetails, orderRefs, itemLines);
     }
 
     public HSSFSheet getSheetFromPath(String filePath) throws IOException {
