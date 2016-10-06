@@ -14,7 +14,6 @@ import java.time.LocalDate;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
-import static junit.framework.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class InvoiceClientTest {
@@ -95,7 +94,7 @@ public class InvoiceClientTest {
         Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "some customer ref", sequence(singleItemLine));
         ItemLine updatedItemLine = invoiceClient.setItemLine(invoiceSheet, invoice, 0);
 
-        assertEquals(updatedItemLine, singleItemLine);
+        assertThat(updatedItemLine, is(singleItemLine));
     }
 
     @Test
@@ -115,6 +114,6 @@ public class InvoiceClientTest {
         );
         Sequence<ItemLine> updatedItemLines = invoiceClient.setItemLines(invoiceSheet, invoice);
 
-        assertEquals(updatedItemLines, actualItemLines);
+        assertThat(updatedItemLines, is(actualItemLines));
     }
 }
