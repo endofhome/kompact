@@ -11,6 +11,9 @@ public class Invoice {
     public final String orderNumber;
     public final Sequence<ItemLine> itemLines;
 
+    public static final int ITEM_LINES_START_AT = 17;
+    public static final int MAX_ITEM_LINES = 17;
+
     public Invoice(String invoiceNumber, LocalDate date, Customer customer, String orderNumber, Sequence<ItemLine> itemLines) {
         this.number = invoiceNumber;
         this.date = date;

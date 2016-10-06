@@ -1,10 +1,13 @@
 package uk.co.endofhome.javoice;
 
 import com.googlecode.totallylazy.Sequence;
+import com.sun.tools.internal.ws.wsdl.document.jaxws.Exception;
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Row;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -15,6 +18,8 @@ import java.util.Date;
 import java.util.Locale;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static uk.co.endofhome.javoice.Invoice.ITEM_LINES_START_AT;
+import static uk.co.endofhome.javoice.Invoice.MAX_ITEM_LINES;
 
 public class InvoiceFileActions {
     public final String rootPath;
@@ -101,15 +106,27 @@ public class InvoiceFileActions {
     }
 
     public ItemLine setItemLine(HSSFSheet invoiceSheet, Invoice invoice, int itemLineNumber) {
-        ItemLine itemLineDetails = invoice.itemLines.get(0);
-        HSSFCell quantityCell = invoiceSheet.getRow(itemLineNumber).getCell(3);
-        HSSFCell descriptionCell = invoiceSheet.getRow(itemLineNumber).getCell(4);
-        HSSFCell unitPriceCell = invoiceSheet.getRow(itemLineNumber).getCell(10);
+        ItemLine itemLineDetails = invoice.itemLines.get(itemLineNumber);
+        HSSFRow row = invoiceSheet.getRow(itemLineNumber + ITEM_LINES_START_AT);
+        row.getCell(3).setCellValue(itemLineDetails.quantity);
+        row.getCell(4).setCellValue(itemLineDetails.description);
+        row.getCell(10).setCellValue(itemLineDetails.unitPrice);
+        return itemLineDetails;
+    }
 
-        quantityCell.setCellValue(itemLineDetails.quantity);
-        descriptionCell.setCellValue(itemLineDetails.description);
-        unitPriceCell.setCellValue(itemLineDetails.unitPrice);
-        return new ItemLine(itemLineDetails.quantity, itemLineDetails.description, itemLineDetails.unitPrice);
+    public Sequence<ItemLine> setItemLines(HSSFSheet invoiceSheet, Invoice invoice) {
+        Sequence<ItemLine> itemLines = sequence();
+        int lastItemLine = ITEM_LINES_START_AT + invoice.itemLines.size() -1;
+        if (invoice.itemLines.size() <= MAX_ITEM_LINES) {
+            for (int i = ITEM_LINES_START_AT; i <= lastItemLine; i++) {
+                int itemLineNumber = i - ITEM_LINES_START_AT;
+                setItemLine(invoiceSheet, invoice, itemLineNumber);
+                itemLines = itemLines.append(invoice.itemLines.get(itemLineNumber));
+            }
+        } else {
+            throw new RuntimeException(String.format("Too many lines for invoice number %s", invoice.number));
+        }
+        return itemLines;
     }
 
     private Invoice buildInvoice(String invoiceNumber, Sequence<String> customerDetails, Sequence<String> orderRefs, Sequence<ItemLine> itemLines) {
