@@ -92,9 +92,10 @@ public class InvoiceClientTest {
         HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
         ItemLine singleItemLine = new ItemLine(3.0, "Magic beans", 3.0);
         Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "some customer ref", sequence(singleItemLine));
-        ItemLine updatedItemLine = invoiceClient.setItemLine(invoiceSheet, invoice, 0);
+        HSSFSheet updatedSheet = invoiceClient.setItemLine(invoiceSheet, invoice, 0);
+        ItemLine newFirstLine = invoiceClient.getItemLinesFrom(updatedSheet).get(0);
 
-        assertThat(updatedItemLine, is(singleItemLine));
+        assertThat(newFirstLine, is(singleItemLine));
     }
 
     @Test
