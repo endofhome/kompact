@@ -18,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class InvoiceClientTest {
     private Customer customer = new Customer("Milford", "Herbalist St.", "New York", "NY-1010", "12345", "ACC-1967");
+    ItemLine itemLine = new ItemLine(3.0, "Green bottles", 10.0);
     private InvoiceClient invoiceClient;
     private File file;
     private NPOIFSFileSystem fs;
@@ -40,7 +41,6 @@ public class InvoiceClientTest {
 
     @Test
     public void can_write_out_a_file() throws IOException {
-        ItemLine itemLine = new ItemLine(3.0, "Green bottles", 10.0);
         Invoice invoice = new Invoice("INV-001", LocalDate.now(), customer, "cust ref", sequence(itemLine));
         invoiceClient.setCustomerSection(sheet, invoice);
         invoiceClient.setInvoiceNumber(sheet, invoice);
@@ -59,7 +59,7 @@ public class InvoiceClientTest {
     @Test
     public void can_set_customer_section() throws IOException {
         HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
-        Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "anything", sequence());
+        Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "anything", sequence(itemLine));
         HSSFSheet updatedSheet = invoiceClient.setCustomerSection(invoiceSheet, invoice);
         Sequence<String> customerDetails = invoiceClient.getCustomerSectionFrom(updatedSheet);
 
@@ -73,7 +73,7 @@ public class InvoiceClientTest {
     @Test
     public void can_set_order_refs_section() throws IOException {
         HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
-        Invoice invoice = new Invoice("some invoice number", LocalDate.of(2017, 03, 19), customer, "Bob", sequence());
+        Invoice invoice = new Invoice("some invoice number", LocalDate.of(2017, 03, 19), customer, "Bob", sequence(itemLine));
         HSSFSheet updatedSheet = invoiceClient.setOrderRefsSection(invoiceSheet, invoice);
         Sequence<String> orderRefsDetails = invoiceClient.getOrderRefsSectionFrom(updatedSheet);
 
@@ -85,7 +85,7 @@ public class InvoiceClientTest {
     @Test
     public void can_set_invoice_number() throws IOException {
         HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
-        Invoice invoice = new Invoice("INV-999", LocalDate.now(), customer, "some customer ref", sequence());
+        Invoice invoice = new Invoice("INV-999", LocalDate.now(), customer, "some customer ref", sequence(itemLine));
         HSSFSheet updatedSheet = invoiceClient.setInvoiceNumber(invoiceSheet, invoice);
         String invoiceNumber = invoiceClient.getInvoiceNumberFrom(updatedSheet);
 

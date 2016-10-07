@@ -10,6 +10,8 @@ examples/*
 .gradle/
 build/
 bin/
+gradle/wrapper/gradle-wrapper.properties
+gradlew.bat
 
 #Project specific
 data/
