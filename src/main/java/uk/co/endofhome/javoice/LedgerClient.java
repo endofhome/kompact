@@ -98,9 +98,8 @@ public class LedgerClient {
     }
 
     private Year getYearFrom(HSSFSheet ledgerMonthlySheet) {
-        // TODO: implement this.
-
-        return null;
+        int year = (int) ledgerMonthlySheet.getRow(1).getCell(1).getNumericCellValue();
+        return Year.of(year);
     }
 
     private Month getMonthFrom(HSSFSheet ledgerMonthlySheet) {
