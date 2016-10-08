@@ -40,7 +40,7 @@ public class LedgerClient {
     }
 
     public HSSFSheet setNewEntry(HSSFSheet ledgerMonthlySheet, LedgerEntry ledgerEntry) {
-        HSSFRow rowToSet = ledgerMonthlySheet.getRow(getNextRow());
+        HSSFRow rowToSet = getNextRow(ledgerMonthlySheet);
         rowToSet.createCell(0).setCellValue(ledgerEntry.customerName.getOrElse(""));
         rowToSet.createCell(1).setCellValue(ledgerEntry.invoiceNumber.getOrElse(""));
         rowToSet.createCell(2).setCellValue(ledgerEntry.valueNett.getOrElse(0.0));
@@ -60,7 +60,7 @@ public class LedgerClient {
         LedgerMonthly ledgerMonthly = new LedgerMonthly(getYearFrom(ledgerMonthlySheet), getMonthFrom(ledgerMonthlySheet));
         Sequence<LedgerEntry> entries = sequence();
         int totalEntries = ledgerMonthlySheet.getLastRowNum() - TOTAL_WHITESPACE_ROWS - TOTAL_FOOTER_ROWS;
-        int lastEntry = LEDGER_ENTRIES_START_AT + totalEntries -1;
+        int lastEntry = LEDGER_ENTRIES_START_AT + totalEntries;
         for (int i = LEDGER_ENTRIES_START_AT; i < lastEntry; i++) {
             HSSFRow rowToExtract = ledgerMonthlySheet.getRow(i);
             Option<String> customerName = getStringCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK));
@@ -86,10 +86,9 @@ public class LedgerClient {
         return ledgerMonthly;
     }
 
-    private int getNextRow() {
-        //TODO: actually get the next row.
-
-        return 10;
+    private HSSFRow getNextRow(HSSFSheet ledgerMonthlySheet) {
+        int nextRowNum = ledgerMonthlySheet.getLastRowNum() - TOTAL_FOOTER_ROWS + 1;
+        return ledgerMonthlySheet.getRow(nextRowNum);
     }
 
     private Date dateFromLocalDate(LocalDate localDate) {

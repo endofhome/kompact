@@ -36,13 +36,13 @@ public class LedgerClientTest {
     @Test
     public void can_set_a_new_entry_in_ledger() throws IOException {
         HSSFSheet ledgerMonthlySheet = ledgerClient.getSheetFromPath("data/SGMSales2015.xls", 4);
-        LedgerEntry ledgerEntry = new LedgerEntry(some("Carla Azar"), some("INV-666"), some(10.0), none(), none(), option(LocalDate.now()), none());
+        LedgerEntry ledgerEntry = new LedgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.now()), none());
         HSSFSheet updatedLedgerMonthlySheet = ledgerClient.setNewEntry(ledgerMonthlySheet, ledgerEntry);
         LedgerMonthly updatedLedgerMonthly = ledgerClient.getLedgerMonthlyFrom(updatedLedgerMonthlySheet);
 
-        assertThat(updatedLedgerMonthly.entries.get(6).customerName.getOrElse(""), is(ledgerEntry.customerName.get()));
-        assertThat(updatedLedgerMonthly.entries.get(6).invoiceNumber.getOrElse(""), is(ledgerEntry.invoiceNumber.get()));
-        assertThat(updatedLedgerMonthly.entries.get(6).valueNett.getOrElse(0.0), is(ledgerEntry.valueNett.get()));
-        assertThat(updatedLedgerMonthly.entries.get(6).date.get(), is(LocalDate.now()));
+        assertThat(updatedLedgerMonthly.entries.get(79).customerName.getOrElse(""), is(ledgerEntry.customerName.get()));
+        assertThat(updatedLedgerMonthly.entries.get(79).invoiceNumber.getOrElse(""), is(ledgerEntry.invoiceNumber.get()));
+        assertThat(updatedLedgerMonthly.entries.get(79).valueNett.getOrElse(0.0), is(ledgerEntry.valueNett.get()));
+        assertThat(updatedLedgerMonthly.entries.get(79).date.get(), is(LocalDate.now()));
     }
 }
