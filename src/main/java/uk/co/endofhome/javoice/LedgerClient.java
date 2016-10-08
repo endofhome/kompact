@@ -103,9 +103,8 @@ public class LedgerClient {
     }
 
     private Month getMonthFrom(HSSFSheet ledgerMonthlySheet) {
-        // TODO: implement this.
-
-        return null;
+        String monthString = ledgerMonthlySheet.getRow(1).getCell(0).getStringCellValue().toUpperCase();
+        return Month.valueOf(monthString);
     }
 
     private Option<String> getStringCellValueFor(HSSFCell cell) {
