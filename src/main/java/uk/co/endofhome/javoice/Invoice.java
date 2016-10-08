@@ -24,6 +24,6 @@ public class Invoice {
 
     public double nettValue() {
         return itemLines.map((item -> (item.quantity * item.unitPrice)))
-                .reduce((x, y) -> ((double) x) +y);
+                .reduce((x, y) -> ((double) x) + y);
     }
 }
