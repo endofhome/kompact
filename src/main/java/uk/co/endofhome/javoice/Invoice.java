@@ -21,4 +21,9 @@ public class Invoice {
         this.orderNumber = orderNumber;
         this.itemLines = itemLines;
     }
+
+    public double nettValue() {
+        return itemLines.map((item -> (item.quantity * item.unitPrice)))
+                .reduce((x, y) -> ((double) x) +y);
+    }
 }

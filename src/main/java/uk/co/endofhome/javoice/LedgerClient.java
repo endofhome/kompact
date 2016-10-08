@@ -1,6 +1,28 @@
 package uk.co.endofhome.javoice;
 
+import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Sequence;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.Year;
+import java.time.ZoneId;
+import java.util.Date;
+
+import static com.googlecode.totallylazy.Option.none;
+import static com.googlecode.totallylazy.Option.option;
+import static com.googlecode.totallylazy.Sequences.sequence;
+import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
+import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
+import static uk.co.endofhome.javoice.LedgerMonthly.LEDGER_ENTRIES_START_AT;
 
 public class LedgerClient {
     private final String rootPath;
@@ -9,5 +31,110 @@ public class LedgerClient {
     public LedgerClient(HSSFWorkbook workBook) {
         this.rootPath = "data/";
         this.workBook = workBook;
+    }
+
+    public HSSFSheet getSheetFromPath(String filePath, int sheetNumber) throws IOException {
+        InputStream inputStream = new FileInputStream(filePath);
+        HSSFWorkbook readInWorkBook = new HSSFWorkbook(new POIFSFileSystem(inputStream));
+        return readInWorkBook.getSheetAt(sheetNumber);
+    }
+
+    public HSSFSheet setNewEntry(HSSFSheet ledgerMonthlySheet, LedgerEntry ledgerEntry) {
+        HSSFRow rowToSet = ledgerMonthlySheet.getRow(getNextRow());
+        rowToSet.createCell(0).setCellValue(ledgerEntry.customerName.getOrElse(""));
+        rowToSet.createCell(1).setCellValue(ledgerEntry.invoiceNumber.getOrElse(""));
+        rowToSet.createCell(2).setCellValue(ledgerEntry.valueNett.getOrElse(0.0));
+        rowToSet.createCell(5).setCellValue(ledgerEntry.crReq.getOrElse(""));
+        rowToSet.createCell(6).setCellValue(ledgerEntry.allocation.getOrElse(""));
+        rowToSet.createCell(8).setCellValue(ledgerEntry.notes.getOrElse(""));
+        HSSFCell dateCell = rowToSet.createCell(7);
+        if (ledgerEntry.date.isDefined()) {
+            dateCell.setCellValue(dateFromLocalDate(ledgerEntry.date.get()));
+        } else {
+            dateCell.setCellValue(CELL_TYPE_BLANK);
+        }
+        return ledgerMonthlySheet;
+    }
+
+    public LedgerMonthly getLedgerMonthlyFrom(HSSFSheet ledgerMonthlySheet) {
+        LedgerMonthly ledgerMonthly = new LedgerMonthly(getYearFrom(ledgerMonthlySheet), getMonthFrom(ledgerMonthlySheet));
+        Sequence<LedgerEntry> entries = sequence();
+        //TODO: LedgerMonthly.totalEntries() needs to be implemented.
+
+        int lastEntry = LEDGER_ENTRIES_START_AT + ledgerMonthly.totalEntries() - 1;
+        for (int i = LEDGER_ENTRIES_START_AT; i < lastEntry; i++) {
+            HSSFRow rowToExtract = ledgerMonthlySheet.getRow(i);
+            Option<String> customerName = getStringCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK));
+            Option<String>  invoiceNumber = getStringCellValueFor(rowToExtract.getCell(1, CREATE_NULL_AS_BLANK));
+            Option<Double> valueNett = getNumericCellValueFor(rowToExtract.getCell(2, CREATE_NULL_AS_BLANK));
+            Option<String> crReq = getStringCellValueFor(rowToExtract.getCell(5, CREATE_NULL_AS_BLANK));
+            Option<String> allocation = getStringCellValueFor(rowToExtract.getCell(6, CREATE_NULL_AS_BLANK));
+            Option<LocalDate> localDate = getDateCellValueFor(rowToExtract.getCell(7, CREATE_NULL_AS_BLANK));
+            Option<String> notes = getStringCellValueFor(rowToExtract.getCell(8, CREATE_NULL_AS_BLANK));
+
+            LedgerEntry ledgerEntry = new LedgerEntry(
+                    customerName,
+                    invoiceNumber,
+                    valueNett,
+                    crReq,
+                    allocation,
+                    localDate,
+                    notes
+            );
+            entries = entries.append(ledgerEntry);
+        }
+        ledgerMonthly.entries = entries;
+        return ledgerMonthly;
+    }
+
+    private int getNextRow() {
+        //TODO: actually get the next row.
+
+        return 10;
+    }
+
+    private Date dateFromLocalDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
+    private Year getYearFrom(HSSFSheet ledgerMonthlySheet) {
+        // TODO: implement this.
+
+        return null;
+    }
+
+    private Month getMonthFrom(HSSFSheet ledgerMonthlySheet) {
+        // TODO: implement this.
+
+        return null;
+    }
+
+    private Option<String> getStringCellValueFor(HSSFCell cell) {
+        Option<String> optionString;
+        if (cell != null) {
+            optionString = option(cell.getStringCellValue());
+        } else {
+            optionString = none();
+        }
+        return optionString;
+    }
+
+    private Option<Double> getNumericCellValueFor(HSSFCell cell) {
+        Option<Double> optionDouble;
+        if (cell != null) {
+            optionDouble = option(cell.getNumericCellValue());
+        } else {
+            optionDouble = none();
+        }
+        return optionDouble;
+    }
+
+    private Option<LocalDate> getDateCellValueFor(HSSFCell cell) {
+        Option<LocalDate> optionLocalDate;
+        if (cell != null && cell.getCellType() == 0) {
+            optionLocalDate = option(cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        } else {
+            optionLocalDate = none();
+        } return optionLocalDate;
     }
 }
