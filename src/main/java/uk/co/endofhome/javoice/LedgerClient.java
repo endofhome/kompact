@@ -22,7 +22,7 @@ import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
-import static uk.co.endofhome.javoice.LedgerMonthly.LEDGER_ENTRIES_START_AT;
+import static uk.co.endofhome.javoice.LedgerMonthly.*;
 
 public class LedgerClient {
     private final String rootPath;
@@ -59,9 +59,8 @@ public class LedgerClient {
     public LedgerMonthly getLedgerMonthlyFrom(HSSFSheet ledgerMonthlySheet) {
         LedgerMonthly ledgerMonthly = new LedgerMonthly(getYearFrom(ledgerMonthlySheet), getMonthFrom(ledgerMonthlySheet));
         Sequence<LedgerEntry> entries = sequence();
-        //TODO: LedgerMonthly.totalEntries() needs to be implemented.
-
-        int lastEntry = LEDGER_ENTRIES_START_AT + ledgerMonthly.totalEntries() - 1;
+        int totalEntries = ledgerMonthlySheet.getLastRowNum() - TOTAL_WHITESPACE_ROWS - TOTAL_FOOTER_ROWS;
+        int lastEntry = LEDGER_ENTRIES_START_AT + totalEntries -1;
         for (int i = LEDGER_ENTRIES_START_AT; i < lastEntry; i++) {
             HSSFRow rowToExtract = ledgerMonthlySheet.getRow(i);
             Option<String> customerName = getStringCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK));

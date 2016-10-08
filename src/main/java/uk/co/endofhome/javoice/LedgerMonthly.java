@@ -12,16 +12,12 @@ public class LedgerMonthly {
     private final Month month;
     public Sequence<LedgerEntry> entries;
     public static final int LEDGER_ENTRIES_START_AT = 4;
+    public static final int TOTAL_WHITESPACE_ROWS = 2;
+    public static final int TOTAL_FOOTER_ROWS = 2;
 
     public LedgerMonthly(Year year, Month month) {
         this.year = year;
         this.month = month;
         this.entries = sequence();
-    }
-
-    public int totalEntries() {
-        //TODO: implement this. Get the total entries dynamically.
-
-        return 80;
     }
 }
