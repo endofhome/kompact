@@ -63,22 +63,14 @@ public class LedgerClient {
         int lastEntry = LEDGER_ENTRIES_START_AT + totalEntries;
         for (int i = LEDGER_ENTRIES_START_AT; i < lastEntry; i++) {
             HSSFRow rowToExtract = ledgerMonthlySheet.getRow(i);
-            Option<String> customerName = getStringCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK));
-            Option<String>  invoiceNumber = getStringCellValueFor(rowToExtract.getCell(1, CREATE_NULL_AS_BLANK));
-            Option<Double> valueNett = getNumericCellValueFor(rowToExtract.getCell(2, CREATE_NULL_AS_BLANK));
-            Option<String> crReq = getStringCellValueFor(rowToExtract.getCell(5, CREATE_NULL_AS_BLANK));
-            Option<String> allocation = getStringCellValueFor(rowToExtract.getCell(6, CREATE_NULL_AS_BLANK));
-            Option<LocalDate> localDate = getDateCellValueFor(rowToExtract.getCell(7, CREATE_NULL_AS_BLANK));
-            Option<String> notes = getStringCellValueFor(rowToExtract.getCell(8, CREATE_NULL_AS_BLANK));
-
             LedgerEntry ledgerEntry = new LedgerEntry(
-                    customerName,
-                    invoiceNumber,
-                    valueNett,
-                    crReq,
-                    allocation,
-                    localDate,
-                    notes
+                    getStringCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK)),
+                    getStringCellValueFor(rowToExtract.getCell(1, CREATE_NULL_AS_BLANK)),
+                    getNumericCellValueFor(rowToExtract.getCell(2, CREATE_NULL_AS_BLANK)),
+                    getStringCellValueFor(rowToExtract.getCell(5, CREATE_NULL_AS_BLANK)),
+                    getStringCellValueFor(rowToExtract.getCell(6, CREATE_NULL_AS_BLANK)),
+                    getDateCellValueFor(rowToExtract.getCell(7, CREATE_NULL_AS_BLANK)),
+                    getStringCellValueFor(rowToExtract.getCell(8, CREATE_NULL_AS_BLANK))
             );
             entries = entries.append(ledgerEntry);
         }
