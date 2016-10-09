@@ -22,7 +22,8 @@ import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
-import static uk.co.endofhome.javoice.LedgerMonthly.*;
+import static uk.co.endofhome.javoice.LedgerMonthly.LEDGER_ENTRIES_START_AT;
+import static uk.co.endofhome.javoice.LedgerMonthly.TOTAL_FOOTER_ROWS;
 
 public class LedgerClient {
     private final String rootPath;
@@ -39,29 +40,10 @@ public class LedgerClient {
         return readInWorkBook.getSheetAt(sheetNumber);
     }
 
-    public HSSFSheet setNewEntry(HSSFSheet ledgerMonthlySheet, LedgerEntry ledgerEntry) {
-        HSSFRow rowToSet = getNextRow(ledgerMonthlySheet);
-        rowToSet.createCell(0).setCellValue(ledgerEntry.customerName.getOrElse(""));
-        rowToSet.createCell(1).setCellValue(ledgerEntry.invoiceNumber.getOrElse(""));
-        rowToSet.createCell(2).setCellValue(ledgerEntry.valueNett.getOrElse(0.0));
-        rowToSet.createCell(5).setCellValue(ledgerEntry.crReq.getOrElse(""));
-        rowToSet.createCell(6).setCellValue(ledgerEntry.allocation.getOrElse(""));
-        rowToSet.createCell(8).setCellValue(ledgerEntry.notes.getOrElse(""));
-        HSSFCell dateCell = rowToSet.createCell(7);
-        if (ledgerEntry.date.isDefined()) {
-            dateCell.setCellValue(dateFromLocalDate(ledgerEntry.date.get()));
-        } else {
-            dateCell.setCellValue(CELL_TYPE_BLANK);
-        }
-        return ledgerMonthlySheet;
-    }
-
     public LedgerMonthly getLedgerMonthlyFrom(HSSFSheet ledgerMonthlySheet) {
         LedgerMonthly ledgerMonthly = new LedgerMonthly(getYearFrom(ledgerMonthlySheet), getMonthFrom(ledgerMonthlySheet));
         Sequence<LedgerEntry> entries = sequence();
-        int totalEntries = ledgerMonthlySheet.getLastRowNum() - TOTAL_WHITESPACE_ROWS - TOTAL_FOOTER_ROWS;
-        int lastEntry = LEDGER_ENTRIES_START_AT + totalEntries;
-        for (int i = LEDGER_ENTRIES_START_AT; i < lastEntry; i++) {
+        for (int i = LEDGER_ENTRIES_START_AT; i <= ledgerMonthlySheet.getLastRowNum(); i++) {
             HSSFRow rowToExtract = ledgerMonthlySheet.getRow(i);
             LedgerEntry ledgerEntry = new LedgerEntry(
                     getStringCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK)),
@@ -78,9 +60,65 @@ public class LedgerClient {
         return ledgerMonthly;
     }
 
+    public HSSFSheet removeFooter(HSSFSheet ledgerMonthlySheet) {
+        //TODO: Don't use LedgerMonthly constants.
+
+        for (int i = 0; i < TOTAL_FOOTER_ROWS; i++) {
+            HSSFRow rowToRemove = ledgerMonthlySheet.getRow(ledgerMonthlySheet.getLastRowNum());
+            ledgerMonthlySheet.removeRow(rowToRemove);
+        }
+        return ledgerMonthlySheet;
+    }
+
+    public HSSFSheet setNewEntry(HSSFSheet ledgerMonthlySheet, LedgerEntry ledgerEntry) {
+        HSSFSheet ledgerMonthlySheetNoFooter = removeFooter(ledgerMonthlySheet);
+        HSSFRow rowToSet = getNextRow(ledgerMonthlySheetNoFooter);
+        rowToSet.createCell(0).setCellValue(ledgerEntry.customerName.getOrElse(""));
+        rowToSet.createCell(1).setCellValue(ledgerEntry.invoiceNumber.getOrElse(""));
+        rowToSet.createCell(2).setCellValue(ledgerEntry.valueNett.getOrElse(0.0));
+        rowToSet.createCell(5).setCellValue(ledgerEntry.crReq.getOrElse(""));
+        rowToSet.createCell(6).setCellValue(ledgerEntry.allocation.getOrElse(""));
+        rowToSet.createCell(8).setCellValue(ledgerEntry.notes.getOrElse(""));
+        HSSFCell dateCell = rowToSet.createCell(7);
+        if (ledgerEntry.date.isDefined()) {
+            dateCell.setCellValue(dateFromLocalDate(ledgerEntry.date.get()));
+        } else {
+            dateCell.setCellValue(CELL_TYPE_BLANK);
+        }
+        return setFooter(ledgerMonthlySheetNoFooter);
+    }
+
+    public HSSFSheet setFooter(HSSFSheet ledgerMonthlySheet) {
+        LedgerMonthly ledgerMonthly = getLedgerMonthlyFrom(ledgerMonthlySheet);
+
+        HSSFRow footerRowOne = getNextRow(ledgerMonthlySheet);
+        for (int i = 0; i < ledgerMonthly.footer.get("rowOne").size(); i++) {
+            footerRowOne.createCell(i).setCellValue(ledgerMonthly.footer.get("rowOne").get(i).getOrElse(""));
+        }
+
+        HSSFRow footerRowTwo = getNextRow(ledgerMonthlySheet);
+        for (int j = 0; j < ledgerMonthly.footer.get("rowTwo").size(); j++) {
+            String cellContents = ledgerMonthly.footer.get("rowTwo").get(j).getOrElse("");
+            if (j >= 2 && j <= 4) {
+                cellContents = footerFormulas(ledgerMonthlySheet, cellContents);
+                footerRowTwo.createCell(j).setCellFormula(cellContents);
+            } else {
+                footerRowTwo.createCell(j).setCellValue(ledgerMonthly.footer.get("rowTwo").get(j).getOrElse(""));
+            }
+        }
+        return ledgerMonthlySheet;
+    }
+
+    private String footerFormulas(HSSFSheet ledgerMonthlySheet, String cellContents) {
+        String sumStringBeginning = cellContents.substring(0, 8);
+        Integer lastRowToSum = ledgerMonthlySheet.getLastRowNum() - 2;
+        String sumStringEnding = cellContents.substring(8);
+        cellContents = sumStringBeginning + lastRowToSum.toString() + sumStringEnding;
+        return cellContents;
+    }
+
     private HSSFRow getNextRow(HSSFSheet ledgerMonthlySheet) {
-        int nextRowNum = ledgerMonthlySheet.getLastRowNum() - TOTAL_FOOTER_ROWS + 1;
-        return ledgerMonthlySheet.getRow(nextRowNum);
+        return ledgerMonthlySheet.createRow(ledgerMonthlySheet.getLastRowNum() + 1);
     }
 
     private Date dateFromLocalDate(LocalDate localDate) {
