@@ -3,18 +3,13 @@ package uk.co.endofhome.javoice;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.Year;
 
 import static com.googlecode.totallylazy.Option.*;
 import static org.hamcrest.Matchers.is;
@@ -27,7 +22,7 @@ public class LedgerClientTest {
     @Before
     public void set_up() throws IOException {
         workbook = new HSSFWorkbook();
-        ledgerClient = new LedgerClient(workbook);
+        ledgerClient = new LedgerClient();
         HSSFSheet testSheet = workbook.createSheet("test sheet");
         createHeaderRows(testSheet);
         FileOutputStream fileOut = new FileOutputStream("src/test/resources/test_ledger.xls");

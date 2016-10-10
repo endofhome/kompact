@@ -26,12 +26,8 @@ import static uk.co.endofhome.javoice.LedgerMonthly.LEDGER_ENTRIES_START_AT;
 import static uk.co.endofhome.javoice.LedgerMonthly.TOTAL_FOOTER_ROWS;
 
 public class LedgerClient {
-    private final String rootPath;
-    private final HSSFWorkbook workBook;
 
-    public LedgerClient(HSSFWorkbook workBook) {
-        this.rootPath = "data/";
-        this.workBook = workBook;
+    public LedgerClient() {
     }
 
     public HSSFSheet getSheetFromPath(String filePath, int sheetNumber) throws IOException {
