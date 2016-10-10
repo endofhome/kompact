@@ -106,7 +106,7 @@ public class InvoiceClientTest {
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet testSheet = workbook.createSheet("test invoice");
         createTestRows(testSheet);
-        invoiceClient = new InvoiceClient(workbook, Paths.get("src/test/resources"));
+        invoiceClient = new InvoiceClient(workbook, Paths.get("data/"), Paths.get("src/test/resources"));
         Invoice invoice = new Invoice("INV-001", LocalDate.now(), customer, "cust ref", sequence(itemLine));
         invoiceClient.setCustomerSection(testSheet, invoice);
         invoiceClient.setInvoiceNumber(testSheet, invoice);

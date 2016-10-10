@@ -20,12 +20,12 @@ import static uk.co.endofhome.javoice.Invoice.ITEM_LINES_START_AT;
 import static uk.co.endofhome.javoice.Invoice.MAX_ITEM_LINES;
 
 public class InvoiceClient {
-    public final String fileTemplatePath;
     public final HSSFWorkbook workBook;
+    public final Path fileTemplatePath;
     public final Path fileOutputPath;
 
-    public InvoiceClient(HSSFWorkbook workBook, Path outputPath) {
-        this.fileTemplatePath = "data/";
+    public InvoiceClient(HSSFWorkbook workBook, Path templatePath, Path outputPath) {
+        this.fileTemplatePath = templatePath;
         this.fileOutputPath = outputPath;
         this.workBook = workBook;
     }
