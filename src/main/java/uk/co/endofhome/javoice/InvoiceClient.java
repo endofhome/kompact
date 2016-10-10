@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static java.lang.String.format;
 import static uk.co.endofhome.javoice.Invoice.ITEM_LINES_START_AT;
 import static uk.co.endofhome.javoice.Invoice.MAX_ITEM_LINES;
 
@@ -32,7 +33,7 @@ public class InvoiceClient {
 
     public Invoice writeFile(Path filePath, Invoice invoice) throws IOException {
         try {
-            FileOutputStream fileOut = new FileOutputStream(filePath + "/" + invoice.number + ".xls");
+            FileOutputStream fileOut = new FileOutputStream(format("%s/%s.xls", filePath, invoice.number));
             workBook.write(fileOut);
             fileOut.close();
         } catch (FileNotFoundException e) {
@@ -103,7 +104,7 @@ public class InvoiceClient {
                 itemLines = itemLines.append(invoice.itemLines.get(itemLineNumber));
             }
         } else {
-            throw new RuntimeException(String.format("Too many lines for invoice number %s", invoice.number));
+            throw new RuntimeException(format("Too many lines for invoice number %s", invoice.number));
         }
         return itemLines;
     }
