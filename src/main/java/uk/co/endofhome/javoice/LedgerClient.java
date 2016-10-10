@@ -111,7 +111,7 @@ public class LedgerClient {
 
     private String footerFormulas(HSSFSheet ledgerMonthlySheet, String cellContents) {
         String sumStringBeginning = cellContents.substring(0, 8);
-        Integer lastRowToSum = ledgerMonthlySheet.getLastRowNum() - 2;
+        Integer lastRowToSum = ledgerMonthlySheet.getLastRowNum() - 1;
         String sumStringEnding = cellContents.substring(8);
         cellContents = sumStringBeginning + lastRowToSum.toString() + sumStringEnding;
         return cellContents;
