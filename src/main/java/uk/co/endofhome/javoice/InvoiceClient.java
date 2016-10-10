@@ -41,28 +41,31 @@ public class InvoiceClient {
         return invoice;
     }
 
-    public Invoice readFile(String filePath) throws IOException {
-        HSSFSheet invoiceSheet = getSheetFromPath(filePath);
-        Sequence<String> customerDetails = getCustomerSectionFrom(invoiceSheet);
-        Sequence<String> orderRefs = getOrderRefsSectionFrom(invoiceSheet);
-        String invoiceNumber = getInvoiceNumberFrom(invoiceSheet);
-        Sequence<ItemLine> itemLines = getItemLinesFrom(invoiceSheet);
-        return buildInvoice(invoiceNumber, customerDetails, orderRefs, itemLines);
+    public Invoice readFile(String filePath, int... sheetsToGet) throws IOException {
+        if (sheetsToGet.length == 1) {
+            HSSFSheet invoiceSheet = getSingleSheetFromPath(filePath, sheetsToGet[0]);
+            Sequence<String> customerDetails = getCustomerSectionFrom(invoiceSheet);
+            Sequence<String> orderRefs = getOrderRefsSectionFrom(invoiceSheet);
+            String invoiceNumber = getInvoiceNumberFrom(invoiceSheet);
+            Sequence<ItemLine> itemLines = getItemLinesFrom(invoiceSheet);
+            return buildInvoice(invoiceNumber, customerDetails, orderRefs, itemLines);
+        }
+        throw new RuntimeException("Sorry, simultaneously reading in multiple sheets from one file is not yet supported.");
     }
 
-    public HSSFSheet getSheetFromPath(String filePath) throws IOException {
+    public HSSFSheet getSingleSheetFromPath(String filePath, int sheetNum) throws IOException {
         InputStream inputStream = new FileInputStream(filePath);
         HSSFWorkbook readInWorkBook = new HSSFWorkbook(new POIFSFileSystem(inputStream));
-        return readInWorkBook.getSheetAt(2);
+         return readInWorkBook.getSheetAt(sheetNum);
     }
 
     public HSSFSheet setCustomerSection(HSSFSheet invoiceSheet, Invoice invoice) {
         Customer customer = invoice.customer;
-        invoiceSheet.getRow(11).getCell(4).setCellValue(customer.name);
-        invoiceSheet.getRow(12).getCell(4).setCellValue(customer.addressOne);
-        invoiceSheet.getRow(13).getCell(4).setCellValue(customer.addressTwo);
-        invoiceSheet.getRow(13).getCell(8).setCellValue(customer.postcode);
-        invoiceSheet.getRow(14).getCell(4).setCellValue(customer.phoneNumber);
+        invoiceSheet.getRow(11).createCell(4).setCellValue(customer.name);
+        invoiceSheet.getRow(12).createCell(4).setCellValue(customer.addressOne);
+        invoiceSheet.getRow(13).createCell(4).setCellValue(customer.addressTwo);
+        invoiceSheet.getRow(13).createCell(8).setCellValue(customer.postcode);
+        invoiceSheet.getRow(14).createCell(4).setCellValue(customer.phoneNumber);
         return invoiceSheet;
     }
 
@@ -70,29 +73,29 @@ public class InvoiceClient {
         LocalDate invoiceDate = invoice.date;
         Date date = Date.from(invoiceDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Customer customer = invoice.customer;
-        invoiceSheet.getRow(11).getCell(11).setCellValue(date);
-        invoiceSheet.getRow(12).getCell(11).setCellValue(invoice.orderNumber);
-        invoiceSheet.getRow(13).getCell(11).setCellValue(customer.accountCode);
+        invoiceSheet.getRow(11).createCell(11).setCellValue(date);
+        invoiceSheet.getRow(12).createCell(11).setCellValue(invoice.orderNumber);
+        invoiceSheet.getRow(13).createCell(11).setCellValue(customer.accountCode);
         return invoiceSheet;
     }
 
     public HSSFSheet setInvoiceNumber(HSSFSheet invoiceSheet, Invoice invoice) {
-        invoiceSheet.getRow(3).getCell(11).setCellValue(invoice.number);
+        invoiceSheet.getRow(3).createCell(11).setCellValue(invoice.number);
         return invoiceSheet;
     }
 
     public HSSFSheet setItemLine(HSSFSheet invoiceSheet, Invoice invoice, int itemLineNumber) {
         ItemLine itemLineDetails = invoice.itemLines.get(itemLineNumber);
         HSSFRow row = invoiceSheet.getRow(itemLineNumber + ITEM_LINES_START_AT);
-        row.getCell(3).setCellValue(itemLineDetails.quantity);
-        row.getCell(4).setCellValue(itemLineDetails.description);
-        row.getCell(10).setCellValue(itemLineDetails.unitPrice);
+        row.createCell(3).setCellValue(itemLineDetails.quantity);
+        row.createCell(4).setCellValue(itemLineDetails.description);
+        row.createCell(10).setCellValue(itemLineDetails.unitPrice);
         return invoiceSheet;
     }
 
     public Sequence<ItemLine> setItemLines(HSSFSheet invoiceSheet, Invoice invoice) {
         Sequence<ItemLine> itemLines = sequence();
-        int lastItemLine = ITEM_LINES_START_AT + invoice.itemLines.size() -1;
+        int lastItemLine = ITEM_LINES_START_AT + invoice.itemLines.size() - 1;
         if (invoice.itemLines.size() <= MAX_ITEM_LINES) {
             for (int i = ITEM_LINES_START_AT; i <= lastItemLine; i++) {
                 int itemLineNumber = i - ITEM_LINES_START_AT;
@@ -129,7 +132,7 @@ public class InvoiceClient {
 
     public Sequence<ItemLine> getItemLinesFrom(HSSFSheet invoiceSheet) {
         Sequence<ItemLine> itemLines = sequence();
-        int lastPossibleItemLine = ITEM_LINES_START_AT + MAX_ITEM_LINES -1;
+        int lastPossibleItemLine = ITEM_LINES_START_AT + MAX_ITEM_LINES - 1;
         for (int i = ITEM_LINES_START_AT; i <= lastPossibleItemLine; i++) {
             double quantity = invoiceSheet.getRow(i).getCell(3).getNumericCellValue();
             String description = invoiceSheet.getRow(i).getCell(4).getStringCellValue();
