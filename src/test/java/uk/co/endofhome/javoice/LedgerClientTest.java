@@ -9,8 +9,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.Year;
 
 import static com.googlecode.totallylazy.Option.*;
 import static org.hamcrest.Matchers.is;
@@ -18,40 +22,37 @@ import static org.junit.Assert.assertThat;
 
 public class LedgerClientTest {
     private LedgerClient ledgerClient;
-    private File file;
-    private NPOIFSFileSystem fs;
+    private HSSFWorkbook workbook;
 
     @Before
     public void set_up() throws IOException {
-        file = new File("data/SGMSales2015.xls");
-        fs = new NPOIFSFileSystem(file);
-        HSSFWorkbook workbook = new HSSFWorkbook(fs.getRoot(), true);
+        workbook = new HSSFWorkbook();
         ledgerClient = new LedgerClient(workbook);
-    }
-
-    @After
-    public void clean_up() throws IOException {
-        fs.close();
+        HSSFSheet testSheet = workbook.createSheet("test sheet");
+        createHeaderRows(testSheet);
+        FileOutputStream fileOut = new FileOutputStream("src/test/resources/test_ledger.xls");
+        ledgerClient.setFooter(testSheet);
+        workbook.write(fileOut);
+        fileOut.close();
     }
 
     @Test
     public void can_set_a_new_entry_in_ledger() throws IOException {
-        HSSFSheet ledgerMonthlySheet = ledgerClient.getSheetFromPath("data/SGMSales2015.xls", 4);
+        HSSFSheet ledgerMonthlySheet = workbook.getSheetAt(0);
         LedgerEntry ledgerEntry = new LedgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.now()), none());
         HSSFSheet updatedLedgerMonthlySheet = ledgerClient.setNewEntry(ledgerMonthlySheet, ledgerEntry);
-
         HSSFSheet updatedLedgerMonthlySheetNoFooter = ledgerClient.removeFooter(updatedLedgerMonthlySheet);
         LedgerMonthly updatedLedgerMonthly = ledgerClient.getLedgerMonthlyFrom(updatedLedgerMonthlySheetNoFooter);
 
-        assertThat(updatedLedgerMonthly.entries.get(79).customerName.getOrElse(""), is(ledgerEntry.customerName.get()));
-        assertThat(updatedLedgerMonthly.entries.get(79).invoiceNumber.getOrElse(""), is(ledgerEntry.invoiceNumber.get()));
-        assertThat(updatedLedgerMonthly.entries.get(79).valueNett.getOrElse(0.0), is(ledgerEntry.valueNett.get()));
-        assertThat(updatedLedgerMonthly.entries.get(79).date.get(), is(LocalDate.now()));
+        assertThat(updatedLedgerMonthly.entries.get(0).customerName.getOrElse(""), is(ledgerEntry.customerName.get()));
+        assertThat(updatedLedgerMonthly.entries.get(0).invoiceNumber.getOrElse(""), is(ledgerEntry.invoiceNumber.get()));
+        assertThat(updatedLedgerMonthly.entries.get(0).valueNett.getOrElse(0.0), is(ledgerEntry.valueNett.get()));
+        assertThat(updatedLedgerMonthly.entries.get(0).date.get(), is(LocalDate.now()));
     }
 
     @Test
     public void can_set_footer() throws IOException {
-        HSSFSheet ledgerMonthlySheet = ledgerClient.getSheetFromPath("data/SGMSales2015.xls", 4);
+        HSSFSheet ledgerMonthlySheet = workbook.getSheetAt(0);
         LedgerEntry firstLedgerEntry = new LedgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.now()), none());
         LedgerEntry secondLedgerEntry = new LedgerEntry(some("Chris Corsano"), some("INV-909"), some(11.0), none(), none(), option(LocalDate.now()), none());
         LedgerEntry thirdLedgerEntry = new LedgerEntry(some("Drumbo Drums"), some("INV-101"), some(1.0), none(), none(), option(LocalDate.now()), none());
@@ -65,8 +66,17 @@ public class LedgerClientTest {
         assertThat(secondToLastRow.getCell(2).getStringCellValue(), is("Nett"));
         assertThat(secondToLastRow.getCell(3).getStringCellValue(), is("VAT"));
         assertThat(secondToLastRow.getCell(4).getStringCellValue(), is("Gross"));
-        assertThat(lastRow.getCell(2).getCellFormula(), is("SUM(C5:C85)"));
-        assertThat(lastRow.getCell(3).getCellFormula(), is("SUM(D5:D85)"));
-        assertThat(lastRow.getCell(4).getCellFormula(), is("SUM(E5:E85)"));
+        assertThat(lastRow.getCell(2).getCellFormula(), is("SUM(C5:C7)"));
+        assertThat(lastRow.getCell(3).getCellFormula(), is("SUM(D5:D7)"));
+        assertThat(lastRow.getCell(4).getCellFormula(), is("SUM(E5:E7)"));
+    }
+
+    private void createHeaderRows(HSSFSheet testSheet) {
+        testSheet.createRow(0);
+        testSheet.createRow(1);
+        testSheet.getRow(1).createCell(0).setCellValue(Month.JANUARY.toString());
+        testSheet.getRow(1).createCell(1).setCellValue(2015);
+        testSheet.createRow(2);
+        testSheet.createRow(3);
     }
 }
