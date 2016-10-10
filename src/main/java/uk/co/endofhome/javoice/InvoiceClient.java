@@ -7,6 +7,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -19,17 +20,19 @@ import static uk.co.endofhome.javoice.Invoice.ITEM_LINES_START_AT;
 import static uk.co.endofhome.javoice.Invoice.MAX_ITEM_LINES;
 
 public class InvoiceClient {
-    public final String rootPath;
+    public final String fileTemplatePath;
     public final HSSFWorkbook workBook;
+    public final Path fileOutputPath;
 
-    public InvoiceClient(HSSFWorkbook workBook) {
-        this.rootPath = "data/";
+    public InvoiceClient(HSSFWorkbook workBook, Path outputPath) {
+        this.fileTemplatePath = "data/";
+        this.fileOutputPath = outputPath;
         this.workBook = workBook;
     }
 
-    public Invoice writeFile(String filePath, Invoice invoice) throws IOException {
+    public Invoice writeFile(Path filePath, Invoice invoice) throws IOException {
         try {
-            FileOutputStream fileOut = new FileOutputStream(filePath + invoice.number + ".xls");
+            FileOutputStream fileOut = new FileOutputStream(filePath + "/" + invoice.number + ".xls");
             workBook.write(fileOut);
             fileOut.close();
         } catch (FileNotFoundException e) {

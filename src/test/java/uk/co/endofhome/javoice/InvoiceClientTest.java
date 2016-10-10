@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -27,11 +29,11 @@ public class InvoiceClientTest {
 
     @Before
     public void set_up() throws IOException {
-        file = new File("data/test.xls");
+        file = new File("data/sample-invoice.xls");
         fs = new NPOIFSFileSystem(file);
         workbook = new HSSFWorkbook(fs.getRoot(), true);
         sheet = workbook.getSheetAt(2);
-        invoiceClient = new InvoiceClient(workbook);
+        invoiceClient = new InvoiceClient(workbook, Paths.get("src/test/resources"));
     }
 
     @After
@@ -46,8 +48,8 @@ public class InvoiceClientTest {
         invoiceClient.setInvoiceNumber(sheet, invoice);
         invoiceClient.setOrderRefsSection(sheet, invoice);
         invoiceClient.setItemLines(sheet, invoice);
-        invoiceClient.writeFile(invoiceClient.rootPath, invoice);
-        Invoice invoiceFromFileSystem = invoiceClient.readFile("data/INV-001.xls");
+        invoiceClient.writeFile(invoiceClient.fileOutputPath, invoice);
+        Invoice invoiceFromFileSystem = invoiceClient.readFile("src/test/resources/INV-001.xls");
 
         assertThat(invoiceFromFileSystem.date, is(LocalDate.now()));
         assertThat(invoiceFromFileSystem.number, is("INV-001"));
@@ -58,7 +60,7 @@ public class InvoiceClientTest {
 
     @Test
     public void can_set_customer_section() throws IOException {
-        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
+        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("src/test/resources/INV-001.xls");
         Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "anything", sequence(itemLine));
         HSSFSheet updatedSheet = invoiceClient.setCustomerSection(invoiceSheet, invoice);
         Sequence<String> customerDetails = invoiceClient.getCustomerSectionFrom(updatedSheet);
@@ -72,8 +74,8 @@ public class InvoiceClientTest {
 
     @Test
     public void can_set_order_refs_section() throws IOException {
-        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
-        Invoice invoice = new Invoice("some invoice number", LocalDate.of(2017, 03, 19), customer, "Bob", sequence(itemLine));
+        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("src/test/resources/INV-001.xls");
+        Invoice invoice = new Invoice("some invoice number", LocalDate.of(2017, 3, 19), customer, "Bob", sequence(itemLine));
         HSSFSheet updatedSheet = invoiceClient.setOrderRefsSection(invoiceSheet, invoice);
         Sequence<String> orderRefsDetails = invoiceClient.getOrderRefsSectionFrom(updatedSheet);
 
@@ -84,7 +86,7 @@ public class InvoiceClientTest {
 
     @Test
     public void can_set_invoice_number() throws IOException {
-        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
+        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("src/test/resources/INV-001.xls");
         Invoice invoice = new Invoice("INV-999", LocalDate.now(), customer, "some customer ref", sequence(itemLine));
         HSSFSheet updatedSheet = invoiceClient.setInvoiceNumber(invoiceSheet, invoice);
         String invoiceNumber = invoiceClient.getInvoiceNumberFrom(updatedSheet);
@@ -94,7 +96,7 @@ public class InvoiceClientTest {
 
     @Test
     public void can_set_one_item_line() throws IOException {
-        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
+        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("src/test/resources/INV-001.xls");
         ItemLine singleItemLine = new ItemLine(3.0, "Magic beans", 3.0);
         Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "some customer ref", sequence(singleItemLine));
         HSSFSheet updatedSheet = invoiceClient.setItemLine(invoiceSheet, invoice, 0);
@@ -105,7 +107,7 @@ public class InvoiceClientTest {
 
     @Test
     public void can_set_multiple_item_lines() throws IOException {
-        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("data/INV-001.xls");
+        HSSFSheet invoiceSheet = invoiceClient.getSheetFromPath("src/test/resources/INV-001.xls");
         ItemLine firstItemLine = new ItemLine(3.0, "Magic beans", 3.0);
         ItemLine secondItemLine = new ItemLine(1.5, "Golden tickets", 100.0);
         ItemLine thirdItemLine = new ItemLine(0.5, "Super foods", 19.0);
