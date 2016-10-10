@@ -16,3 +16,4 @@ gradlew.bat
 #Project specific
 data/
 src/test/resources/*
+!src/test/resources/README.md
