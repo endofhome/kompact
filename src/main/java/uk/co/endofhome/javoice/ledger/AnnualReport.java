@@ -1,13 +1,13 @@
-package uk.co.endofhome.javoice;
+package uk.co.endofhome.javoice.ledger;
 
 import com.googlecode.totallylazy.Sequence;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public class LedgerAnnual {
+public class AnnualReport {
     private final Sequence monthlyReports;
 
-    public LedgerAnnual() {
+    public AnnualReport() {
         this.monthlyReports = sequence();
     }
 }

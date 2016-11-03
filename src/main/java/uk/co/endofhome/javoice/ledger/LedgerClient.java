@@ -1,4 +1,4 @@
-package uk.co.endofhome.javoice;
+package uk.co.endofhome.javoice.ledger;
 
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
@@ -22,22 +22,24 @@ import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
-import static uk.co.endofhome.javoice.LedgerMonthly.LEDGER_ENTRIES_START_AT;
-import static uk.co.endofhome.javoice.LedgerMonthly.TOTAL_FOOTER_ROWS;
+import static uk.co.endofhome.javoice.ledger.MonthlyReport.LEDGER_ENTRIES_START_AT;
+import static uk.co.endofhome.javoice.ledger.MonthlyReport.TOTAL_FOOTER_ROWS;
 
 public class LedgerClient {
 
     public LedgerClient() {
     }
 
+    // MonthlyReport
     public HSSFSheet getSheetFromPath(String filePath, int sheetNumber) throws IOException {
         InputStream inputStream = new FileInputStream(filePath);
         HSSFWorkbook readInWorkBook = new HSSFWorkbook(new POIFSFileSystem(inputStream));
         return readInWorkBook.getSheetAt(sheetNumber);
     }
 
-    public LedgerMonthly getLedgerMonthlyFrom(HSSFSheet ledgerMonthlySheet) {
-        LedgerMonthly ledgerMonthly = new LedgerMonthly(getYearFrom(ledgerMonthlySheet), getMonthFrom(ledgerMonthlySheet));
+    // MonthlyReport
+    public MonthlyReport getLedgerMonthlyFrom(HSSFSheet ledgerMonthlySheet) {
+        MonthlyReport monthlyReport = new MonthlyReport(getYearFrom(ledgerMonthlySheet), getMonthFrom(ledgerMonthlySheet));
         Sequence<LedgerEntry> entries = sequence();
         for (int i = LEDGER_ENTRIES_START_AT; i <= ledgerMonthlySheet.getLastRowNum(); i++) {
             HSSFRow rowToExtract = ledgerMonthlySheet.getRow(i);
@@ -52,12 +54,13 @@ public class LedgerClient {
             );
             entries = entries.append(ledgerEntry);
         }
-        ledgerMonthly.entries = entries;
-        return ledgerMonthly;
+        monthlyReport.entries = entries;
+        return monthlyReport;
     }
 
+    // MonthlyReport
     public HSSFSheet removeFooter(HSSFSheet ledgerMonthlySheet) {
-        //TODO: Don't use LedgerMonthly constants.
+        //TODO: Don't use MonthlyReport constants.
 
         for (int i = 0; i < TOTAL_FOOTER_ROWS; i++) {
             HSSFRow rowToRemove = ledgerMonthlySheet.getRow(ledgerMonthlySheet.getLastRowNum());
@@ -66,6 +69,7 @@ public class LedgerClient {
         return ledgerMonthlySheet;
     }
 
+    // MonthlyReport
     public HSSFSheet setNewEntry(HSSFSheet ledgerMonthlySheet, LedgerEntry ledgerEntry) {
         HSSFSheet ledgerMonthlySheetNoFooter = removeFooter(ledgerMonthlySheet);
         HSSFRow rowToSet = getNextRow(ledgerMonthlySheetNoFooter);
@@ -84,27 +88,29 @@ public class LedgerClient {
         return setFooter(ledgerMonthlySheetNoFooter);
     }
 
+    // MonthlyReport
     public HSSFSheet setFooter(HSSFSheet ledgerMonthlySheet) {
-        LedgerMonthly ledgerMonthly = getLedgerMonthlyFrom(ledgerMonthlySheet);
+        MonthlyReport monthlyReport = getLedgerMonthlyFrom(ledgerMonthlySheet);
 
         HSSFRow footerRowOne = getNextRow(ledgerMonthlySheet);
-        for (int i = 0; i < ledgerMonthly.footer.get("rowOne").size(); i++) {
-            footerRowOne.createCell(i).setCellValue(ledgerMonthly.footer.get("rowOne").get(i).getOrElse(""));
+        for (int i = 0; i < monthlyReport.footer.get("rowOne").size(); i++) {
+            footerRowOne.createCell(i).setCellValue(monthlyReport.footer.get("rowOne").get(i).getOrElse(""));
         }
 
         HSSFRow footerRowTwo = getNextRow(ledgerMonthlySheet);
-        for (int j = 0; j < ledgerMonthly.footer.get("rowTwo").size(); j++) {
-            String cellContents = ledgerMonthly.footer.get("rowTwo").get(j).getOrElse("");
+        for (int j = 0; j < monthlyReport.footer.get("rowTwo").size(); j++) {
+            String cellContents = monthlyReport.footer.get("rowTwo").get(j).getOrElse("");
             if (j >= 2 && j <= 4) {
                 cellContents = footerFormulas(ledgerMonthlySheet, cellContents);
                 footerRowTwo.createCell(j).setCellFormula(cellContents);
             } else {
-                footerRowTwo.createCell(j).setCellValue(ledgerMonthly.footer.get("rowTwo").get(j).getOrElse(""));
+                footerRowTwo.createCell(j).setCellValue(monthlyReport.footer.get("rowTwo").get(j).getOrElse(""));
             }
         }
         return ledgerMonthlySheet;
     }
 
+    // MonthlyReport
     private String footerFormulas(HSSFSheet ledgerMonthlySheet, String cellContents) {
         String sumStringBeginning = cellContents.substring(0, 8);
         Integer lastRowToSum = ledgerMonthlySheet.getLastRowNum() - 1;
@@ -113,24 +119,29 @@ public class LedgerClient {
         return cellContents;
     }
 
+    // MonthlyReport
     private HSSFRow getNextRow(HSSFSheet ledgerMonthlySheet) {
         return ledgerMonthlySheet.createRow(ledgerMonthlySheet.getLastRowNum() + 1);
     }
 
+    // MonthlyReport
     private Date dateFromLocalDate(LocalDate localDate) {
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
+    // MonthlyReport
     private Year getYearFrom(HSSFSheet ledgerMonthlySheet) {
         int year = (int) ledgerMonthlySheet.getRow(1).getCell(1).getNumericCellValue();
         return Year.of(year);
     }
 
+    // MonthlyReport
     private Month getMonthFrom(HSSFSheet ledgerMonthlySheet) {
         String monthString = ledgerMonthlySheet.getRow(1).getCell(0).getStringCellValue().toUpperCase();
         return Month.valueOf(monthString);
     }
 
+    // any HSSFSheet ? MonthlyReport & Overview
     private Option<String> getStringCellValueFor(HSSFCell cell) {
         Option<String> optionString;
         if (cell != null) {
@@ -141,6 +152,7 @@ public class LedgerClient {
         return optionString;
     }
 
+    // any HSSFSheet ? MonthlyReport & Overview
     private Option<Double> getNumericCellValueFor(HSSFCell cell) {
         Option<Double> optionDouble;
         if (cell != null) {
@@ -151,6 +163,7 @@ public class LedgerClient {
         return optionDouble;
     }
 
+    // any HSSFSheet ? MonthlyReport & Overview
     private Option<LocalDate> getDateCellValueFor(HSSFCell cell) {
         Option<LocalDate> optionLocalDate;
         if (cell != null && cell.getCellType() == 0) {

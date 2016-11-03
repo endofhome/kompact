@@ -1,10 +1,11 @@
-package uk.co.endofhome.javoice;
+package uk.co.endofhome.javoice.invoice;
 
 import com.googlecode.totallylazy.Sequence;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import uk.co.endofhome.javoice.Customer;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -17,8 +18,8 @@ import java.util.Locale;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
-import static uk.co.endofhome.javoice.Invoice.ITEM_LINES_START_AT;
-import static uk.co.endofhome.javoice.Invoice.MAX_ITEM_LINES;
+import static uk.co.endofhome.javoice.invoice.Invoice.ITEM_LINES_START_AT;
+import static uk.co.endofhome.javoice.invoice.Invoice.MAX_ITEM_LINES;
 
 public class InvoiceClient {
     public final HSSFWorkbook workBook;

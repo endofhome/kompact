@@ -1,4 +1,4 @@
-package uk.co.endofhome.javoice;
+package uk.co.endofhome.javoice.ledger;
 
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -37,12 +37,12 @@ public class LedgerClientTest {
         LedgerEntry ledgerEntry = new LedgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.now()), none());
         HSSFSheet updatedLedgerMonthlySheet = ledgerClient.setNewEntry(ledgerMonthlySheet, ledgerEntry);
         HSSFSheet updatedLedgerMonthlySheetNoFooter = ledgerClient.removeFooter(updatedLedgerMonthlySheet);
-        LedgerMonthly updatedLedgerMonthly = ledgerClient.getLedgerMonthlyFrom(updatedLedgerMonthlySheetNoFooter);
+        MonthlyReport updatedMonthlyReport = ledgerClient.getLedgerMonthlyFrom(updatedLedgerMonthlySheetNoFooter);
 
-        assertThat(updatedLedgerMonthly.entries.get(0).customerName.getOrElse(""), is(ledgerEntry.customerName.get()));
-        assertThat(updatedLedgerMonthly.entries.get(0).invoiceNumber.getOrElse(""), is(ledgerEntry.invoiceNumber.get()));
-        assertThat(updatedLedgerMonthly.entries.get(0).valueNett.getOrElse(0.0), is(ledgerEntry.valueNett.get()));
-        assertThat(updatedLedgerMonthly.entries.get(0).date.get(), is(LocalDate.now()));
+        assertThat(updatedMonthlyReport.entries.get(0).customerName.getOrElse(""), is(ledgerEntry.customerName.get()));
+        assertThat(updatedMonthlyReport.entries.get(0).invoiceNumber.getOrElse(""), is(ledgerEntry.invoiceNumber.get()));
+        assertThat(updatedMonthlyReport.entries.get(0).valueNett.getOrElse(0.0), is(ledgerEntry.valueNett.get()));
+        assertThat(updatedMonthlyReport.entries.get(0).date.get(), is(LocalDate.now()));
     }
 
     @Test

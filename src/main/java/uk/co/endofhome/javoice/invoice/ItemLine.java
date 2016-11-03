@@ -1,4 +1,4 @@
-package uk.co.endofhome.javoice;
+package uk.co.endofhome.javoice.invoice;
 
 import java.util.Objects;
 

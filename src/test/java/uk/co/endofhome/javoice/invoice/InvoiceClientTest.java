@@ -1,10 +1,11 @@
-package uk.co.endofhome.javoice;
+package uk.co.endofhome.javoice.invoice;
 
 import com.googlecode.totallylazy.Sequence;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.junit.Before;
 import org.junit.Test;
+import uk.co.endofhome.javoice.Customer;
 
 import java.io.IOException;
 import java.nio.file.Paths;
