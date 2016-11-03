@@ -28,7 +28,7 @@ import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_B
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.LEDGER_ENTRIES_START_AT;
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.TOTAL_FOOTER_ROWS;
 
-public class AnnualReport extends SpreadsheetReport {
+public class AnnualReport implements SpreadsheetWithOptions {
     public final HSSFWorkbook workbook;
     private Year year;
     private Sequence<MonthlyReport> monthlyReports;
