@@ -1,6 +1,5 @@
 package uk.co.endofhome.javoice.ledger;
 
-import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -17,15 +16,13 @@ import java.time.Year;
 import java.time.ZoneId;
 import java.util.Date;
 
-import static com.googlecode.totallylazy.Option.none;
-import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.LEDGER_ENTRIES_START_AT;
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.TOTAL_FOOTER_ROWS;
 
-public class LedgerClient {
+public class LedgerClient extends SpreadsheetReport {
 
     public LedgerClient() {
     }
@@ -139,37 +136,5 @@ public class LedgerClient {
     private Month getMonthFrom(HSSFSheet ledgerMonthlySheet) {
         String monthString = ledgerMonthlySheet.getRow(1).getCell(0).getStringCellValue().toUpperCase();
         return Month.valueOf(monthString);
-    }
-
-    // any HSSFSheet ? MonthlyReport & Overview
-    private Option<String> getStringCellValueFor(HSSFCell cell) {
-        Option<String> optionString;
-        if (cell != null) {
-            optionString = option(cell.getStringCellValue());
-        } else {
-            optionString = none();
-        }
-        return optionString;
-    }
-
-    // any HSSFSheet ? MonthlyReport & Overview
-    private Option<Double> getNumericCellValueFor(HSSFCell cell) {
-        Option<Double> optionDouble;
-        if (cell != null) {
-            optionDouble = option(cell.getNumericCellValue());
-        } else {
-            optionDouble = none();
-        }
-        return optionDouble;
-    }
-
-    // any HSSFSheet ? MonthlyReport & Overview
-    private Option<LocalDate> getDateCellValueFor(HSSFCell cell) {
-        Option<LocalDate> optionLocalDate;
-        if (cell != null && cell.getCellType() == 0) {
-            optionLocalDate = option(cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-        } else {
-            optionLocalDate = none();
-        } return optionLocalDate;
     }
 }
