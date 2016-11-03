@@ -23,8 +23,8 @@ import static uk.co.endofhome.javoice.invoice.Invoice.MAX_ITEM_LINES;
 
 public class InvoiceClient {
     public final HSSFWorkbook workBook;
-    public final Path fileTemplatePath;
-    public final Path fileOutputPath;
+    private Path fileTemplatePath;
+    private Path fileOutputPath;
 
     public InvoiceClient(HSSFWorkbook workBook, Path templatePath, Path outputPath) {
         this.fileTemplatePath = templatePath;
@@ -32,7 +32,7 @@ public class InvoiceClient {
         this.workBook = workBook;
     }
 
-    public Invoice writeFile(Path filePath, Invoice invoice) throws IOException {
+    public void writeFile(Path filePath, Invoice invoice) throws IOException {
         try {
             FileOutputStream fileOut = new FileOutputStream(format("%s/%s.xls", filePath, invoice.number));
             workBook.write(fileOut);
@@ -40,7 +40,6 @@ public class InvoiceClient {
         } catch (FileNotFoundException e) {
             throw new FileNotFoundException("There was a problem writing your file.");
         }
-        return invoice;
     }
 
     public Invoice readFile(String filePath, int... sheetsToGet) throws IOException {
@@ -150,5 +149,13 @@ public class InvoiceClient {
         LocalDate invoiceDate = LocalDate.parse(orderRefs.get(0), formatter);
         Customer customer = new Customer(customerDetails.get(0), customerDetails.get(1), customerDetails.get(2), customerDetails.get(3), customerDetails.get(4), "");
         return new Invoice(invoiceNumber, invoiceDate, customer, orderRefs.get(1), itemLines);
+    }
+
+    public Path fileTemplatePath() {
+        return fileTemplatePath;
+    }
+
+    public Path fileOutputPath() {
+        return fileOutputPath;
     }
 }

@@ -113,7 +113,7 @@ public class InvoiceClientTest {
         invoiceClient.setInvoiceNumber(testSheet, invoice);
         invoiceClient.setOrderRefsSection(testSheet, invoice);
         invoiceClient.setItemLines(testSheet, invoice);
-        invoiceClient.writeFile(invoiceClient.fileOutputPath, invoice);
+        invoiceClient.writeFile(invoiceClient.fileOutputPath(), invoice);
     }
 
     private void createTestRows(HSSFSheet testSheet) {

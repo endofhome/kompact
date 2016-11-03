@@ -5,8 +5,8 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 
 import static com.googlecode.totallylazy.Option.*;
@@ -18,15 +18,13 @@ public class AnnualReportTest {
 
     @Before
     public void set_up() throws IOException {
-        annualReport = new AnnualReport(1983);
-        FileOutputStream fileOut = new FileOutputStream("src/test/resources/test_ledger.xls");
-        annualReport.write(fileOut);
-        fileOut.close();
+        annualReport = new AnnualReport(1983, Paths.get("src/test/resources"));
+        annualReport.writeFile(annualReport.fileOutputPath());
     }
 
     @Test
     public void can_set_a_new_entry_in_ledger() throws IOException {
-        HSSFSheet monthlyReportSheet = annualReport.getSheetAt(1);
+        HSSFSheet monthlyReportSheet = annualReport.sheetAt(1);
         MonthlyReport monthlyReport = annualReport.monthlyReports().get(0);
         LedgerEntry ledgerEntry = new LedgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.now()), none());
         HSSFSheet updatedLedgerMonthlySheet = annualReport.setNewEntry(monthlyReportSheet, monthlyReport, ledgerEntry);
@@ -40,7 +38,7 @@ public class AnnualReportTest {
 
     @Test
     public void can_set_footer() throws IOException {
-        HSSFSheet monthlyReportSheet = annualReport.getSheetAt(1);
+        HSSFSheet monthlyReportSheet = annualReport.sheetAt(1);
         MonthlyReport monthlyReport = annualReport.monthlyReports().get(0);
         LedgerEntry firstLedgerEntry = new LedgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.now()), none());
         LedgerEntry secondLedgerEntry = new LedgerEntry(some("Chris Corsano"), some("INV-909"), some(11.0), none(), none(), option(LocalDate.now()), none());

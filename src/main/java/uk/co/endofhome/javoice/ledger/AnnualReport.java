@@ -8,10 +8,8 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
@@ -22,6 +20,7 @@ import java.util.Map;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Strings.capitalise;
+import static java.lang.String.format;
 import static java.time.format.TextStyle.SHORT;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
@@ -32,22 +31,26 @@ public class AnnualReport implements SpreadsheetWithOptions {
     public final HSSFWorkbook workbook;
     private Year year;
     private Sequence<MonthlyReport> monthlyReports;
+    private Path fileOutputPath;
 
-    public AnnualReport(int isoReportYear) {
+    public AnnualReport(int isoReportYear, Path outputPath) {
         workbook = new HSSFWorkbook();
         year = Year.of(isoReportYear);
         monthlyReports = sequence();
+        fileOutputPath = outputPath;
         createDefaultReports();
         createDefaultSheets();
         setMonthlyReportHeaders();
         setMonthlyReportFooters();
     }
 
-    public void write(FileOutputStream fileOut) throws IOException {
+    public void writeFile(Path filePath) throws IOException {
         try {
+            FileOutputStream fileOut = new FileOutputStream(format("%s/sales%s.xls", filePath, year.getValue()));
             workbook.write(fileOut);
-        } catch (IOException e) {
-            throw new IOException("Sorry, there was a problem writing your spreadsheet.");
+            fileOut.close();
+        } catch (FileNotFoundException e) {
+            throw new FileNotFoundException("There was a problem writing your file.");
         }
     }
 
@@ -111,6 +114,10 @@ public class AnnualReport implements SpreadsheetWithOptions {
 
     public Sequence<MonthlyReport> monthlyReports() {
         return monthlyReports;
+    }
+
+    public Path fileOutputPath() {
+        return fileOutputPath;
     }
 
     @SuppressWarnings("unchecked")
