@@ -14,8 +14,8 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 
 public class MonthlyReport {
-    private final Year year;
-    private final Month month;
+    public final Year year;
+    public final Month month;
     public final Map<String, Sequence<Option<String>>> footer;
     public Sequence<LedgerEntry> entries;
     public static final int LEDGER_ENTRIES_START_AT = 4;
