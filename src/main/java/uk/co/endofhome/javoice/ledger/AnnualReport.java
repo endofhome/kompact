@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.Strings.capitalise;
 import static java.time.format.TextStyle.SHORT;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
@@ -40,6 +41,76 @@ public class AnnualReport extends SpreadsheetReport {
         createDefaultSheets();
         setMonthlyReportHeaders();
         setMonthlyReportFooters();
+    }
+
+    public void write(FileOutputStream fileOut) throws IOException {
+        try {
+            workbook.write(fileOut);
+        } catch (IOException e) {
+            throw new IOException("Sorry, there was a problem writing your spreadsheet.");
+        }
+    }
+
+    public MonthlyReport getMonthlyReportFrom(HSSFSheet monthlyReportSheet) {
+        MonthlyReport monthlyReport = new MonthlyReport(yearFrom(monthlyReportSheet), monthFrom(monthlyReportSheet));
+        Sequence<LedgerEntry> entries = sequence();
+        for (int i = LEDGER_ENTRIES_START_AT; i < monthlyReportSheet.getLastRowNum() - 1; i++) {
+            HSSFRow rowToExtract = monthlyReportSheet.getRow(i);
+            LedgerEntry ledgerEntry = new LedgerEntry(
+                    getStringCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK)),
+                    getStringCellValueFor(rowToExtract.getCell(1, CREATE_NULL_AS_BLANK)),
+                    getNumericCellValueFor(rowToExtract.getCell(2, CREATE_NULL_AS_BLANK)),
+                    getStringCellValueFor(rowToExtract.getCell(5, CREATE_NULL_AS_BLANK)),
+                    getStringCellValueFor(rowToExtract.getCell(6, CREATE_NULL_AS_BLANK)),
+                    getDateCellValueFor(rowToExtract.getCell(7, CREATE_NULL_AS_BLANK)),
+                    getStringCellValueFor(rowToExtract.getCell(8, CREATE_NULL_AS_BLANK))
+            );
+            entries = entries.append(ledgerEntry);
+        }
+        monthlyReport.entries = entries;
+        return monthlyReport;
+    }
+
+    public HSSFSheet getSheetFromPath(String filePath, int sheetNumber) throws IOException {
+        InputStream inputStream = new FileInputStream(filePath);
+        HSSFWorkbook readInWorkBook = new HSSFWorkbook(new POIFSFileSystem(inputStream));
+        return readInWorkBook.getSheetAt(sheetNumber);
+    }
+
+    public HSSFSheet setNewEntry(HSSFSheet monthlyReportSheet, MonthlyReport monthlyReport, LedgerEntry ledgerEntry) {
+        HSSFSheet monthlyReportSheetNoFooter = removeFooterFrom(monthlyReportSheet);
+        HSSFRow rowToSet = getNextRow(monthlyReportSheetNoFooter);
+        rowToSet.createCell(0).setCellValue(ledgerEntry.customerName.getOrElse(""));
+        rowToSet.createCell(1).setCellValue(ledgerEntry.invoiceNumber.getOrElse(""));
+        rowToSet.createCell(2).setCellValue(ledgerEntry.valueNett.getOrElse(0.0));
+        rowToSet.createCell(5).setCellValue(ledgerEntry.crReq.getOrElse(""));
+        rowToSet.createCell(6).setCellValue(ledgerEntry.allocation.getOrElse(""));
+        rowToSet.createCell(8).setCellValue(ledgerEntry.notes.getOrElse(""));
+        HSSFCell dateCell = rowToSet.createCell(7);
+        if (ledgerEntry.date.isDefined()) {
+            dateCell.setCellValue(dateFrom(ledgerEntry.date.get()));
+        } else {
+            dateCell.setCellValue(CELL_TYPE_BLANK);
+        }
+        return setFooter(monthlyReportSheetNoFooter, monthlyReport.footer);
+    }
+
+    public HSSFSheet removeFooterFrom(HSSFSheet monthlyReportSheet) {
+        //TODO: Don't use MonthlyReport constants.
+
+        for (int i = 0; i < TOTAL_FOOTER_ROWS; i++) {
+            HSSFRow rowToRemove = monthlyReportSheet.getRow(monthlyReportSheet.getLastRowNum());
+            monthlyReportSheet.removeRow(rowToRemove);
+        }
+        return monthlyReportSheet;
+    }
+
+    public HSSFSheet sheetAt(int i) {
+        return workbook.getSheetAt(i);
+    }
+
+    public Sequence<MonthlyReport> monthlyReports() {
+        return monthlyReports;
     }
 
     @SuppressWarnings("unchecked")
@@ -62,7 +133,7 @@ public class AnnualReport extends SpreadsheetReport {
             MonthlyReport monthlyReport = monthlyReports.get(i);
             sheet.createRow(0);
             sheet.createRow(1);
-            sheet.getRow(1).createCell(0).setCellValue(monthlyReport.month.toString());
+            sheet.getRow(1).createCell(0).setCellValue(capitalise(monthlyReport.month.toString().toLowerCase()));
             sheet.getRow(1).createCell(1).setCellValue(year.getValue());
             sheet.createRow(2);
             sheet.createRow(3);
@@ -109,87 +180,17 @@ public class AnnualReport extends SpreadsheetReport {
         return cellContents;
     }
 
-    public void write(FileOutputStream fileOut) throws IOException {
-        try {
-            workbook.write(fileOut);
-        } catch (IOException e) {
-            throw new IOException("Sorry, there was a problem writing your spreadsheet.");
-        }
-    }
-
-    public HSSFSheet getSheetAt(int i) {
-        return workbook.getSheetAt(i);
-    }
-
-    public HSSFSheet setNewEntry(HSSFSheet monthlyReportSheet, MonthlyReport monthlyReport, LedgerEntry ledgerEntry) {
-        HSSFSheet monthlyReportSheetNoFooter = removeFooter(monthlyReportSheet);
-        HSSFRow rowToSet = getNextRow(monthlyReportSheetNoFooter);
-        rowToSet.createCell(0).setCellValue(ledgerEntry.customerName.getOrElse(""));
-        rowToSet.createCell(1).setCellValue(ledgerEntry.invoiceNumber.getOrElse(""));
-        rowToSet.createCell(2).setCellValue(ledgerEntry.valueNett.getOrElse(0.0));
-        rowToSet.createCell(5).setCellValue(ledgerEntry.crReq.getOrElse(""));
-        rowToSet.createCell(6).setCellValue(ledgerEntry.allocation.getOrElse(""));
-        rowToSet.createCell(8).setCellValue(ledgerEntry.notes.getOrElse(""));
-        HSSFCell dateCell = rowToSet.createCell(7);
-        if (ledgerEntry.date.isDefined()) {
-            dateCell.setCellValue(dateFromLocalDate(ledgerEntry.date.get()));
-        } else {
-            dateCell.setCellValue(CELL_TYPE_BLANK);
-        }
-        return setFooter(monthlyReportSheetNoFooter, monthlyReport.footer);
-    }
-
-    public HSSFSheet removeFooter(HSSFSheet monthlyReportSheet) {
-        //TODO: Don't use MonthlyReport constants.
-
-        for (int i = 0; i < TOTAL_FOOTER_ROWS; i++) {
-            HSSFRow rowToRemove = monthlyReportSheet.getRow(monthlyReportSheet.getLastRowNum());
-            monthlyReportSheet.removeRow(rowToRemove);
-        }
-        return monthlyReportSheet;
-    }
-
-    private Date dateFromLocalDate(LocalDate localDate) {
+    private Date dateFrom(LocalDate localDate) {
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
-    
-    public Sequence<MonthlyReport> monthlyReports() {
-        return monthlyReports;
-    }
 
-    public MonthlyReport getMonthlyReportFrom(HSSFSheet monthlyReportSheet) {
-        MonthlyReport monthlyReport = new MonthlyReport(getYearFrom(monthlyReportSheet), getMonthFrom(monthlyReportSheet));
-        Sequence<LedgerEntry> entries = sequence();
-        for (int i = LEDGER_ENTRIES_START_AT; i < monthlyReportSheet.getLastRowNum() - 1; i++) {
-            HSSFRow rowToExtract = monthlyReportSheet.getRow(i);
-            LedgerEntry ledgerEntry = new LedgerEntry(
-                    getStringCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK)),
-                    getStringCellValueFor(rowToExtract.getCell(1, CREATE_NULL_AS_BLANK)),
-                    getNumericCellValueFor(rowToExtract.getCell(2, CREATE_NULL_AS_BLANK)),
-                    getStringCellValueFor(rowToExtract.getCell(5, CREATE_NULL_AS_BLANK)),
-                    getStringCellValueFor(rowToExtract.getCell(6, CREATE_NULL_AS_BLANK)),
-                    getDateCellValueFor(rowToExtract.getCell(7, CREATE_NULL_AS_BLANK)),
-                    getStringCellValueFor(rowToExtract.getCell(8, CREATE_NULL_AS_BLANK))
-            );
-            entries = entries.append(ledgerEntry);
-        }
-        monthlyReport.entries = entries;
-        return monthlyReport;
-    }
-
-    private Year getYearFrom(HSSFSheet monthlyReportSheet) {
+    private Year yearFrom(HSSFSheet monthlyReportSheet) {
         int year = (int) monthlyReportSheet.getRow(1).getCell(1).getNumericCellValue();
         return Year.of(year);
     }
 
-    private Month getMonthFrom(HSSFSheet monthlyReportSheet) {
+    private Month monthFrom(HSSFSheet monthlyReportSheet) {
         String monthString = monthlyReportSheet.getRow(1).getCell(0).getStringCellValue().toUpperCase();
         return Month.valueOf(monthString);
-    }
-
-    public HSSFSheet getSheetFromPath(String filePath, int sheetNumber) throws IOException {
-        InputStream inputStream = new FileInputStream(filePath);
-        HSSFWorkbook readInWorkBook = new HSSFWorkbook(new POIFSFileSystem(inputStream));
-        return readInWorkBook.getSheetAt(sheetNumber);
     }
 }
