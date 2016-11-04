@@ -1,6 +1,7 @@
 package uk.co.endofhome.javoice.invoice;
 
 import com.googlecode.totallylazy.Sequence;
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -18,11 +19,12 @@ import java.util.Locale;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
+import static uk.co.endofhome.javoice.DateCellFormat.excelDateCellStyleFor;
 import static uk.co.endofhome.javoice.invoice.Invoice.ITEM_LINES_START_AT;
 import static uk.co.endofhome.javoice.invoice.Invoice.MAX_ITEM_LINES;
 
 public class InvoiceClient {
-    public final HSSFWorkbook workBook;
+    private HSSFWorkbook workBook;
     private Path fileTemplatePath;
     private Path fileOutputPath;
 
@@ -56,8 +58,8 @@ public class InvoiceClient {
 
     public HSSFSheet getSingleSheetFromPath(String filePath, int sheetNum) throws IOException {
         InputStream inputStream = new FileInputStream(filePath);
-        HSSFWorkbook readInWorkBook = new HSSFWorkbook(new POIFSFileSystem(inputStream));
-         return readInWorkBook.getSheetAt(sheetNum);
+        workBook = new HSSFWorkbook(new POIFSFileSystem(inputStream));
+         return workBook.getSheetAt(sheetNum);
     }
 
     public HSSFSheet setCustomerSection(HSSFSheet invoiceSheet, Invoice invoice) {
@@ -74,7 +76,9 @@ public class InvoiceClient {
         LocalDate invoiceDate = invoice.date;
         Date date = Date.from(invoiceDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Customer customer = invoice.customer;
-        invoiceSheet.getRow(11).createCell(11).setCellValue(date);
+        HSSFCell dateCell = invoiceSheet.getRow(11).createCell(11);
+        dateCell.setCellValue(date);
+        dateCell.setCellStyle(excelDateCellStyleFor(workBook));
         invoiceSheet.getRow(12).createCell(11).setCellValue(invoice.orderNumber);
         invoiceSheet.getRow(13).createCell(11).setCellValue(customer.accountCode);
         return invoiceSheet;
