@@ -45,8 +45,17 @@ public class AnnualReport {
         fileOutputPath = outputPath;
     }
 
-    public static AnnualReport annualReport(int isoReportYear, Path outputPath) {
+    public static AnnualReport annualReportCustomConfig(int isoReportYear, Path outputPath) {
         AnnualReport annualReport = new AnnualReport(new HSSFWorkbook(), Year.of(isoReportYear), sequence(), outputPath);
+        annualReport.createDefaultReports();
+        annualReport.createDefaultSheets();
+        annualReport.setMonthlyReportHeaders();
+        annualReport.setMonthlyReportFooters();
+        return annualReport;
+    }
+
+    public static AnnualReport annualReport(int isoReportYear) {
+        AnnualReport annualReport = new AnnualReport(new HSSFWorkbook(), Year.of(isoReportYear), sequence(), Config.salesLedgerFileOutputPath());
         annualReport.createDefaultReports();
         annualReport.createDefaultSheets();
         annualReport.setMonthlyReportHeaders();
