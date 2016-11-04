@@ -6,7 +6,7 @@ import uk.co.endofhome.javoice.Customer;
 import java.time.LocalDate;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.totallylazy.matchers.NumberMatcher.is;
+import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 public class InvoiceTest {
@@ -21,4 +21,11 @@ public class InvoiceTest {
         assertThat(invoice.nettValue(), is(2));
     }
 
+    @Test
+    public void can_get_customer_name() {
+        Customer customer = new Customer("Andrew Cyrille", "", "", "", "", "");
+        Invoice invoice = new Invoice("", LocalDate.now(), customer, "", sequence());
+
+        assertThat(invoice.customerName(), is("Andrew Cyrille"));
+    }
 }

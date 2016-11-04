@@ -27,4 +27,8 @@ public class Invoice {
         return itemLines.map((item -> (item.quantity * item.unitPrice)))
                 .reduce((x, y) -> ((double) x) + y);
     }
+
+    public String customerName() {
+        return customer.name();
+    }
 }
