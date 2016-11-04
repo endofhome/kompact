@@ -54,16 +54,6 @@ public class AnnualReport {
         return annualReport;
     }
 
-    public void writeFile(Path filePath) throws IOException {
-        try {
-            FileOutputStream fileOut = new FileOutputStream(format("%s/sales%s.xls", filePath, year.getValue()));
-            workbook.write(fileOut);
-            fileOut.close();
-        } catch (FileNotFoundException e) {
-            throw new FileNotFoundException("There was a problem writing your file.");
-        }
-    }
-
     public static AnnualReport readFile(String filePath) throws IOException {
         HSSFWorkbook workbook;
         try {
@@ -77,7 +67,7 @@ public class AnnualReport {
             HSSFSheet sheet = workbook.getSheetAt(i);
             monthlyReports = monthlyReports.append(getMonthlyReportFrom(sheet));
         }
-        Path outputPath = Config.defaultSalesLedgerFileOutputPath();
+        Path outputPath = Config.salesLedgerFileOutputPath();
         return new AnnualReport(workbook, year, monthlyReports, outputPath);
     }
 
@@ -99,6 +89,70 @@ public class AnnualReport {
         }
         monthlyReport.entries = entries;
         return monthlyReport;
+    }
+
+    private static Year yearFrom(HSSFSheet monthlyReportSheet) {
+        int year = (int) monthlyReportSheet.getRow(1).getCell(1).getNumericCellValue();
+        return Year.of(year);
+    }
+
+    private static Month monthFrom(HSSFSheet monthlyReportSheet) {
+        String monthString = monthlyReportSheet.getRow(1).getCell(0).getStringCellValue().toUpperCase();
+        return Month.valueOf(monthString);
+    }
+
+    private static int isoYearFromFileName(String filePath) {
+        int length = filePath.length();
+        if (length > 8) {
+            return parseInt(filePath.substring(length - 8, length - 4));
+        } else {
+            throw new IllegalArgumentException("Non-standard filename.");
+        }
+    }
+
+    static Option<String> stringOptionCellValueFor(HSSFCell cell) {
+        Option<String> optionString;
+        if (cell != null) {
+            optionString = option(cell.getStringCellValue());
+        } else {
+            optionString = none();
+        }
+        return optionString;
+    }
+
+    static Option<Double> numericOptionCellValueFor(HSSFCell cell) {
+        Option<Double> optionDouble;
+        if (cell != null) {
+            optionDouble = option(cell.getNumericCellValue());
+        } else {
+            optionDouble = none();
+        }
+        return optionDouble;
+    }
+
+    static Option<LocalDate> dateOptionCellValueFor(HSSFCell cell) {
+        Option<LocalDate> optionLocalDate;
+        if (cell != null && cell.getCellType() == 0) {
+            optionLocalDate = option(cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        } else {
+            optionLocalDate = none();
+        }
+        return optionLocalDate;
+    }
+
+    private static HSSFWorkbook workbookFromPath(String filePath) throws IOException {
+        InputStream inputStream = new FileInputStream(filePath);
+        return new HSSFWorkbook(new POIFSFileSystem(inputStream));
+    }
+
+    public void writeFile(Path filePath) throws IOException {
+        try {
+            FileOutputStream fileOut = new FileOutputStream(format("%s/sales%s.xls", filePath, year.getValue()));
+            workbook.write(fileOut);
+            fileOut.close();
+        } catch (FileNotFoundException e) {
+            throw new FileNotFoundException("There was a problem writing your file.");
+        }
     }
 
     public HSSFSheet setNewEntry(HSSFSheet monthlyReportSheet, MonthlyReport monthlyReport, LedgerEntry ledgerEntry) {
@@ -211,58 +265,5 @@ public class AnnualReport {
 
     private Date dateFrom(LocalDate localDate) {
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-    }
-
-    private static Year yearFrom(HSSFSheet monthlyReportSheet) {
-        int year = (int) monthlyReportSheet.getRow(1).getCell(1).getNumericCellValue();
-        return Year.of(year);
-    }
-
-    private static Month monthFrom(HSSFSheet monthlyReportSheet) {
-        String monthString = monthlyReportSheet.getRow(1).getCell(0).getStringCellValue().toUpperCase();
-        return Month.valueOf(monthString);
-    }
-
-    private static int isoYearFromFileName(String filePath) {
-        int length = filePath.length();
-        if (length > 8) {
-            return parseInt(filePath.substring(length - 8, length - 4));
-        } else {
-            throw new IllegalArgumentException("Non-standard filename.");
-        }
-    }
-
-    static Option<String> stringOptionCellValueFor(HSSFCell cell) {
-        Option<String> optionString;
-        if (cell != null) {
-            optionString = option(cell.getStringCellValue());
-        } else {
-            optionString = none();
-        }
-        return optionString;
-    }
-
-    static Option<Double> numericOptionCellValueFor(HSSFCell cell) {
-        Option<Double> optionDouble;
-        if (cell != null) {
-            optionDouble = option(cell.getNumericCellValue());
-        } else {
-            optionDouble = none();
-        }
-        return optionDouble;
-    }
-
-    static Option<LocalDate> dateOptionCellValueFor(HSSFCell cell) {
-        Option<LocalDate> optionLocalDate;
-        if (cell != null && cell.getCellType() == 0) {
-            optionLocalDate = option(cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-        } else {
-            optionLocalDate = none();
-        } return optionLocalDate;
-    }
-
-    private static HSSFWorkbook workbookFromPath(String filePath) throws IOException {
-        InputStream inputStream = new FileInputStream(filePath);
-        return new HSSFWorkbook(new POIFSFileSystem(inputStream));
     }
 }

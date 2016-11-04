@@ -6,6 +6,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import uk.co.endofhome.javoice.Config;
 import uk.co.endofhome.javoice.Customer;
 
 import java.io.*;
@@ -28,10 +29,18 @@ public class InvoiceClient {
     private Path fileTemplatePath;
     private Path fileOutputPath;
 
-    public InvoiceClient(HSSFWorkbook workBook, Path templatePath, Path outputPath) {
-        this.fileTemplatePath = templatePath;
-        this.fileOutputPath = outputPath;
-        this.workBook = workBook;
+    private InvoiceClient(HSSFWorkbook workbook, Path templatePath, Path outputPath) {
+        fileTemplatePath = templatePath;
+        fileOutputPath = outputPath;
+        workBook = workbook;
+    }
+
+    public static InvoiceClient invoiceClient(HSSFWorkbook workbook) {
+        return new InvoiceClient(workbook, Config.invoiceFileTemplatePath(), Config.invoiceFileOutputPath());
+    }
+
+    public static InvoiceClient invoiceClientCustomConfig(HSSFWorkbook workbook, Path templatePath, Path outputPath) {
+        return new InvoiceClient(workbook, templatePath, outputPath);
     }
 
     public void writeFile(Path filePath, Invoice invoice) throws IOException {

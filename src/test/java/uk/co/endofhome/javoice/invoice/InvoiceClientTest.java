@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static uk.co.endofhome.javoice.invoice.InvoiceClient.invoiceClientCustomConfig;
 
 public class InvoiceClientTest {
     private Customer customer = new Customer("Milford", "Herbalist St.", "New York", "NY-1010", "12345", "ACC-1967");
@@ -107,7 +108,7 @@ public class InvoiceClientTest {
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet testSheet = workbook.createSheet("test invoice");
         createTestRows(testSheet);
-        invoiceClient = new InvoiceClient(workbook, Paths.get("data/"), Paths.get("src/test/resources"));
+        invoiceClient = invoiceClientCustomConfig(workbook, Paths.get("data/"), Paths.get("src/test/resources"));
         Invoice invoice = new Invoice("INV-001", LocalDate.now(), customer, "cust ref", sequence(itemLine));
         invoiceClient.setCustomerSection(testSheet, invoice);
         invoiceClient.setInvoiceNumber(testSheet, invoice);
