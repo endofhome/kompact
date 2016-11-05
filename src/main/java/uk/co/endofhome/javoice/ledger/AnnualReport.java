@@ -3,10 +3,12 @@ package uk.co.endofhome.javoice.ledger;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Sheet;
 import uk.co.endofhome.javoice.Config;
 
 import java.io.FileInputStream;
@@ -163,10 +165,20 @@ public class AnnualReport {
     public void writeFile(Path filePath) throws IOException {
         try {
             FileOutputStream fileOut = new FileOutputStream(format("%s/sales%s.xls", filePath, year.getValue()));
+            resizeColumns();
             workbook.write(fileOut);
             fileOut.close();
         } catch (FileNotFoundException e) {
             throw new FileNotFoundException("There was a problem writing your file.");
+        }
+    }
+
+    private void resizeColumns() {
+        HSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
+        for (Sheet sheet : workbook) {
+            for (int i = 0; i < 8; i++) {
+                sheet.autoSizeColumn(i);
+            }
         }
     }
 
