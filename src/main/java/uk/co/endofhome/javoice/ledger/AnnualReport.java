@@ -29,6 +29,7 @@ import static java.time.format.TextStyle.SHORT;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
 import static uk.co.endofhome.javoice.DateCellFormat.excelDateCellStyleFor;
+import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.LEDGER_ENTRIES_START_AT;
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.TOTAL_FOOTER_ROWS;
 
@@ -85,7 +86,7 @@ public class AnnualReport {
         Sequence<LedgerEntry> entries = sequence();
         for (int i = LEDGER_ENTRIES_START_AT; i < monthlyReportSheet.getLastRowNum() - 1; i++) {
             HSSFRow rowToExtract = monthlyReportSheet.getRow(i);
-            LedgerEntry ledgerEntry = new LedgerEntry(
+            LedgerEntry ledgerEntry = ledgerEntry(
                     stringOptionCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK)),
                     stringOptionCellValueFor(rowToExtract.getCell(1, CREATE_NULL_AS_BLANK)),
                     numericOptionCellValueFor(rowToExtract.getCell(2, CREATE_NULL_AS_BLANK)),

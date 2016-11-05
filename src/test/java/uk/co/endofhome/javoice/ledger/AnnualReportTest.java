@@ -14,6 +14,7 @@ import static com.googlecode.totallylazy.Option.*;
 import static java.time.Month.JANUARY;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 
 public class AnnualReportTest {
     private AnnualReport annualReport;
@@ -28,7 +29,7 @@ public class AnnualReportTest {
     public void can_set_a_new_entry_in_ledger() throws IOException {
         HSSFSheet monthlyReportSheet = annualReport.sheetAt(1);
         MonthlyReport monthlyReport = annualReport.monthlyReports().get(0);
-        LedgerEntry ledgerEntry = new LedgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.now()), none());
+        LedgerEntry ledgerEntry = ledgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.now()), none());
         HSSFSheet updatedLedgerMonthlySheet = annualReport.setNewEntry(monthlyReportSheet, monthlyReport, ledgerEntry);
         MonthlyReport updatedMonthlyReport = annualReport.getMonthlyReportFrom(updatedLedgerMonthlySheet);
 
@@ -42,9 +43,9 @@ public class AnnualReportTest {
     public void can_set_footer() throws IOException {
         HSSFSheet monthlyReportSheet = annualReport.sheetAt(1);
         MonthlyReport monthlyReport = annualReport.monthlyReports().get(0);
-        LedgerEntry firstLedgerEntry = new LedgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.now()), none());
-        LedgerEntry secondLedgerEntry = new LedgerEntry(some("Chris Corsano"), some("INV-909"), some(11.0), none(), none(), option(LocalDate.now()), none());
-        LedgerEntry thirdLedgerEntry = new LedgerEntry(some("Drumbo Drums"), some("INV-101"), some(1.0), none(), none(), option(LocalDate.now()), none());
+        LedgerEntry firstLedgerEntry = ledgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.now()), none());
+        LedgerEntry secondLedgerEntry = ledgerEntry(some("Chris Corsano"), some("INV-909"), some(11.0), none(), none(), option(LocalDate.now()), none());
+        LedgerEntry thirdLedgerEntry = ledgerEntry(some("Drumbo Drums"), some("INV-101"), some(1.0), none(), none(), option(LocalDate.now()), none());
 
         HSSFSheet sheetWithOneAdded = annualReport.setNewEntry(monthlyReportSheet, monthlyReport, firstLedgerEntry);
         HSSFSheet sheetWithTwoAdded = annualReport.setNewEntry(sheetWithOneAdded, monthlyReport, secondLedgerEntry);
@@ -65,7 +66,7 @@ public class AnnualReportTest {
         annualReport = AnnualReport.annualReportCustomConfig(1984, Paths.get("src/test/resources"));
         HSSFSheet januaryReportSheet = annualReport.sheetAt(1);
         MonthlyReport monthlyReport = annualReport.monthlyReports().get(0);
-        LedgerEntry newLedgerEntry = new LedgerEntry(some("Buddy Rich"), some("INV-909"), some(3.0), none(), none(), option(LocalDate.now()), none());
+        LedgerEntry newLedgerEntry = ledgerEntry(some("Buddy Rich"), some("INV-909"), some(3.0), none(), none(), option(LocalDate.now()), none());
         annualReport.setNewEntry(januaryReportSheet, monthlyReport, newLedgerEntry);
         annualReport.writeFile(annualReport.fileOutputPath());
 
