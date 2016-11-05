@@ -29,6 +29,6 @@ public class Invoice {
     }
 
     public String customerName() {
-        return customer.name();
+        return customer.name;
     }
 }

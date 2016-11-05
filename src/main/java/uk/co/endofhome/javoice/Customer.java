@@ -16,8 +16,4 @@ public class Customer {
         this.phoneNumber = phoneNumber;
         this.accountCode = accountCode;
     }
-
-    public String name() {
-        return name;
-    }
 }
