@@ -40,6 +40,24 @@ public class AnnualReportTest {
     }
 
     @Test
+    public void can_set_a_new_entry_in_ledger_from_LedgerEntry_only() throws IOException {
+        LedgerEntry ledgerEntry = ledgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.of(1983,11,10)), none());
+        annualReport.setNewEntry(ledgerEntry);
+        MonthlyReport novemberReport = annualReport.monthlyReports().get(10);
+
+        assertThat(novemberReport.entries.get(0).customerName.getOrElse(""), is(ledgerEntry.customerName.get()));
+        assertThat(novemberReport.entries.get(0).invoiceNumber.getOrElse(""), is(ledgerEntry.invoiceNumber.get()));
+        assertThat(novemberReport.entries.get(0).valueNett.getOrElse(0.0), is(ledgerEntry.valueNett.get()));
+        assertThat(novemberReport.entries.get(0).date.get(), is(LocalDate.of(1983,11,10)));
+    }
+
+    @Test(expected=RuntimeException.class)
+    public void blows_up_if_ledger_entry_added_to_workbook_for_different_year() throws IOException {
+        LedgerEntry ledgerEntry = ledgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), option(LocalDate.of(1978,11,10)), none());
+        annualReport.setNewEntry(ledgerEntry);
+    }
+
+    @Test
     public void can_set_footer() throws IOException {
         HSSFSheet monthlyReportSheet = annualReport.sheetAt(1);
         MonthlyReport monthlyReport = annualReport.monthlyReports().get(0);

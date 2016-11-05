@@ -9,8 +9,13 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import uk.co.endofhome.javoice.Config;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
@@ -182,6 +187,19 @@ public class AnnualReport {
             dateCell.setCellValue(CELL_TYPE_BLANK);
         }
         return setFooter(monthlyReportSheetNoFooter, monthlyReport.footer);
+    }
+
+    public void setNewEntry(LedgerEntry ledgerEntry) {
+        LocalDate dateOfEntry = ledgerEntry.date.getOrThrow(new DateTimeException("Ledger entry has no date"));
+        if (dateOfEntry.getYear() != year.getValue()) {
+            throw new RuntimeException("Wrong ledger for entry.");
+        }
+        int entryMonthValue = dateOfEntry.getMonthValue();
+        MonthlyReport monthlyReport = this.monthlyReports.get(entryMonthValue - 1);
+        HSSFSheet reportSheet = workbook.getSheetAt(entryMonthValue);
+
+        monthlyReport.entries = monthlyReport.entries.append(ledgerEntry);
+        setNewEntry(reportSheet, monthlyReport, ledgerEntry);
     }
 
     public HSSFSheet removeFooterFrom(HSSFSheet monthlyReportSheet) {
