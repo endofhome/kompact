@@ -3,8 +3,6 @@ package uk.co.endofhome.javoice.ledger;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -256,7 +254,7 @@ public class AnnualReport {
             titleRow.createCell(1).setCellValue(year.getValue());
             HSSFRow tableHeadersRow = sheet.getRow(3);
             setTableHeaders(tableHeadersRow);
-            setCellStyleFor(tableHeadersRow);
+            setCellStyleForTableHeaders(tableHeadersRow);
         }
     }
 
@@ -267,14 +265,9 @@ public class AnnualReport {
         sheet.createRow(3);
     }
 
-    private void setCellStyleFor(HSSFRow tableHeadersRow) {
-        HSSFCellStyle style = workbook.createCellStyle();
-        HSSFFont font = workbook.createFont();
-        font.setBold(true);
-        style.setFont(font);
-        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+    private void setCellStyleForTableHeaders(HSSFRow tableHeadersRow) {
         for(int j = 0; j < 9; j++) {
-            tableHeadersRow.getCell(j).setCellStyle(style);
+            tableHeadersRow.getCell(j).setCellStyle(excelBoldBorderBottomCellStyleFor(workbook));
         }
     }
 
@@ -315,6 +308,9 @@ public class AnnualReport {
                 footerRowTwo.createCell(k).setCellValue(footerMap.get("rowTwo").get(k).getOrElse(""));
             }
         }
+        footerRowTwo.getCell(2).setCellStyle(excelSterlingCellStyleFor(workbook));
+        footerRowTwo.getCell(3).setCellStyle(excelSterlingCellStyleFor(workbook));
+        footerRowTwo.getCell(4).setCellStyle(excelSterlingCellStyleFor(workbook));
         return sheet;
     }
 

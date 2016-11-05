@@ -32,4 +32,13 @@ public class CellStyler {
         boldStyle.setFont(font);
         return boldStyle;
     }
+
+    public static HSSFCellStyle excelBoldBorderBottomCellStyleFor(HSSFWorkbook workbook) {
+        HSSFCellStyle boldBottomBorder = workbook.createCellStyle();
+        HSSFFont font = workbook.createFont();
+        font.setBold(true);
+        boldBottomBorder.setFont(font);
+        boldBottomBorder.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        return boldBottomBorder;
+    }
 }
