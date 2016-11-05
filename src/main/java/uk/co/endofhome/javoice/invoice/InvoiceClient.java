@@ -9,7 +9,11 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import uk.co.endofhome.javoice.Config;
 import uk.co.endofhome.javoice.Customer;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -20,7 +24,7 @@ import java.util.Locale;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
-import static uk.co.endofhome.javoice.DateCellFormat.excelDateCellStyleFor;
+import static uk.co.endofhome.javoice.CellStyler.excelDateCellStyleFor;
 import static uk.co.endofhome.javoice.invoice.Invoice.ITEM_LINES_START_AT;
 import static uk.co.endofhome.javoice.invoice.Invoice.MAX_ITEM_LINES;
 

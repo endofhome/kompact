@@ -3,6 +3,8 @@ package uk.co.endofhome.javoice.ledger;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -33,7 +35,8 @@ import static java.lang.String.format;
 import static java.time.format.TextStyle.SHORT;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
-import static uk.co.endofhome.javoice.DateCellFormat.excelDateCellStyleFor;
+import static uk.co.endofhome.javoice.CellStyler.excelDateCellStyleFor;
+import static uk.co.endofhome.javoice.CellStyler.excelSterlingCellStyleFor;
 import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.LEDGER_ENTRIES_START_AT;
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.TOTAL_FOOTER_ROWS;
@@ -176,6 +179,11 @@ public class AnnualReport {
         rowToSet.createCell(0).setCellValue(ledgerEntry.customerName.getOrElse(""));
         rowToSet.createCell(1).setCellValue(ledgerEntry.invoiceNumber.getOrElse(""));
         rowToSet.createCell(2).setCellValue(ledgerEntry.valueNett.getOrElse(0.0));
+        rowToSet.getCell(2).setCellStyle(excelSterlingCellStyleFor(workbook));
+        rowToSet.createCell(3).setCellFormula("SUM(C5*0.2)");
+        rowToSet.getCell(3).setCellStyle(excelSterlingCellStyleFor(workbook));
+        rowToSet.createCell(4).setCellFormula(("SUM(C5:D5)"));
+        rowToSet.getCell(4).setCellStyle(excelSterlingCellStyleFor(workbook));
         rowToSet.createCell(5).setCellValue(ledgerEntry.crReq.getOrElse(""));
         rowToSet.createCell(6).setCellValue(ledgerEntry.allocation.getOrElse(""));
         rowToSet.createCell(8).setCellValue(ledgerEntry.notes.getOrElse(""));
@@ -242,13 +250,44 @@ public class AnnualReport {
         for (int i = 0; i < workbook.getNumberOfSheets() - 1; i++) {
             HSSFSheet sheet = workbook.getSheetAt(i + 1);
             MonthlyReport monthlyReport = monthlyReports.get(i);
-            sheet.createRow(0);
-            sheet.createRow(1);
-            sheet.getRow(1).createCell(0).setCellValue(capitalise(monthlyReport.month.toString().toLowerCase()));
-            sheet.getRow(1).createCell(1).setCellValue(year.getValue());
-            sheet.createRow(2);
-            sheet.createRow(3);
+            createRowsForMonthlyReportHeaders(sheet);
+            HSSFRow titleRow = sheet.getRow(1);
+            titleRow.createCell(0).setCellValue(capitalise(monthlyReport.month.toString().toLowerCase()));
+            titleRow.createCell(1).setCellValue(year.getValue());
+            HSSFRow tableHeadersRow = sheet.getRow(3);
+            setTableHeaders(tableHeadersRow);
+            setCellStyleFor(tableHeadersRow);
         }
+    }
+
+    private void createRowsForMonthlyReportHeaders(HSSFSheet sheet) {
+        sheet.createRow(0);
+        sheet.createRow(1);
+        sheet.createRow(2);
+        sheet.createRow(3);
+    }
+
+    private void setCellStyleFor(HSSFRow tableHeadersRow) {
+        HSSFCellStyle style = workbook.createCellStyle();
+        HSSFFont font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        for(int j = 0; j < 9; j++) {
+            tableHeadersRow.getCell(j).setCellStyle(style);
+        }
+    }
+
+    private void setTableHeaders(HSSFRow tableHeadersRow) {
+        tableHeadersRow.createCell(0).setCellValue("Customer");
+        tableHeadersRow.createCell(1).setCellValue("Invoice");
+        tableHeadersRow.createCell(2).setCellValue("Value nett");
+        tableHeadersRow.createCell(3).setCellValue("Vat");
+        tableHeadersRow.createCell(4).setCellValue("Gross");
+        tableHeadersRow.createCell(5).setCellValue("Cr req");
+        tableHeadersRow.createCell(6).setCellValue("Allocation");
+        tableHeadersRow.createCell(7).setCellValue("Date");
+        tableHeadersRow.createCell(8).setCellValue("Notes");
     }
 
     private void setMonthlyReportFooters() {
