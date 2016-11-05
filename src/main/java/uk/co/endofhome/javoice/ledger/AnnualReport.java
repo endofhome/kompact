@@ -35,8 +35,7 @@ import static java.lang.String.format;
 import static java.time.format.TextStyle.SHORT;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
-import static uk.co.endofhome.javoice.CellStyler.excelDateCellStyleFor;
-import static uk.co.endofhome.javoice.CellStyler.excelSterlingCellStyleFor;
+import static uk.co.endofhome.javoice.CellStyler.*;
 import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.LEDGER_ENTRIES_START_AT;
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.TOTAL_FOOTER_ROWS;
@@ -253,6 +252,7 @@ public class AnnualReport {
             createRowsForMonthlyReportHeaders(sheet);
             HSSFRow titleRow = sheet.getRow(1);
             titleRow.createCell(0).setCellValue(capitalise(monthlyReport.month.toString().toLowerCase()));
+            titleRow.getCell(0).setCellStyle(excelBoldCellStyleFor(workbook));
             titleRow.createCell(1).setCellValue(year.getValue());
             HSSFRow tableHeadersRow = sheet.getRow(3);
             setTableHeaders(tableHeadersRow);
