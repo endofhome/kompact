@@ -177,9 +177,9 @@ public class AnnualReport {
         rowToSet.createCell(1).setCellValue(ledgerEntry.invoiceNumber.getOrElse(""));
         rowToSet.createCell(2).setCellValue(ledgerEntry.valueNett.getOrElse(0.0));
         rowToSet.getCell(2).setCellStyle(excelSterlingCellStyleFor(workbook));
-        rowToSet.createCell(3).setCellFormula("SUM(C5*0.2)");
+        rowToSet.createCell(3).setCellFormula(String.format("SUM(C%s*0.2)", rowToSet.getRowNum() + 1));
         rowToSet.getCell(3).setCellStyle(excelSterlingCellStyleFor(workbook));
-        rowToSet.createCell(4).setCellFormula(("SUM(C5:D5)"));
+        rowToSet.createCell(4).setCellFormula((String.format("SUM(C%1$s:D%1$s)", rowToSet.getRowNum() + 1)));
         rowToSet.getCell(4).setCellStyle(excelSterlingCellStyleFor(workbook));
         rowToSet.createCell(5).setCellValue(ledgerEntry.crReq.getOrElse(""));
         rowToSet.createCell(6).setCellValue(ledgerEntry.allocation.getOrElse(""));
