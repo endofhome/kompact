@@ -3,6 +3,8 @@ package uk.co.endofhome.javoice.customer;
 import com.googlecode.totallylazy.Sequence;
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -29,5 +31,16 @@ public class CustomerStoreTest {
         assertThat(customerStore.customers().size(), is(2));
         assertThat(customerStore.customers().get(0).name, is("Kevin Shea"));
         assertThat(customerStore.customers().get(1).name, is("Kevin Cascell"));
+    }
+
+    @Test
+    public void can_read_in_a_customer_store_from_file() throws IOException {
+        try {
+            //TODO: replace sample file with a test file once we can write one.
+            CustomerStore customerStore = CustomerStore.readFile("data/sample-customer-db.xls", 0);
+            assertThat(customerStore.customers().size(), is(3));
+        } catch (IOException e) {
+            throw new IOException("Sorry, there was a problem reading in your file");
+        }
     }
 }
