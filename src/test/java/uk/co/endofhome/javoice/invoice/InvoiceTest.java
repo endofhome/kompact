@@ -18,7 +18,7 @@ public class InvoiceTest {
         ItemLine secondItemLine = new ItemLine(1.0, "stuff", 1.0);
         Invoice invoice = new Invoice("some num", LocalDate.now(), customer, "", sequence(firstItemLine, secondItemLine));
 
-        assertThat(invoice.nettValue(), is(2));
+        assertThat(invoice.nettValue(), is(2.0));
     }
 
     @Test
