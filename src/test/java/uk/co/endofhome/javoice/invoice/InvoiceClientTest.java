@@ -5,7 +5,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.junit.Before;
 import org.junit.Test;
-import uk.co.endofhome.javoice.Customer;
+import uk.co.endofhome.javoice.customer.Customer;
 
 import java.io.IOException;
 import java.nio.file.Paths;

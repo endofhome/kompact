@@ -7,7 +7,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import uk.co.endofhome.javoice.Config;
-import uk.co.endofhome.javoice.Customer;
+import uk.co.endofhome.javoice.customer.Customer;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

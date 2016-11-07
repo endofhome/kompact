@@ -1,7 +1,7 @@
 package uk.co.endofhome.javoice.invoice;
 
 import com.googlecode.totallylazy.Sequence;
-import uk.co.endofhome.javoice.Customer;
+import uk.co.endofhome.javoice.customer.Customer;
 
 import java.time.LocalDate;
 

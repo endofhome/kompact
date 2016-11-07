@@ -1,4 +1,4 @@
-package uk.co.endofhome.javoice;
+package uk.co.endofhome.javoice.customer;
 
 public class Customer {
     public final String name;

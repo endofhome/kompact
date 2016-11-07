@@ -1,7 +1,7 @@
 package uk.co.endofhome.javoice.invoice;
 
 import org.junit.Test;
-import uk.co.endofhome.javoice.Customer;
+import uk.co.endofhome.javoice.customer.Customer;
 
 import java.time.LocalDate;
 
