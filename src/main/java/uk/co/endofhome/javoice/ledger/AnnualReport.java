@@ -263,7 +263,9 @@ public class AnnualReport {
             HSSFRow titleRow = sheet.getRow(1);
             titleRow.createCell(0).setCellValue(capitalise(monthlyReport.month.toString().toLowerCase()));
             titleRow.getCell(0).setCellStyle(excelBoldCellStyleFor(workbook));
-            titleRow.createCell(1).setCellValue(year.getValue());
+            HSSFCell dateCell = titleRow.createCell(1);
+            dateCell.setCellValue(year.getValue());
+            dateCell.setCellStyle(excelGeneralCellStyleFor(workbook));
             HSSFRow tableHeadersRow = sheet.getRow(3);
             setTableHeaders(tableHeadersRow);
             setCellStyleForTableHeaders(tableHeadersRow);

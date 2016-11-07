@@ -26,6 +26,14 @@ public class CellStyler {
         return sterlingStyle;
     }
 
+    public static HSSFCellStyle excelGeneralCellStyleFor(HSSFWorkbook workbook) {
+        String excelGeneralStylePattern = "General";
+        HSSFCellStyle generalStyle = workbook.createCellStyle();
+        DataFormat dataFormat = workbook.createDataFormat();
+        generalStyle.setDataFormat(dataFormat.getFormat(excelGeneralStylePattern));
+        return generalStyle;
+    }
+
     public static HSSFCellStyle excelBoldCellStyleFor(HSSFWorkbook workbook) {
         HSSFCellStyle boldStyle = workbook.createCellStyle();
         HSSFFont font = workbook.createFont();
