@@ -199,7 +199,7 @@ public class AnnualReport {
         HSSFCell dateCell = rowToSet.createCell(7);
         if (ledgerEntry.date.isDefined()) {
             dateCell.setCellValue(dateFrom(ledgerEntry.date.get()));
-            dateCell.setCellStyle(excelDateCellStyleFor(workbook));
+            dateCell.setCellStyle(excelDateCellStyleFor(workbook, dateCell));
         } else {
             dateCell.setCellValue(CELL_TYPE_BLANK);
         }

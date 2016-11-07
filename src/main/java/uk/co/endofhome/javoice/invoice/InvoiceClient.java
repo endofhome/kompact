@@ -72,16 +72,16 @@ public class InvoiceClient {
     public HSSFSheet getSingleSheetFromPath(String filePath, int sheetNum) throws IOException {
         InputStream inputStream = new FileInputStream(filePath);
         workBook = new HSSFWorkbook(new POIFSFileSystem(inputStream));
-         return workBook.getSheetAt(sheetNum);
+        return workBook.getSheetAt(sheetNum);
     }
 
     public HSSFSheet setCustomerSection(HSSFSheet invoiceSheet, Invoice invoice) {
         Customer customer = invoice.customer;
-        invoiceSheet.getRow(11).createCell(4).setCellValue(customer.name);
-        invoiceSheet.getRow(12).createCell(4).setCellValue(customer.addressOne);
-        invoiceSheet.getRow(13).createCell(4).setCellValue(customer.addressTwo);
-        invoiceSheet.getRow(13).createCell(8).setCellValue(customer.postcode);
-        invoiceSheet.getRow(14).createCell(4).setCellValue(customer.phoneNumber);
+        invoiceSheet.getRow(11).getCell(4).setCellValue(customer.name);
+        invoiceSheet.getRow(12).getCell(4).setCellValue(customer.addressOne);
+        invoiceSheet.getRow(13).getCell(4).setCellValue(customer.addressTwo);
+        invoiceSheet.getRow(13).getCell(8).setCellValue(customer.postcode);
+        invoiceSheet.getRow(14).getCell(4).setCellValue(customer.phoneNumber);
         return invoiceSheet;
     }
 
@@ -89,25 +89,25 @@ public class InvoiceClient {
         LocalDate invoiceDate = invoice.date;
         Date date = Date.from(invoiceDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Customer customer = invoice.customer;
-        HSSFCell dateCell = invoiceSheet.getRow(11).createCell(11);
+        HSSFCell dateCell = invoiceSheet.getRow(11).getCell(11);
         dateCell.setCellValue(date);
-        dateCell.setCellStyle(excelDateCellStyleFor(workBook));
-        invoiceSheet.getRow(12).createCell(11).setCellValue(invoice.orderNumber);
-        invoiceSheet.getRow(13).createCell(11).setCellValue(customer.accountCode);
+        dateCell.setCellStyle(excelDateCellStyleFor(workBook, dateCell));
+        invoiceSheet.getRow(12).getCell(11).setCellValue(invoice.orderNumber);
+        invoiceSheet.getRow(13).getCell(11).setCellValue(customer.accountCode);
         return invoiceSheet;
     }
 
     public HSSFSheet setInvoiceNumber(HSSFSheet invoiceSheet, Invoice invoice) {
-        invoiceSheet.getRow(3).createCell(11).setCellValue(invoice.number);
+        invoiceSheet.getRow(3).getCell(11).setCellValue(invoice.number);
         return invoiceSheet;
     }
 
     public HSSFSheet setItemLine(HSSFSheet invoiceSheet, Invoice invoice, int itemLineNumber) {
         ItemLine itemLineDetails = invoice.itemLines.get(itemLineNumber);
         HSSFRow row = invoiceSheet.getRow(itemLineNumber + ITEM_LINES_START_AT);
-        row.createCell(3).setCellValue(itemLineDetails.quantity);
-        row.createCell(4).setCellValue(itemLineDetails.description);
-        row.createCell(10).setCellValue(itemLineDetails.unitPrice);
+        row.getCell(3).setCellValue(itemLineDetails.quantity);
+        row.getCell(4).setCellValue(itemLineDetails.description);
+        row.getCell(10).setCellValue(itemLineDetails.unitPrice);
         return invoiceSheet;
     }
 

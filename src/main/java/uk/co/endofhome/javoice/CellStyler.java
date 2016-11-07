@@ -1,5 +1,6 @@
 package uk.co.endofhome.javoice;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -9,11 +10,11 @@ import org.apache.poi.ss.util.DateFormatConverter;
 import java.util.Locale;
 
 public class CellStyler {
-    public static HSSFCellStyle excelDateCellStyleFor(HSSFWorkbook workbook) {
+    public static HSSFCellStyle excelDateCellStyleFor(HSSFWorkbook workbook, HSSFCell dateCell) {
         String excelDatePattern = DateFormatConverter.convert(Locale.getDefault(), "dd/MM/yyyy");
-        HSSFCellStyle dateCellStyle = workbook.createCellStyle();
-        DataFormat dateFormat = workbook.createDataFormat();
-        dateCellStyle.setDataFormat(dateFormat.getFormat(excelDatePattern));
+        HSSFCellStyle dateCellStyle = dateCell.getCellStyle();
+        DataFormat dataFormat = workbook.createDataFormat();
+        dateCellStyle.setDataFormat(dataFormat.getFormat(excelDatePattern));
         return dateCellStyle;
     }
 
