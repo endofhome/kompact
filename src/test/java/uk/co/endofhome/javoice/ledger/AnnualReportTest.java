@@ -10,7 +10,9 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.Year;
 
-import static com.googlecode.totallylazy.Option.*;
+import static com.googlecode.totallylazy.Option.none;
+import static com.googlecode.totallylazy.Option.option;
+import static com.googlecode.totallylazy.Option.some;
 import static java.time.Month.JANUARY;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
