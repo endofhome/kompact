@@ -1,5 +1,6 @@
 package uk.co.endofhome.javoice.customer;
 
+import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
@@ -143,5 +144,9 @@ public class CustomerStore {
                 sheet.autoSizeColumn(i);
             }
         }
+    }
+
+    public Option<Customer> search(String nameToSearchFor) {
+        return customers.find(customer -> customer.name.equals(nameToSearchFor));
     }
 }
