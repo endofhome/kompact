@@ -1,15 +1,22 @@
 package uk.co.endofhome.javoice.customer;
 
 import com.googlecode.totallylazy.Sequence;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 public class CustomerStoreTest {
+    @Before
+    public void setUp() throws IOException {
+        writeCustomerStoreToFileSystem();
+    }
+
     @Test
     public void can_add_one_customer() {
         CustomerStore customerStore = new CustomerStore();
@@ -35,12 +42,21 @@ public class CustomerStoreTest {
 
     @Test
     public void can_read_in_a_customer_store_from_file() throws IOException {
-        try {
-            //TODO: replace sample file with a test file once we can write one.
-            CustomerStore customerStore = CustomerStore.readFile("data/sample-customer-db.xls", 0);
-            assertThat(customerStore.customers().size(), is(3));
-        } catch (IOException e) {
-            throw new IOException("Sorry, there was a problem reading in your file");
-        }
+        CustomerStore customerStore = CustomerStore.readFile("src/test/resources/Customers.xls", 0);
+        assertThat(customerStore.customers().size(), is(2));
+    }
+
+    private CustomerStore customerStoreWithTwoCustomers() {
+        CustomerStore customerStore = new CustomerStore();
+        Customer customer1 = new Customer("Donald", "Some address", "some more address", "NY9876", "938273", "ACC-44");
+        Customer customer2 = new Customer("Hillary", "Another address", "yet more address", "PO421", "54321", "ACC-55");
+        Sequence<Customer> twoCustomers = sequence(customer1, customer2);
+        customerStore.addCustomers(twoCustomers);
+        return customerStore;
+    }
+
+    private void writeCustomerStoreToFileSystem() throws IOException {
+        CustomerStore customerStore = customerStoreWithTwoCustomers();
+        customerStore.writeFile(Paths.get("src/test/resources"));
     }
 }
