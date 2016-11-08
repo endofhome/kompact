@@ -44,7 +44,7 @@ public class CustomerStoreTest {
 
     @Test
     public void can_read_in_a_customer_store_from_file() throws IOException {
-        CustomerStore customerStore = CustomerStore.readFile("src/test/resources/Customers.xls", 0);
+        CustomerStore customerStore = CustomerStore.readFile(Paths.get("src/test/resources/Customers.xls"), 0);
         assertThat(customerStore.customers().size(), is(2));
     }
 

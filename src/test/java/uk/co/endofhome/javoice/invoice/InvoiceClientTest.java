@@ -8,11 +8,11 @@ import org.junit.Test;
 import uk.co.endofhome.javoice.customer.Customer;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
+import static java.nio.file.Paths.get;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.co.endofhome.javoice.invoice.InvoiceClient.invoiceClientCustomConfig;
 
@@ -39,7 +39,7 @@ public class InvoiceClientTest {
 
     @Test
     public void can_set_customer_section() throws IOException {
-        HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath("src/test/resources/INV-001.xls", 0);
+        HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath(get("src/test/resources/INV-001.xls"), 0);
         Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "anything", sequence(itemLine));
         HSSFSheet updatedSheet = invoiceClient.setCustomerSection(invoiceSheet, invoice);
         Sequence<String> customerDetails = invoiceClient.getCustomerSectionFrom(updatedSheet);
@@ -53,7 +53,7 @@ public class InvoiceClientTest {
 
     @Test
     public void can_set_order_refs_section() throws IOException {
-        HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath("src/test/resources/INV-001.xls", 0);
+        HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath(get("src/test/resources/INV-001.xls"), 0);
         Invoice invoice = new Invoice("some invoice number", LocalDate.of(2017, 3, 19), customer, "Bob", sequence(itemLine));
         HSSFSheet updatedSheet = invoiceClient.setOrderRefsSection(invoiceSheet, invoice);
         Sequence<String> orderRefsDetails = invoiceClient.getOrderRefsSectionFrom(updatedSheet);
@@ -65,7 +65,7 @@ public class InvoiceClientTest {
 
     @Test
     public void can_set_invoice_number() throws IOException {
-        HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath("src/test/resources/INV-001.xls", 0);
+        HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath(get("src/test/resources/INV-001.xls"), 0);
         Invoice invoice = new Invoice("INV-999", LocalDate.now(), customer, "some customer ref", sequence(itemLine));
         HSSFSheet updatedSheet = invoiceClient.setInvoiceNumber(invoiceSheet, invoice);
         String invoiceNumber = invoiceClient.getInvoiceNumberFrom(updatedSheet);
@@ -75,7 +75,7 @@ public class InvoiceClientTest {
 
     @Test
     public void can_set_one_item_line() throws IOException {
-        HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath("src/test/resources/INV-001.xls", 0);
+        HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath(get("src/test/resources/INV-001.xls"), 0);
         ItemLine singleItemLine = new ItemLine(3.0, "Magic beans", 3.0);
         Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "some customer ref", sequence(singleItemLine));
         HSSFSheet updatedSheet = invoiceClient.setItemLine(invoiceSheet, invoice, 0);
@@ -86,7 +86,7 @@ public class InvoiceClientTest {
 
     @Test
     public void can_set_multiple_item_lines() throws IOException {
-        HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath("src/test/resources/INV-001.xls", 0);
+        HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath(get("src/test/resources/INV-001.xls"), 0);
         ItemLine firstItemLine = new ItemLine(3.0, "Magic beans", 3.0);
         ItemLine secondItemLine = new ItemLine(1.5, "Golden tickets", 100.0);
         ItemLine thirdItemLine = new ItemLine(0.5, "Super foods", 19.0);
@@ -108,7 +108,7 @@ public class InvoiceClientTest {
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet testSheet = workbook.createSheet("test invoice");
         createTestRows(testSheet);
-        invoiceClient = invoiceClientCustomConfig(workbook, Paths.get("data/"), Paths.get("src/test/resources"));
+        invoiceClient = invoiceClientCustomConfig(workbook, get("data/"), get("src/test/resources"));
         Invoice invoice = new Invoice("INV-001", LocalDate.now(), customer, "cust ref", sequence(itemLine));
         invoiceClient.setCustomerSection(testSheet, invoice);
         invoiceClient.setInvoiceNumber(testSheet, invoice);

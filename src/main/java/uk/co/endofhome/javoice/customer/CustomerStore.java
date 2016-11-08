@@ -35,7 +35,7 @@ public class CustomerStore {
         return customers;
     }
 
-    public static CustomerStore readFile(String filePath, int... sheetsToGet) throws IOException {
+    public static CustomerStore readFile(Path filePath, int... sheetsToGet) throws IOException {
         if (sheetsToGet.length == 1) {
             HSSFWorkbook customerStoreWorkbook = getWorkbookFromPath(filePath);
             HSSFSheet customerStoreSheet = customerStoreWorkbook.getSheetAt(0);
@@ -122,8 +122,8 @@ public class CustomerStore {
         return new Customer(name, addressOne, addressTwo, postcode, phoneNumber, accountCode);
     }
 
-    public static HSSFWorkbook getWorkbookFromPath(String filePath) throws IOException {
-        InputStream inputStream = new FileInputStream(filePath);
+    public static HSSFWorkbook getWorkbookFromPath(Path filePath) throws IOException {
+        InputStream inputStream = new FileInputStream(filePath.toString());
         return new HSSFWorkbook(new POIFSFileSystem(inputStream));
     }
 

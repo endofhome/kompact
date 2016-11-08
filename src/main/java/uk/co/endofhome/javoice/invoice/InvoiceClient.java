@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -59,7 +60,7 @@ public class InvoiceClient {
 
     public Invoice readFile(String filePath, int... sheetsToGet) throws IOException {
         if (sheetsToGet.length == 1) {
-            HSSFSheet invoiceSheet = getSingleSheetFromPath(filePath, sheetsToGet[0]);
+            HSSFSheet invoiceSheet = getSingleSheetFromPath(Paths.get(filePath), sheetsToGet[0]);
             Sequence<String> customerDetails = getCustomerSectionFrom(invoiceSheet);
             Sequence<String> orderRefs = getOrderRefsSectionFrom(invoiceSheet);
             String invoiceNumber = getInvoiceNumberFrom(invoiceSheet);
@@ -69,8 +70,8 @@ public class InvoiceClient {
         throw new RuntimeException("Sorry, simultaneously reading in multiple sheets from one file is not yet supported.");
     }
 
-    public HSSFSheet getSingleSheetFromPath(String filePath, int sheetNum) throws IOException {
-        InputStream inputStream = new FileInputStream(filePath);
+    public HSSFSheet getSingleSheetFromPath(Path filePath, int sheetNum) throws IOException {
+        InputStream inputStream = new FileInputStream(filePath.toString());
         workBook = new HSSFWorkbook(new POIFSFileSystem(inputStream));
         return workBook.getSheetAt(sheetNum);
     }
