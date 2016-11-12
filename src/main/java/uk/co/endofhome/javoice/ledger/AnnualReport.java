@@ -75,7 +75,7 @@ public class AnnualReport {
         return annualReport;
     }
 
-    public static AnnualReport readFile(String filePath) throws IOException {
+    public static AnnualReport readFile(Path filePath) throws IOException {
         HSSFWorkbook workbook;
         try {
             workbook = workbookFromPath(filePath);
@@ -122,10 +122,11 @@ public class AnnualReport {
         return Month.valueOf(monthString);
     }
 
-    private static int isoYearFromFileName(String filePath) {
-        int length = filePath.length();
+    private static int isoYearFromFileName(Path filePath) {
+        String pathString = filePath.toString();
+        int length = pathString.length();
         if (length > 8) {
-            return parseInt(filePath.substring(length - 8, length - 4));
+            return parseInt(pathString.substring(length - 8, length - 4));
         } else {
             throw new IllegalArgumentException("Non-standard filename.");
         }
@@ -161,8 +162,8 @@ public class AnnualReport {
         return optionLocalDate;
     }
 
-    private static HSSFWorkbook workbookFromPath(String filePath) throws IOException {
-        InputStream inputStream = new FileInputStream(filePath);
+    private static HSSFWorkbook workbookFromPath(Path filePath) throws IOException {
+        InputStream inputStream = new FileInputStream(filePath.toString());
         return new HSSFWorkbook(new POIFSFileSystem(inputStream));
     }
 

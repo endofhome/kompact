@@ -90,7 +90,7 @@ public class AnnualReportTest {
         annualReport.setNewEntry(januaryReportSheet, monthlyReport, newLedgerEntry);
         annualReport.writeFile(annualReport.fileOutputPath());
 
-        AnnualReport annualReport = AnnualReport.readFile("src/test/resources/sales1984.xls");
+        AnnualReport annualReport = AnnualReport.readFile(Paths.get("src/test/resources/sales1984.xls"));
         MonthlyReport reportToTest = annualReport.monthlyReports().get(0);
 
         assertThat(reportToTest.month, is(JANUARY));

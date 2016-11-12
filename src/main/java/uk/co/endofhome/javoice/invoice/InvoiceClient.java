@@ -50,7 +50,7 @@ public class InvoiceClient {
 
     public void writeFile(Path filePath, Invoice invoice) throws IOException {
         try {
-            FileOutputStream fileOut = new FileOutputStream(format("%s/%s.xls", filePath, invoice.number));
+            FileOutputStream fileOut = new FileOutputStream(format("%s/%s.xls", filePath.toString(), invoice.number));
             workBook.write(fileOut);
             fileOut.close();
         } catch (FileNotFoundException e) {
@@ -125,6 +125,13 @@ public class InvoiceClient {
             throw new RuntimeException(format("Too many lines for invoice number %s", invoice.number));
         }
         return itemLines;
+    }
+
+    public void setSections(HSSFSheet invoiceSheet, Invoice invoice) {
+        setInvoiceNumber(invoiceSheet, invoice);
+        setCustomerSection(invoiceSheet, invoice);
+        setOrderRefsSection(invoiceSheet, invoice);
+        setItemLines(invoiceSheet, invoice);
     }
 
     public Sequence<String> getCustomerSectionFrom(HSSFSheet invoiceSheet) {
