@@ -154,6 +154,9 @@ public class CustomerStore {
     }
 
     public String nextAccountNumber() {
+        if (customers.size() == 0) {
+            return "1";
+        }
         int lastAccountNumber = Integer.parseInt(customers.last().accountCode);
         return String.valueOf(lastAccountNumber + 1);
     }

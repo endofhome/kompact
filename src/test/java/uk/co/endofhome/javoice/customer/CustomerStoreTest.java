@@ -23,7 +23,7 @@ public class CustomerStoreTest {
     @Test
     public void can_add_one_customer() {
         CustomerStore customerStore = new CustomerStore();
-        Customer customer = new Customer("Kevin Shea", "Some address", "some more address", "NY9876", "938273", "ACC-33");
+        Customer customer = new Customer("Kevin Shea", "Some address", "some more address", "NY9876", "938273", "33");
         customerStore.addCustomer(customer);
 
         assertThat(customerStore.customers().size(), is(1));
@@ -33,8 +33,8 @@ public class CustomerStoreTest {
     @Test
     public void can_add_multiple_customers() {
         CustomerStore customerStore = new CustomerStore();
-        Customer customer1 = new Customer("Kevin Shea", "Some address", "some more address", "NY9876", "938273", "ACC-33");
-        Customer customer2 = new Customer("Kevin Cascell", "Another address", "yet more address", "PO421", "54321", "ACC-34");
+        Customer customer1 = new Customer("Kevin Shea", "Some address", "some more address", "NY9876", "938273", "33");
+        Customer customer2 = new Customer("Kevin Cascell", "Another address", "yet more address", "PO421", "54321", "34");
         Sequence<Customer> twoCustomers = sequence(customer1, customer2);
         customerStore.addCustomers(twoCustomers);
 
