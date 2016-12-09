@@ -36,7 +36,7 @@ public class ControllerTest {
         Config.setInvoiceOutputPath(pathForTestOutput);
         Config.setCustomerDataFileOutputPath(get(pathForTestOutput.toString(), "/Customers.xls"));
         customerStore = new CustomerStore();
-        Customer customer = new Customer("some customer", null, null, "P05T C0D3", null, "ACC-64972");
+        Customer customer = new Customer("some customer", null, null, "P05T C0D3", null, "798");
         customerStore.addCustomer(customer);
         controller = new Controller(customerStore);
         ItemLine itemLine = new ItemLine(5.0, "Slices of toast", 0.5);
@@ -50,6 +50,11 @@ public class ControllerTest {
     @Test
     public void can_get_next_invoice_number() {
         assertThat(controller.nextInvoiceNumber(annualReport, LocalDate.now().getMonth()), is("2"));
+    }
+
+    @Test
+    public void can_get_next_account_number() throws Exception {
+        assertThat(controller.nextAccountNumber(), is("799"));
     }
 
     @Test
@@ -70,13 +75,13 @@ public class ControllerTest {
 
     @Test
     public void can_add_new_customer_to_existing_customer_DB() throws Exception {
-        controller.newCustomer("Friendly Customer", "first bit of address", "second bit of address", "a postcode", "45632", "ACC-9876");
+        controller.newCustomer("Friendly Customer", "first bit of address", "second bit of address", "a postcode", "45632");
 
         CustomerStore updatedCustomerStoreFromFS = CustomerStore.readFile(get(pathForTestOutput + "/Customers.xls"), 0);
         Customer customerUnderTest = updatedCustomerStoreFromFS.customers().last();
         assertThat(customerUnderTest.name, is("Friendly Customer"));
         assertThat(customerUnderTest.postcode, is("a postcode"));
-        assertThat(customerUnderTest.accountCode, is("ACC-9876"));
+        assertThat(customerUnderTest.accountCode, is("799"));
     }
 
     @Test
@@ -85,7 +90,7 @@ public class ControllerTest {
 
         assertThat(foundCustomer.get().name, is("some customer"));
         assertThat(foundCustomer.get().postcode, is("P05T C0D3"));
-        assertThat(foundCustomer.get().accountCode, is("ACC-64972"));
+        assertThat(foundCustomer.get().accountCode, is("798"));
     }
 
     @Test

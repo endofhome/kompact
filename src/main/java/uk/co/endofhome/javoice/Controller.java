@@ -47,8 +47,8 @@ public class Controller {
         updateAnnualReportOnFS(annualReport, invoice);
     }
 
-    public void newCustomer(String name, String addressOne, String addressTwo, String postcode, String phoneNum, String accountCode) throws IOException {
-        Customer newCustomer = new Customer(name, addressOne, addressTwo, postcode, phoneNum, accountCode);
+    public void newCustomer(String name, String addressOne, String addressTwo, String postcode, String phoneNum) throws IOException {
+        Customer newCustomer = new Customer(name, addressOne, addressTwo, postcode, phoneNum, nextAccountNumber());
         CustomerStore customerStoreFromFS = CustomerStore.readFile(Config.customerDataFilePath(), 0);
         customerStoreFromFS.addCustomer(newCustomer);
         customerStoreFromFS.writeFile(Config.customerDataFilePath());
@@ -90,11 +90,15 @@ public class Controller {
         }
     }
 
-    String nextInvoiceNumber(AnnualReport annualReport, Month month) {
+    public String nextInvoiceNumber(AnnualReport annualReport, Month month) {
         HSSFSheet sheetForThisMonth = annualReport.sheetAt(month.getValue());
         int lastInvoiceRowNum = sheetForThisMonth.getLastRowNum() -2;
         HSSFRow lastInvoiceRow = sheetForThisMonth.getRow(lastInvoiceRowNum);
         int invoiceNumber = Integer.parseInt(lastInvoiceRow.getCell(1).getStringCellValue());
         return String.valueOf(++invoiceNumber);
+    }
+
+    public String nextAccountNumber() {
+        return customerStore.nextAccountNumber();
     }
 }

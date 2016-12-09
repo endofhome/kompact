@@ -152,4 +152,9 @@ public class CustomerStore {
     public Option<Customer> search(String nameToSearchFor) {
         return customers.find(customer -> customer.name.equals(nameToSearchFor));
     }
+
+    public String nextAccountNumber() {
+        int lastAccountNumber = Integer.parseInt(customers.last().accountCode);
+        return String.valueOf(lastAccountNumber + 1);
+    }
 }
