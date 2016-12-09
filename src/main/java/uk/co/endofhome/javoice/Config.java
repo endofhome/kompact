@@ -8,7 +8,7 @@ public class Config {
     private static Path defaultInvoiceFileTemplatePath = get(String.format("%s/Javoice/Templates/invoice-template.xls", System.getProperty("user.home")));
     private static Path defaultInvoiceFileOutputPath = get(String.format("%s/Javoice/Invoices", System.getProperty("user.home")));
     private static Path defaultSalesLedgerFileOutputPath = get(String.format("%s/Javoice/Sales Ledger", System.getProperty("user.home")));
-    private static Path defaultCustomerDataFilePath = get(String.format("%s/Javoice/Customer Data", System.getProperty("user.home")));
+    private static Path defaultCustomerDataFilePath = get(String.format("%s/Javoice/Customer Data/Customers.xls", System.getProperty("user.home")));
 
     private static Path invoiceFileTemplatePath = defaultInvoiceFileTemplatePath;
     private static Path invoiceFileOutputPath = defaultInvoiceFileOutputPath;
@@ -37,5 +37,9 @@ public class Config {
 
     public static Path setSalesLedgerFileOutputPath(Path newPath) {
         return salesLedgerFileOutputPath = newPath;
+    }
+
+    public static Path setCustomerDataFileOutputPath(Path newPath) {
+        return customerDataFilePath = newPath;
     }
 }
