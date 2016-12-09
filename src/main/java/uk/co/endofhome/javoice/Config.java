@@ -1,13 +1,14 @@
 package uk.co.endofhome.javoice;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
+
+import static java.nio.file.Paths.get;
 
 public class Config {
-    private static Path defaultInvoiceFileTemplatePath = Paths.get(String.format("%s/Javoice/Templates", System.getProperty("user.home")));
-    private static Path defaultInvoiceFileOutputPath = Paths.get(String.format("%s/Javoice/Invoices", System.getProperty("user.home")));
-    private static Path defaultSalesLedgerFileOutputPath = Paths.get(String.format("%s/Javoice/Sales Ledger", System.getProperty("user.home")));
-    private static Path defaultCustomerDataFilePath = Paths.get(String.format("%s/Javoice/Customer Data", System.getProperty("user.home")));
+    private static Path defaultInvoiceFileTemplatePath = get(String.format("%s/Javoice/Templates/invoice-template.xls", System.getProperty("user.home")));
+    private static Path defaultInvoiceFileOutputPath = get(String.format("%s/Javoice/Invoices", System.getProperty("user.home")));
+    private static Path defaultSalesLedgerFileOutputPath = get(String.format("%s/Javoice/Sales Ledger", System.getProperty("user.home")));
+    private static Path defaultCustomerDataFilePath = get(String.format("%s/Javoice/Customer Data", System.getProperty("user.home")));
 
     private static Path invoiceFileTemplatePath = defaultInvoiceFileTemplatePath;
     private static Path invoiceFileOutputPath = defaultInvoiceFileOutputPath;
@@ -28,5 +29,13 @@ public class Config {
 
     public static Path customerDataFilePath() {
         return customerDataFilePath;
+    }
+
+    public static Path setInvoiceOutputPath(Path newPath) {
+        return invoiceFileOutputPath = newPath;
+    }
+
+    public static Path setSalesLedgerFileOutputPath(Path newPath) {
+        return salesLedgerFileOutputPath = newPath;
     }
 }
