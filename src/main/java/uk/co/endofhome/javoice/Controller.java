@@ -37,28 +37,45 @@ public class Controller {
         int year = LocalDate.now().getYear();
         Month month = LocalDate.now().getMonth();
         Path annualReportForThisYear = get(salesLedgerFileOutputPath().toString(), String.format("sales%s.xls", year));
-        if (notExists(annualReportForThisYear)) {
-            AnnualReport newAnnualReport = annualReport(year);
-            newAnnualReport.writeFile(salesLedgerFileOutputPath());
-        }
-        AnnualReport annualReport = AnnualReport.readFile(get(salesLedgerFileOutputPath().toString(), String.format("sales%s.xls", year)));
+        ensureAnnualReportForThisYear(year, annualReportForThisYear);
+        AnnualReport annualReport = AnnualReport.readFile(annualReportForThisYear);
         Invoice invoice = new Invoice(nextInvoiceNumber(annualReport, month), LocalDate.now(), customer, orderNumber, itemLines);
         InvoiceClient invoiceClient = invoiceClient(new HSSFWorkbook());
-        HSSFSheet invoiceSheet;
-        try {
-            invoiceSheet = invoiceClient.getSingleSheetFromPath(Config.invoiceFileTemplatePath(), 2);
-        } catch (IOException e) {
-            throw new IOException("Controller could not get invoice template.");
-        }
+        HSSFSheet invoiceTemplateSheet = getSheetForInvoiceTemplate(invoiceClient);
+        createInvoiceOnFS(invoice, invoiceClient, invoiceTemplateSheet);
+        updateAnnualReportOnFS(annualReport, invoice);
+    }
+
+    private void updateAnnualReportOnFS(AnnualReport annualReport, Invoice invoice) throws IOException {
+        LedgerEntry ledgerEntry = ledgerEntry(invoice, none(), none(), none());
+        annualReport.setNewEntry(ledgerEntry);
+        annualReport.writeFile(salesLedgerFileOutputPath());
+    }
+
+    private void createInvoiceOnFS(Invoice invoice, InvoiceClient invoiceClient, HSSFSheet invoiceSheet) throws IOException {
         invoiceClient.setSections(invoiceSheet, invoice);
         try {
             invoiceClient.writeFile(invoiceFileOutputPath(), invoice);
         } catch (IOException e) {
             throw new IOException("Controller could not write new invoice file.");
         }
-        LedgerEntry ledgerEntry = ledgerEntry(invoice, none(), none(), none());
-        annualReport.setNewEntry(ledgerEntry);
-        annualReport.writeFile(salesLedgerFileOutputPath());
+    }
+
+    private HSSFSheet getSheetForInvoiceTemplate(InvoiceClient invoiceClient) throws IOException {
+        HSSFSheet invoiceSheet;
+        try {
+            invoiceSheet = invoiceClient.getSingleSheetFromPath(Config.invoiceFileTemplatePath(), 2);
+        } catch (IOException e) {
+            throw new IOException("Controller could not get invoice template.");
+        }
+        return invoiceSheet;
+    }
+
+    private void ensureAnnualReportForThisYear(int year, Path annualReportForThisYear) throws IOException {
+        if (notExists(annualReportForThisYear)) {
+            AnnualReport newAnnualReport = annualReport(year);
+            newAnnualReport.writeFile(salesLedgerFileOutputPath());
+        }
     }
 
     String nextInvoiceNumber(AnnualReport annualReport, Month month) {
