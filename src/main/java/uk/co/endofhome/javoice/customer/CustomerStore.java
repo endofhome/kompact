@@ -21,6 +21,7 @@ import java.nio.file.Path;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
+import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
 import static uk.co.endofhome.javoice.CellStyler.excelBoldBorderBottomCellStyleFor;
 import static uk.co.endofhome.javoice.CellStyler.excelBoldCellStyleFor;
@@ -107,7 +108,9 @@ public class CustomerStore {
         int firstRowNum = 4;
         for (int i = firstRowNum; i <= customerStoreSheet.getLastRowNum(); i++) {
             HSSFRow row = customerStoreSheet.getRow(i);
-            if (!row.getCell(0, CREATE_NULL_AS_BLANK).getStringCellValue().equals("")) {
+            HSSFCell accountCodeCell = row.getCell(0, CREATE_NULL_AS_BLANK);
+            accountCodeCell.setCellType(CELL_TYPE_STRING);
+            if (!accountCodeCell.getStringCellValue().equals("")) {
                 Customer customer = getSingleCustomerFrom(row);
                 customers = customers.append(customer);
             }
