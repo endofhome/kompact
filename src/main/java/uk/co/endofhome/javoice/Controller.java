@@ -49,9 +49,8 @@ public class Controller {
 
     public void newCustomer(String name, String addressOne, String addressTwo, String postcode, String phoneNum) throws IOException {
         Customer newCustomer = new Customer(name, addressOne, addressTwo, postcode, phoneNum, nextAccountNumber());
-        CustomerStore customerStoreFromFS = CustomerStore.readFile(Config.customerDataFilePath(), 0);
-        customerStoreFromFS.addCustomer(newCustomer);
-        customerStoreFromFS.writeFile(Config.customerDataFilePath());
+        customerStore.addCustomer(newCustomer);
+        customerStore.writeFile(Config.customerDataFilePath());
     }
 
     public Option<Customer> findCustomer(String customerName) {
