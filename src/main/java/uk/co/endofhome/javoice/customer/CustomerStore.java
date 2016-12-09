@@ -108,14 +108,20 @@ public class CustomerStore {
         int firstRowNum = 4;
         for (int i = firstRowNum; i <= customerStoreSheet.getLastRowNum(); i++) {
             HSSFRow row = customerStoreSheet.getRow(i);
+            setStringCellType(row);
             HSSFCell accountCodeCell = row.getCell(0, CREATE_NULL_AS_BLANK);
-            accountCodeCell.setCellType(CELL_TYPE_STRING);
             if (!accountCodeCell.getStringCellValue().equals("")) {
                 Customer customer = getSingleCustomerFrom(row);
                 customers = customers.append(customer);
             }
         }
         return customers;
+    }
+
+    private static void setStringCellType(HSSFRow row) {
+        for (Cell cell : row) {
+            cell.setCellType(CELL_TYPE_STRING);
+        }
     }
 
     private static Customer getSingleCustomerFrom(Row row) {
