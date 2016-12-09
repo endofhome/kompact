@@ -174,7 +174,7 @@ public class AnnualReport {
             workbook.write(fileOut);
             fileOut.close();
         } catch (FileNotFoundException e) {
-            throw new FileNotFoundException("There was a problem writing your file.");
+            throw new FileNotFoundException(String.format("There was a problem writing your file: ", e));
         }
     }
 
