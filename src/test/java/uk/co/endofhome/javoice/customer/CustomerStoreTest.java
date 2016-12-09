@@ -69,6 +69,6 @@ public class CustomerStoreTest {
 
     private void writeCustomerStoreToFileSystem() throws IOException {
         CustomerStore customerStore = customerStoreWithTwoCustomers();
-        customerStore.writeFile(Paths.get("src/test/resources"));
+        customerStore.writeFile(Paths.get("src/test/resources/Customers.xls"));
     }
 }

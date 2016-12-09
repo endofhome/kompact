@@ -21,6 +21,7 @@ import java.nio.file.Path;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
+import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
 import static uk.co.endofhome.javoice.CellStyler.excelBoldBorderBottomCellStyleFor;
 import static uk.co.endofhome.javoice.CellStyler.excelBoldCellStyleFor;
 
@@ -49,7 +50,7 @@ public class CustomerStore {
 
     public void writeFile(Path filePath) throws IOException {
         try {
-            FileOutputStream fileOut = new FileOutputStream(format("%s/Customers.xls", filePath));
+            FileOutputStream fileOut = new FileOutputStream(format(filePath.toString()));
             HSSFWorkbook workbook = createWorkbookWithOneSheet();
             resizeColumns(workbook);
             workbook.write(fileOut);
@@ -106,19 +107,21 @@ public class CustomerStore {
         int firstRowNum = 4;
         for (int i = firstRowNum; i <= customerStoreSheet.getLastRowNum(); i++) {
             HSSFRow row = customerStoreSheet.getRow(i);
-            Customer customer = getSingleCustomerFrom(row);
-            customers = customers.append(customer);
+            if (!row.getCell(0, CREATE_NULL_AS_BLANK).getStringCellValue().equals("")) {
+                Customer customer = getSingleCustomerFrom(row);
+                customers = customers.append(customer);
+            }
         }
         return customers;
     }
 
     private static Customer getSingleCustomerFrom(Row row) {
-        String accountCode = row.getCell(0).getStringCellValue();
-        String name = row.getCell(1).getStringCellValue();
-        String addressOne = row.getCell(2).getStringCellValue();
-        String addressTwo = row.getCell(3).getStringCellValue();
-        String postcode = row.getCell(4).getStringCellValue();
-        String phoneNumber = row.getCell(5).getStringCellValue();
+        String accountCode = row.getCell(0, CREATE_NULL_AS_BLANK).getStringCellValue();
+        String name = row.getCell(1, CREATE_NULL_AS_BLANK).getStringCellValue();
+        String addressOne = row.getCell(2, CREATE_NULL_AS_BLANK).getStringCellValue();
+        String addressTwo = row.getCell(3, CREATE_NULL_AS_BLANK).getStringCellValue();
+        String postcode = row.getCell(4, CREATE_NULL_AS_BLANK).getStringCellValue();
+        String phoneNumber = row.getCell(5, CREATE_NULL_AS_BLANK).getStringCellValue();
         return new Customer(name, addressOne, addressTwo, postcode, phoneNumber, accountCode);
     }
 

@@ -48,7 +48,7 @@ public class Controller {
 
     public void newCustomer(String name, String addressOne, String addressTwo, String postcode, String phoneNum, String accountCode) throws IOException {
         Customer newCustomer = new Customer(name, addressOne, addressTwo, postcode, phoneNum, accountCode);
-        CustomerStore customerStoreFromFS = CustomerStore.readFile(get(Config.customerDataFilePath().toString() + "/Customers.xls"), 0);
+        CustomerStore customerStoreFromFS = CustomerStore.readFile(Config.customerDataFilePath(), 0);
         customerStoreFromFS.addCustomer(newCustomer);
         customerStoreFromFS.writeFile(Config.customerDataFilePath());
     }
