@@ -1,5 +1,6 @@
 package uk.co.endofhome.javoice;
 
+import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -51,6 +52,10 @@ public class Controller {
         CustomerStore customerStoreFromFS = CustomerStore.readFile(Config.customerDataFilePath(), 0);
         customerStoreFromFS.addCustomer(newCustomer);
         customerStoreFromFS.writeFile(Config.customerDataFilePath());
+    }
+
+    public Option<Customer> findCustomer(String customerName) {
+        return customerStore.search(customerName);
     }
 
     private void updateAnnualReportOnFS(AnnualReport annualReport, Invoice invoice) throws IOException {

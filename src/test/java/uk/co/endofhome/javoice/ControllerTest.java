@@ -1,5 +1,6 @@
 package uk.co.endofhome.javoice;
 
+import com.googlecode.totallylazy.Option;
 import org.junit.Before;
 import org.junit.Test;
 import uk.co.endofhome.javoice.customer.Customer;
@@ -35,7 +36,8 @@ public class ControllerTest {
         Config.setInvoiceOutputPath(pathForTestOutput);
         Config.setCustomerDataFileOutputPath(get(pathForTestOutput.toString(), "/Customers.xls"));
         customerStore = new CustomerStore();
-        Customer customer = new Customer("some customer", null, null, null, null, null);
+        Customer customer = new Customer("some customer", null, null, "P05T C0D3", null, "ACC-64972");
+        customerStore.addCustomer(customer);
         controller = new Controller(customerStore);
         ItemLine itemLine = new ItemLine(5.0, "Slices of toast", 0.5);
         Invoice invoice = new Invoice("1", LocalDate.now(), customer, "some ref", sequence(itemLine));
@@ -75,5 +77,21 @@ public class ControllerTest {
         assertThat(customerUnderTest.name, is("Friendly Customer"));
         assertThat(customerUnderTest.postcode, is("a postcode"));
         assertThat(customerUnderTest.accountCode, is("ACC-9876"));
+    }
+
+    @Test
+    public void can_find_customer_using_exact_name() throws Exception {
+        Option<Customer> foundCustomer = controller.findCustomer("some customer");
+
+        assertThat(foundCustomer.get().name, is("some customer"));
+        assertThat(foundCustomer.get().postcode, is("P05T C0D3"));
+        assertThat(foundCustomer.get().accountCode, is("ACC-64972"));
+    }
+
+    @Test
+    public void cannot_find_any_customers_if_customer_name_does_not_match_exactly() throws Exception {
+        Option<Customer> missingCustomer = controller.findCustomer("I don't exist");
+
+        assertThat(missingCustomer, is(none()));
     }
 }
