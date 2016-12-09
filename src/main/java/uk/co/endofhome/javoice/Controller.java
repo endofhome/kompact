@@ -33,7 +33,7 @@ public class Controller {
         this.customerStore = customerStore;
     }
 
-    void newInvoice(Customer customer, String orderNumber, Sequence<ItemLine> itemLines) throws IOException {
+    public void newInvoice(Customer customer, String orderNumber, Sequence<ItemLine> itemLines) throws IOException {
         int year = LocalDate.now().getYear();
         Month month = LocalDate.now().getMonth();
         Path annualReportForThisYear = get(salesLedgerFileOutputPath().toString(), String.format("sales%s.xls", year));
@@ -44,6 +44,13 @@ public class Controller {
         HSSFSheet invoiceTemplateSheet = getSheetForInvoiceTemplate(invoiceClient);
         createInvoiceOnFS(invoice, invoiceClient, invoiceTemplateSheet);
         updateAnnualReportOnFS(annualReport, invoice);
+    }
+
+    public void newCustomer(String name, String addressOne, String addressTwo, String postcode, String phoneNum, String accountCode) throws IOException {
+        Customer newCustomer = new Customer(name, addressOne, addressTwo, postcode, phoneNum, accountCode);
+        CustomerStore customerStoreFromFS = CustomerStore.readFile(get(Config.customerDataFilePath().toString() + "/Customers.xls"), 0);
+        customerStoreFromFS.addCustomer(newCustomer);
+        customerStoreFromFS.writeFile(Config.customerDataFilePath());
     }
 
     private void updateAnnualReportOnFS(AnnualReport annualReport, Invoice invoice) throws IOException {
