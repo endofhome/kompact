@@ -1,23 +1,22 @@
-package uk.co.endofhome.javoice.ui;
+package uk.co.endofhome.javoice.gui;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 import java.time.LocalDate;
 
-import static uk.co.endofhome.javoice.ui.UiController.newCustomerStackPane;
-import static uk.co.endofhome.javoice.ui.UiController.newInvoiceStackPane;
-import static uk.co.endofhome.javoice.ui.UiController.settingsStackPane;
+import static uk.co.endofhome.javoice.gui.UiController.newCustomerStackPane;
+import static uk.co.endofhome.javoice.gui.UiController.newInvoiceStackPane;
+import static uk.co.endofhome.javoice.gui.UiController.settingsStackPane;
 
-public class MainMenu extends JavoiceScreen implements Observable {
+public class MainMenu extends JavoiceScreen implements GuiObservable {
     public StackPane mainMenuStackPane;
-    private Observer observer;
+    private GuiObserver guiObserver;
 
     public MainMenu() {
         initialise();
@@ -32,11 +31,11 @@ public class MainMenu extends JavoiceScreen implements Observable {
         bannerTitle.setFill(OXBLOOD);
         mainMenuGrid.add(bannerTitle, 0, 0, 2, 1);
 
-        Button invoice = initButtonWithMinWidth(mainMenuGrid, "New invoice", event -> notifyObserver(newInvoiceStackPane), 0, 7, 200);
+        Button invoice = initButtonWithMinWidth(mainMenuGrid, "New invoice", event -> notifyGuiObserver(newInvoiceStackPane), 0, 7, 200);
 
-        Button customer = initButtonWithMinWidth(mainMenuGrid, "New customer", event -> notifyObserver(newCustomerStackPane), 0, 8, 200);
+        Button customer = initButtonWithMinWidth(mainMenuGrid, "New customer", event -> notifyGuiObserver(newCustomerStackPane), 0, 8, 200);
 
-        Button settings = initButtonWithMinWidth(mainMenuGrid, "Settings", event -> notifyObserver(settingsStackPane), 0, 9, 200);
+        Button settings = initButtonWithMinWidth(mainMenuGrid, "Settings", event -> notifyGuiObserver(settingsStackPane), 0, 9, 200);
 
         Label copyright = new Label(String.format("© %s  Tom Barnes", copyrightYears()));
         copyright.setTextFill(OXBLOOD);
@@ -53,12 +52,12 @@ public class MainMenu extends JavoiceScreen implements Observable {
     }
 
     @Override
-    public void registerObserver(Observer observer) {
-        this.observer = observer;
+    public void registerGuiObserver(GuiObserver guiObserver) {
+        this.guiObserver = guiObserver;
     }
 
     @Override
-    public void notifyObserver(StackPane stackPane) {
-        observer.switchScene(stackPane);
+    public void notifyGuiObserver(StackPane stackPane) {
+        guiObserver.switchScene(stackPane);
     }
 }

@@ -1,4 +1,4 @@
-package uk.co.endofhome.javoice.ui;
+package uk.co.endofhome.javoice.gui;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -12,11 +12,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.co.endofhome.javoice.ui.UiController.mainMenuStackPane;
+import static uk.co.endofhome.javoice.gui.UiController.mainMenuStackPane;
 
-public class InvoiceDetails extends JavoiceScreen implements Observable {
+public class InvoiceDetails extends JavoiceScreen implements GuiObservable {
 
-    private Observer observer;
+    private GuiObserver guiObserver;
     StackPane invoiceDetailsStackPane;
     private String fakeOrderNumber = "1053";
 
@@ -88,7 +88,7 @@ public class InvoiceDetails extends JavoiceScreen implements Observable {
             invoiceDetailsGrid.add(totalList.get(i), 5, 14 + i);
         }
 
-        Button mainMenu = initButton(invoiceDetailsGrid, "Main menu", event -> notifyObserver(mainMenuStackPane), 0, 31);
+        Button mainMenu = initButton(invoiceDetailsGrid, "Main menu", event -> notifyGuiObserver(mainMenuStackPane), 0, 31);
 
         Button submitInvoice = initButton(invoiceDetailsGrid, "Submit", event -> System.out.println("INVOICE SUBMITTED!"), 2, 31);
 
@@ -106,12 +106,12 @@ public class InvoiceDetails extends JavoiceScreen implements Observable {
     }
 
     @Override
-    public void registerObserver(Observer observer) {
-        this.observer = observer;
+    public void registerGuiObserver(GuiObserver guiObserver) {
+        this.guiObserver = guiObserver;
     }
 
     @Override
-    public void notifyObserver(StackPane stackPane) {
-        observer.switchScene(stackPane);
+    public void notifyGuiObserver(StackPane stackPane) {
+        guiObserver.switchScene(stackPane);
     }
 }

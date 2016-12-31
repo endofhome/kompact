@@ -1,17 +1,12 @@
-package uk.co.endofhome.javoice.ui;
+package uk.co.endofhome.javoice.gui;
 
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import uk.co.endofhome.javoice.ui.InvoiceDetails;
-import uk.co.endofhome.javoice.ui.MainMenu;
-import uk.co.endofhome.javoice.ui.NewCustomer;
-import uk.co.endofhome.javoice.ui.NewInvoice;
-import uk.co.endofhome.javoice.ui.Observer;
-import uk.co.endofhome.javoice.ui.Settings;
+import uk.co.endofhome.javoice.Controller;
 
-public class UiController implements Observer {
+public class UiController implements GuiObserver {
 
     static Scene fixedScene;
     static StackPane mainMenuStackPane;
@@ -19,30 +14,33 @@ public class UiController implements Observer {
     static StackPane invoiceDetailsStackPane;
     static StackPane newCustomerStackPane;
     static StackPane settingsStackPane;
+    public Controller controller;
 
-    public UiController() {
+    public UiController(Controller controller) {
+        this.controller = controller;
         initialise();
     }
 
     private void initialise() {
         MainMenu mainMenu = new MainMenu();
-        mainMenu.registerObserver(this);
+        mainMenu.registerGuiObserver(this);
         mainMenuStackPane = mainMenu.mainMenuStackPane;
 
         NewInvoice newInvoice = new NewInvoice();
-        newInvoice.registerObserver(this);
+        newInvoice.registerGuiObserver(this);
         newInvoiceStackPane = newInvoice.newInvoiceStackPane;
 
         InvoiceDetails invoiceDetails = new InvoiceDetails();
-        invoiceDetails.registerObserver(this);
+        invoiceDetails.registerGuiObserver(this);
         invoiceDetailsStackPane = invoiceDetails.invoiceDetailsStackPane;
 
         NewCustomer newCustomer = new NewCustomer();
-        newCustomer.registerObserver(this);
+        newCustomer.registerObserver(controller);
+        newCustomer.registerGuiObserver(this);
         newCustomerStackPane = newCustomer.newCustomerStackPane;
 
         Settings settings = new Settings();
-        settings.registerObserver(this);
+        settings.registerGuiObserver(this);
         settingsStackPane = settings.settingsStackPane;
     }
 

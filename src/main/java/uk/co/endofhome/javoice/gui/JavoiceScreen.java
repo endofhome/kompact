@@ -1,4 +1,4 @@
-package uk.co.endofhome.javoice.ui;
+package uk.co.endofhome.javoice.gui;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;

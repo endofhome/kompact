@@ -1,16 +1,21 @@
-package uk.co.endofhome.javoice.ui;
+package uk.co.endofhome.javoice.gui;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import uk.co.endofhome.javoice.Observable;
+import uk.co.endofhome.javoice.Observer;
 
-import static uk.co.endofhome.javoice.ui.UiController.mainMenuStackPane;
+import java.io.IOException;
 
-public class NewCustomer extends JavoiceScreen implements Observable {
+import static uk.co.endofhome.javoice.gui.UiController.mainMenuStackPane;
+
+public class NewCustomer extends JavoiceScreen implements GuiObservable, Observable {
 
     StackPane newCustomerStackPane;
+    private GuiObserver guiObserver;
     private Observer observer;
 
     public NewCustomer() {
@@ -20,6 +25,8 @@ public class NewCustomer extends JavoiceScreen implements Observable {
     private void initialise() {
         GridPane addCustomerGrid = new GridPane();
         basicGridSetup(addCustomerGrid, "New customer", 1);
+
+        // TODO: Add appropriate character limits for textfields.
 
         Label customerName = new Label("Name");
         addCustomerGrid.add(customerName, 0, 2);
@@ -51,26 +58,33 @@ public class NewCustomer extends JavoiceScreen implements Observable {
         TextField customerPhoneField = new TextField();
         addCustomerGrid.add(customerPhoneField, 1, 6);
 
-        Button mainMenu = initButton(addCustomerGrid, "Main menu", event -> notifyObserver(mainMenuStackPane), 0, 7);
+        Button mainMenu = initButton(addCustomerGrid, "Main menu", event -> notifyGuiObserver(mainMenuStackPane), 0, 7);
 
-        Button addCustomer = initButton(addCustomerGrid, "Add customer", event -> printCustomerDetails(
-                customerNameField,
-                customerAddressOneField,
-                customerAddressTwoField,
-                customerPostcodeField,
-                customerPhoneField
-        ), 5, 7);
+        Button addCustomer = initButton(addCustomerGrid, "Add customer", event -> {
+            try {
+                newCustomer(
+                        customerNameField.getText(),
+                        customerAddressOneField.getText(),
+                        customerAddressTwoField.getText(),
+                        customerPostcodeField.getText(),
+                        customerPhoneField.getText()
+                );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }, 5, 7);
 
         newCustomerStackPane = new StackPane(addCustomerGrid);
     }
 
-    private void printCustomerDetails(TextField nameField, TextField customerAddressOneField, TextField customerAddressTwoField, TextField customerPostcodeField, TextField customerPhoneField) {
-        System.out.println(String.format("...adding customer %s, from %s %s %s, ph. %s",
-                nameField.getText(),
-                customerAddressOneField.getText(),
-                customerAddressTwoField.getText(),
-                customerPostcodeField.getText(),
-                customerPhoneField.getText()));
+    @Override
+    public void registerGuiObserver(GuiObserver guiObserver) {
+        this.guiObserver = guiObserver;
+    }
+
+    @Override
+    public void notifyGuiObserver(StackPane stackPane) {
+        guiObserver.switchScene(stackPane);
     }
 
     @Override
@@ -79,7 +93,10 @@ public class NewCustomer extends JavoiceScreen implements Observable {
     }
 
     @Override
-    public void notifyObserver(StackPane stackPane) {
-        observer.switchScene(stackPane);
+    public void newCustomer(String name, String addressOne, String addressTwo, String postcode, String phoneNumber) throws IOException {
+        /* TODO: adding a customer should take you either to the invoice details screen, or back to the new customer screen.
+           TODO: ...depending on where you came from.
+        */
+        observer.newCustomer(name, addressOne, addressTwo, postcode, phoneNumber);
     }
 }

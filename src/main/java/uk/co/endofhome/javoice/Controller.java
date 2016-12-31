@@ -27,7 +27,7 @@ import static uk.co.endofhome.javoice.invoice.InvoiceClient.invoiceClient;
 import static uk.co.endofhome.javoice.ledger.AnnualReport.annualReport;
 import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 
-public class Controller {
+public class Controller implements Observer {
     private CustomerStore customerStore;
 
     Controller(CustomerStore customerStore) {

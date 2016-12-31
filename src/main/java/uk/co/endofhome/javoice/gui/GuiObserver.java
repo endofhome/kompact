@@ -1,7 +1,7 @@
-package uk.co.endofhome.javoice.ui;
+package uk.co.endofhome.javoice.gui;
 
 import javafx.scene.layout.StackPane;
 
-public interface Observer {
+public interface GuiObserver {
     void switchScene(StackPane stackPane);
 }

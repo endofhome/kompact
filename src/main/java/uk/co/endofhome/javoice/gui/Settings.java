@@ -1,4 +1,4 @@
-package uk.co.endofhome.javoice.ui;
+package uk.co.endofhome.javoice.gui;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -9,11 +9,11 @@ import javafx.stage.FileChooser;
 
 import java.io.File;
 
-import static uk.co.endofhome.javoice.ui.UiController.mainMenuStackPane;
+import static uk.co.endofhome.javoice.gui.UiController.mainMenuStackPane;
 
-public class Settings extends JavoiceScreen implements Observable {
+public class Settings extends JavoiceScreen implements GuiObservable {
 
-    private Observer observer;
+    private GuiObserver guiObserver;
     StackPane settingsStackPane;
     private File fakeInvoiceTemplateConfig = new File(String.format("%s/Javoice/Templates/invoice-template.xls", System.getProperty("user.home")));;
     private File fakeInvoiceOutputPathConfig = new File(String.format("%s/Javoice/Invoices", System.getProperty("user.home")));;
@@ -52,7 +52,7 @@ public class Settings extends JavoiceScreen implements Observable {
 
         Button updateSettings = initButton(settingsGrid, "Update", event -> System.out.println("settings updated..."), 0, 7);
 
-        Button mainMenu = initButton(settingsGrid, "Main menu", event -> notifyObserver(mainMenuStackPane), 0, 9);
+        Button mainMenu = initButton(settingsGrid, "Main menu", event -> notifyGuiObserver(mainMenuStackPane), 0, 9);
 
         settingsStackPane = new StackPane(settingsGrid);
     }
@@ -88,12 +88,12 @@ public class Settings extends JavoiceScreen implements Observable {
     }
 
     @Override
-    public void registerObserver(Observer observer) {
-        this.observer = observer;
+    public void registerGuiObserver(GuiObserver guiObserver) {
+        this.guiObserver = guiObserver;
     }
 
     @Override
-    public void notifyObserver(StackPane stackPane) {
-        observer.switchScene(stackPane);
+    public void notifyGuiObserver(StackPane stackPane) {
+        guiObserver.switchScene(stackPane);
     }
 }

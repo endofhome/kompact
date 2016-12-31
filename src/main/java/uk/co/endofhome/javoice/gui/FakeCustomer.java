@@ -1,4 +1,4 @@
-package uk.co.endofhome.javoice.ui;
+package uk.co.endofhome.javoice.gui;
 
 public class FakeCustomer {
     final String accountCode;
