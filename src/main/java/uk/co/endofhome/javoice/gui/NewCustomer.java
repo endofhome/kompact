@@ -99,4 +99,8 @@ public class NewCustomer extends JavoiceScreen implements GuiObservable, Observa
         */
         observer.newCustomer(name, addressOne, addressTwo, postcode, phoneNumber);
     }
+
+    // TODO: method/s not required, side-effect of the fact that the observer pattern stuff isn't quite the right tool for the job?
+    @Override
+    public void searchForCustomer(String name) {}
 }

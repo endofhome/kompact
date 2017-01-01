@@ -29,6 +29,7 @@ import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 
 public class Controller implements Observer {
     private CustomerStore customerStore;
+    private Customer currentCustomer;
 
     Controller(CustomerStore customerStore) {
         this.customerStore = customerStore;
@@ -55,6 +56,11 @@ public class Controller implements Observer {
 
     public Option<Customer> findCustomer(String customerName) {
         return customerStore.search(customerName);
+    }
+
+    @Override
+    public void currentCustomerIs(Customer customer) {
+        currentCustomer = customer;
     }
 
     private void updateAnnualReportOnFS(AnnualReport annualReport, Invoice invoice) throws IOException {

@@ -28,6 +28,7 @@ public class UiController implements GuiObserver {
 
         NewInvoice newInvoice = new NewInvoice();
         newInvoice.registerGuiObserver(this);
+        newInvoice.registerObserver(controller);
         newInvoiceStackPane = newInvoice.newInvoiceStackPane;
 
         InvoiceDetails invoiceDetails = new InvoiceDetails();
