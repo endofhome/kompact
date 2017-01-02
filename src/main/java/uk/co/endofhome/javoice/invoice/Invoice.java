@@ -24,6 +24,10 @@ public class Invoice {
     }
 
     public double nettValue() {
+        // TODO: if no itemLines then this will be null, but it must return 0 if empty. Write a test!
+        if (itemLines.isEmpty()) {
+            return 0;
+        }
         return itemLines.map((item -> (item.quantity * item.unitPrice)))
                 .reduce((x, y) -> ((double) x) + y);
     }

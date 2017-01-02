@@ -1,47 +1,60 @@
 package uk.co.endofhome.javoice.gui;
 
+import com.googlecode.totallylazy.Option;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import uk.co.endofhome.javoice.Observable;
+import uk.co.endofhome.javoice.Observer;
+import uk.co.endofhome.javoice.customer.Customer;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.googlecode.totallylazy.Sequences.sequence;
 import static uk.co.endofhome.javoice.gui.UiController.mainMenuStackPane;
 
-public class InvoiceDetails extends JavoiceScreen implements GuiObservable {
+public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Observable {
 
-    private GuiObserver guiObserver;
     StackPane invoiceDetailsStackPane;
+    private GuiObserver guiObserver;
+    private Observer observer;
+    private Customer customer;
     private String fakeOrderNumber = "1053";
 
-    public InvoiceDetails() {
+    public InvoiceDetails(Option<Customer> customer) {
+        this.customer = ensureCustomer(customer);
         initialise();
     }
 
-    private void initialise() {
-        // Fake customer for testing purposes...
-        FakeCustomer fakeCustomer = new FakeCustomer();
+    private Customer ensureCustomer(Option<Customer> customer) {
+        if (customer.isDefined()) {
+            return this.customer = customer.get();
+        }
+        return this.customer = new FakeCustomer();
+    }
 
+    private void initialise() {
         GridPane invoiceDetailsGrid = new GridPane();
         basicGridSetup(invoiceDetailsGrid, "Invoice details:", 1);
 
         Label nameLabel = initLabel(invoiceDetailsGrid, "Name:", 0, 3);
-        TextField nameField = initTextField(invoiceDetailsGrid, 3, fakeCustomer.name, 0,4);
+        TextField nameField = initTextField(invoiceDetailsGrid, 3, customer.name, 0,4);
 
         Label addressOne = initLabel(invoiceDetailsGrid, "Address (1):", 0, 5);
-        TextField addressField = initTextField(invoiceDetailsGrid, 4, fakeCustomer.addressOne, 0,6);
+        TextField addressField = initTextField(invoiceDetailsGrid, 4, customer.addressOne, 0,6);
 
         Label addressTwo = initLabel(invoiceDetailsGrid, "Address (2):", 0, 7);
-        TextField addressTwoField = initTextField(invoiceDetailsGrid, 3, fakeCustomer.addressTwo, 0,8);
+        TextField addressTwoField = initTextField(invoiceDetailsGrid, 3, customer.addressTwo, 0,8);
 
         Label postcodeLabel = initLabel(invoiceDetailsGrid, "Postcode:", 3, 7);
-        TextField postcodeField = initTextField(invoiceDetailsGrid, 1, fakeCustomer.postcode, 3, 8);
+        TextField postcodeField = initTextField(invoiceDetailsGrid, 1, customer.postcode, 3, 8);
 
         Label dateLabel = initLabel(invoiceDetailsGrid, "Date:", 5, 3);
         TextField dateField = initTextField(invoiceDetailsGrid, 1, todaysDate(), 5, 4);
@@ -50,7 +63,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable {
         TextField orderNumberField = initTextField(invoiceDetailsGrid, 1, fakeOrderNumber, 5, 6);
 
         Label accountCodeLabel = initLabel(invoiceDetailsGrid, "Account code:", 5, 7);
-        TextField accountCodeField = initTextField(invoiceDetailsGrid, 1, fakeCustomer.accountCode, 5, 8);
+        TextField accountCodeField = initTextField(invoiceDetailsGrid, 1, customer.accountCode, 5, 8);
 
         Label quantity = initLabel(invoiceDetailsGrid, "Quantity", 0, 13);
         Label description = initLabel(invoiceDetailsGrid, "Description", 1, 13);
@@ -90,13 +103,25 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable {
 
         Button mainMenu = initButton(invoiceDetailsGrid, "Main menu", event -> notifyGuiObserver(mainMenuStackPane), 0, 31);
 
-        Button submitInvoice = initButton(invoiceDetailsGrid, "Submit", event -> System.out.println("INVOICE SUBMITTED!"), 2, 31);
+        Button submitInvoice = initButton(invoiceDetailsGrid, "Submit", event -> {
+            try {
+                newInvoice();
+            } catch (IOException e) {
+                // TODO: fix this mess too. should be throwing this exception somewhere, not swallowing it.
+            }
+        }, 2, 31);
 
         ScrollPane invoiceDetailsScroll = new ScrollPane(invoiceDetailsGrid);
         invoiceDetailsScroll.setFitToWidth(true);
         invoiceDetailsStackPane = new StackPane(invoiceDetailsScroll);
         // TODO: this doesn't work, for some reason:
         quantitiyFieldList.get(0).requestFocus();
+    }
+
+    private void newInvoice() throws IOException {
+        // TODO: get the item lines by looping through? Empty sequence for now.
+        // TODO: get the correct order number - no need to use a fake one.
+        observer.newInvoice(customer, fakeOrderNumber, sequence());
     }
 
     private String todaysDate() {
@@ -114,4 +139,16 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable {
     public void notifyGuiObserver(StackPane stackPane) {
         guiObserver.switchScene(stackPane);
     }
+
+    @Override
+    public void registerObserver(Observer observer) {
+        this.observer = observer;
+    }
+
+    // TODO: method/s not required, side-effect of the fact that the observer pattern stuff isn't quite the right tool for the job?
+    @Override
+    public void newCustomer(String name, String addressOne, String addressTwo, String postcode, String phoneNumber) throws IOException {}
+
+    @Override
+    public void searchForCustomer(String name) throws Exception {}
 }

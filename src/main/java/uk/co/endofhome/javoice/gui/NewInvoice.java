@@ -30,8 +30,8 @@ public class NewInvoice extends JavoiceScreen implements GuiObservable, Observab
         basicGridSetup(newInvoiceGrid, "New invoice", 1);
 
         Label customerSearchLabel = initLabel(newInvoiceGrid, "Search for existing customer:", 0, 11);
-        TextField customerSearchField = initTextField(newInvoiceGrid, 1, "Search", 1, 11);
-        Button customerSearchButton = initButton(newInvoiceGrid, "Search", event -> notifyGuiObserver(invoiceDetailsStackPane), 2, 11);
+        TextField customerSearchField = initTextField(newInvoiceGrid, 1, "", 1, 11);
+        Button customerSearchButton = initButton(newInvoiceGrid, "Search", event -> searchForCustomer(customerSearchField.getText()), 2, 11);
 
         Label or = initLabelWithColumnSpanAndHAlignment(newInvoiceGrid, "- OR -", 0, 13, 3, HPos.CENTER);
 
@@ -61,7 +61,8 @@ public class NewInvoice extends JavoiceScreen implements GuiObservable, Observab
     public void searchForCustomer(String name) {
         Option<Customer> customer = observer.findCustomer(name);
         if (customer.isDefined()) {
-            observer.currentCustomerIs(customer.get());
+            observer.setCurrentCustomer(customer);
+            guiObserver.updateInvoiceDetails();
             notifyGuiObserver(invoiceDetailsStackPane);
         } else {
             notifyGuiObserver(newInvoiceStackPane);

@@ -34,6 +34,7 @@ import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static java.time.format.TextStyle.SHORT;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
+import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
 import static uk.co.endofhome.javoice.CellStyler.excelBoldBorderBottomCellStyleFor;
 import static uk.co.endofhome.javoice.CellStyler.excelBoldCellStyleFor;
@@ -99,6 +100,8 @@ public class AnnualReport {
             HSSFRow rowToExtract = monthlyReportSheet.getRow(i);
             LedgerEntry ledgerEntry = ledgerEntry(
                     stringOptionCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK)),
+                    // TODO: below blows up if manually entered as it's not a string.
+                    // TODO: Enforcing string cell type in stringOptionCellValueFor, as a fix (may be temporary):
                     stringOptionCellValueFor(rowToExtract.getCell(1, CREATE_NULL_AS_BLANK)),
                     numericOptionCellValueFor(rowToExtract.getCell(2, CREATE_NULL_AS_BLANK)),
                     stringOptionCellValueFor(rowToExtract.getCell(5, CREATE_NULL_AS_BLANK)),
@@ -135,6 +138,10 @@ public class AnnualReport {
     static Option<String> stringOptionCellValueFor(HSSFCell cell) {
         Option<String> optionString;
         if (cell != null) {
+            // TODO: Write a test for enforcing string cell type:
+            if (cell.getCellType() != CELL_TYPE_STRING) {
+                cell.setCellType(CELL_TYPE_STRING);
+            }
             optionString = option(cell.getStringCellValue());
         } else {
             optionString = none();

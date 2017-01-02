@@ -31,9 +31,7 @@ public class UiController implements GuiObserver {
         newInvoice.registerObserver(controller);
         newInvoiceStackPane = newInvoice.newInvoiceStackPane;
 
-        InvoiceDetails invoiceDetails = new InvoiceDetails();
-        invoiceDetails.registerGuiObserver(this);
-        invoiceDetailsStackPane = invoiceDetails.invoiceDetailsStackPane;
+        updateInvoiceDetails();
 
         NewCustomer newCustomer = new NewCustomer();
         newCustomer.registerObserver(controller);
@@ -58,5 +56,13 @@ public class UiController implements GuiObserver {
     public void switchScene(StackPane layout) {
         fixedScene.setRoot(layout);
         layout.requestFocus();
+    }
+
+    @Override
+    public void updateInvoiceDetails() {
+        InvoiceDetails invoiceDetails = new InvoiceDetails(controller.currentCustomer);
+        invoiceDetails.registerGuiObserver(this);
+        invoiceDetails.registerObserver(controller);
+        invoiceDetailsStackPane = invoiceDetails.invoiceDetailsStackPane;
     }
 }

@@ -1,19 +1,15 @@
 package uk.co.endofhome.javoice.gui;
 
-public class FakeCustomer {
-    final String accountCode;
-    public final String name;
-    final String addressOne;
-    final String addressTwo;
-    final String phoneNumber;
-    final String postcode;
+import uk.co.endofhome.javoice.customer.Customer;
 
-    public FakeCustomer() {
-        accountCode = "50";
-        name = "Bob";
-        addressOne = "10 Littlehaven Lane";
-        addressTwo = "Horsham";
-        postcode = "RH12 ???";
-        phoneNumber = "01403 034552";
+public class FakeCustomer extends Customer {
+        public FakeCustomer() {
+            super("Bob",
+                    "10 Littlehaven Lane",
+                    "Horsham",
+                    "RH12 ???",
+                    "01403 034552",
+                    "50"
+            );
     }
 }

@@ -29,7 +29,7 @@ import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 
 public class Controller implements Observer {
     private CustomerStore customerStore;
-    private Customer currentCustomer;
+    public Option<Customer> currentCustomer = none();
 
     Controller(CustomerStore customerStore) {
         this.customerStore = customerStore;
@@ -59,7 +59,7 @@ public class Controller implements Observer {
     }
 
     @Override
-    public void currentCustomerIs(Customer customer) {
+    public void setCurrentCustomer(Option<Customer> customer) {
         currentCustomer = customer;
     }
 
@@ -99,6 +99,8 @@ public class Controller implements Observer {
         HSSFSheet sheetForThisMonth = annualReport.sheetAt(month.getValue());
         int lastInvoiceRowNum = sheetForThisMonth.getLastRowNum() -2;
         HSSFRow lastInvoiceRow = sheetForThisMonth.getRow(lastInvoiceRowNum);
+
+        // TODO: seems to blow up (NumberFormatException.forInputString) if no invoices found for this month.
         int invoiceNumber = Integer.parseInt(lastInvoiceRow.getCell(1).getStringCellValue());
         return String.valueOf(++invoiceNumber);
     }

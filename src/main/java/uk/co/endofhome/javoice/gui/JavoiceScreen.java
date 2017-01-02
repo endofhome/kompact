@@ -45,10 +45,10 @@ public abstract class JavoiceScreen {
         return label;
     }
 
-    TextField initTextField(GridPane grid, int columnSpan, String labelText, int columnIndex, int rowIndex) {
+    TextField initTextField(GridPane grid, int columnSpan, String fieldText, int columnIndex, int rowIndex) {
         TextField textField = new TextField();
         GridPane.setColumnSpan(textField, columnSpan);
-        textField.setText(labelText);
+        textField.setText(fieldText);
         grid.add(textField, columnIndex, rowIndex);
         return textField;
     }
