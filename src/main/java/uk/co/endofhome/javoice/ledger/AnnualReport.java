@@ -47,7 +47,7 @@ import static uk.co.endofhome.javoice.ledger.MonthlyReport.TOTAL_FOOTER_ROWS;
 
 public class AnnualReport {
     public final HSSFWorkbook workbook;
-    private Year year;
+    public final Year year;
     private Sequence<MonthlyReport> monthlyReports;
     private Path fileOutputPath;
 

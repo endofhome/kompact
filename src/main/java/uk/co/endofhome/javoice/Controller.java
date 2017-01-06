@@ -2,7 +2,6 @@ package uk.co.endofhome.javoice;
 
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import uk.co.endofhome.javoice.customer.Customer;
@@ -12,19 +11,26 @@ import uk.co.endofhome.javoice.invoice.InvoiceClient;
 import uk.co.endofhome.javoice.invoice.ItemLine;
 import uk.co.endofhome.javoice.ledger.AnnualReport;
 import uk.co.endofhome.javoice.ledger.LedgerEntry;
+import uk.co.endofhome.javoice.ledger.MonthlyReport;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.Year;
 
 import static com.googlecode.totallylazy.Option.none;
+import static com.googlecode.totallylazy.Option.option;
+import static java.nio.file.Files.exists;
 import static java.nio.file.Files.notExists;
 import static java.nio.file.Paths.get;
+import static java.time.Month.DECEMBER;
+import static java.time.temporal.ChronoUnit.YEARS;
 import static uk.co.endofhome.javoice.Config.invoiceFileOutputPath;
 import static uk.co.endofhome.javoice.Config.salesLedgerFileOutputPath;
 import static uk.co.endofhome.javoice.invoice.InvoiceClient.invoiceClient;
 import static uk.co.endofhome.javoice.ledger.AnnualReport.annualReport;
+import static uk.co.endofhome.javoice.ledger.AnnualReport.readFile;
 import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 
 public class Controller implements Observer {
@@ -37,11 +43,9 @@ public class Controller implements Observer {
 
     public void newInvoice(Customer customer, String orderNumber, Sequence<ItemLine> itemLines) throws IOException {
         int year = LocalDate.now().getYear();
-        Month month = LocalDate.now().getMonth();
-        Path annualReportForThisYear = get(salesLedgerFileOutputPath().toString(), String.format("sales%s.xls", year));
-        ensureAnnualReportForThisYear(year, annualReportForThisYear);
-        AnnualReport annualReport = AnnualReport.readFile(annualReportForThisYear);
-        Invoice invoice = new Invoice(nextInvoiceNumber(annualReport, month), LocalDate.now(), customer, orderNumber, itemLines);
+        ensureAnnualReportForThisYear(year, annualReportFor(year));
+        AnnualReport annualReport = AnnualReport.readFile(annualReportFor(year));
+        Invoice invoice = new Invoice(nextInvoiceNumber(annualReport), LocalDate.now(), customer, orderNumber, itemLines);
         InvoiceClient invoiceClient = invoiceClient(new HSSFWorkbook());
         HSSFSheet invoiceTemplateSheet = getSheetForInvoiceTemplate(invoiceClient);
         createInvoiceOnFS(invoice, invoiceClient, invoiceTemplateSheet);
@@ -63,10 +67,49 @@ public class Controller implements Observer {
         currentCustomer = customer;
     }
 
+    public String nextAccountNumber() {
+        return customerStore.nextAccountNumber();
+    }
+
+    public String nextInvoiceNumber(AnnualReport currentAnnualReport) throws IOException {
+        String result = "1";
+        for (int i = 0; i <= 6; i++) {
+            Year currentYear = currentAnnualReport.year.minus(i, YEARS);
+            if (exists(annualReportFor(currentYear.getValue()))) {
+                currentAnnualReport = readFile(annualReportFor(currentYear.getValue()));
+                Option<String> invoiceNumberValue = findNextInvoiceNumberIn(currentAnnualReport, DECEMBER);
+                if (invoiceNumberValue.isDefined()) {
+                    result = invoiceNumberValue.get();
+                }
+            }
+        }
+        return result;
+    }
+
+    private Option<String> findNextInvoiceNumberIn(AnnualReport annualReport, Month month) {
+            for (int i = month.getValue(); i >= 1; i--) {
+                MonthlyReport monthlyReport = annualReport.monthlyReports().get(i - 1);
+                Sequence<LedgerEntry> reversedEntries = monthlyReport.entries.reverse();
+                Option<LedgerEntry> lastInvoiceEntryOption = reversedEntries.find(entry -> entry.invoiceNumber.isDefined());
+                if (lastInvoiceEntryOption.isDefined()) {
+                    Option<Integer> invoiceNumberOption = parseIntOption(lastInvoiceEntryOption.get().invoiceNumber.get());
+                    if (invoiceNumberOption.isDefined()) {
+                        Integer invoiceNumber = invoiceNumberOption.get();
+                        return option(String.valueOf(++invoiceNumber));
+                    }
+                }
+        }
+        return none();
+    }
+
     private void updateAnnualReportOnFS(AnnualReport annualReport, Invoice invoice) throws IOException {
         LedgerEntry ledgerEntry = ledgerEntry(invoice, none(), none(), none());
         annualReport.setNewEntry(ledgerEntry);
         annualReport.writeFile(salesLedgerFileOutputPath());
+    }
+
+    private Path annualReportFor(int year) {
+        return get(salesLedgerFileOutputPath().toString(), String.format("sales%s.xls", year));
     }
 
     private void createInvoiceOnFS(Invoice invoice, InvoiceClient invoiceClient, HSSFSheet invoiceSheet) throws IOException {
@@ -95,17 +138,11 @@ public class Controller implements Observer {
         }
     }
 
-    public String nextInvoiceNumber(AnnualReport annualReport, Month month) {
-        HSSFSheet sheetForThisMonth = annualReport.sheetAt(month.getValue());
-        int lastInvoiceRowNum = sheetForThisMonth.getLastRowNum() -2;
-        HSSFRow lastInvoiceRow = sheetForThisMonth.getRow(lastInvoiceRowNum);
-
-        // TODO: seems to blow up (NumberFormatException.forInputString) if no invoices found for this month.
-        int invoiceNumber = Integer.parseInt(lastInvoiceRow.getCell(1).getStringCellValue());
-        return String.valueOf(++invoiceNumber);
-    }
-
-    public String nextAccountNumber() {
-        return customerStore.nextAccountNumber();
+    private Option<Integer> parseIntOption(String lastInvoiceNumber) {
+        try {
+            return option(Integer.parseInt(lastInvoiceNumber));
+        } catch (NumberFormatException e) {
+            return none();
+        }
     }
 }
