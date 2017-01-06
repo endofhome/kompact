@@ -1,5 +1,6 @@
 package uk.co.endofhome.javoice.invoice;
 
+import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -23,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 import static uk.co.endofhome.javoice.CellStyler.excelDateCellStyleFor;
@@ -106,9 +108,9 @@ public class InvoiceClient {
     public HSSFSheet setItemLine(HSSFSheet invoiceSheet, Invoice invoice, int itemLineNumber) {
         ItemLine itemLineDetails = invoice.itemLines.get(itemLineNumber);
         HSSFRow row = invoiceSheet.getRow(itemLineNumber + ITEM_LINES_START_AT);
-        row.getCell(3).setCellValue(itemLineDetails.quantity);
-        row.getCell(4).setCellValue(itemLineDetails.description);
-        row.getCell(10).setCellValue(itemLineDetails.unitPrice);
+        if (itemLineDetails.quantity.isDefined()) row.getCell(3).setCellValue(itemLineDetails.quantity.get());
+        if (itemLineDetails.description.isDefined()) row.getCell(4).setCellValue(itemLineDetails.description.get());
+        if (itemLineDetails.unitPrice.isDefined()) row.getCell(10).setCellValue(itemLineDetails.unitPrice.get());
         return invoiceSheet;
     }
 
@@ -160,9 +162,9 @@ public class InvoiceClient {
         Sequence<ItemLine> itemLines = sequence();
         int lastPossibleItemLine = ITEM_LINES_START_AT + MAX_ITEM_LINES - 1;
         for (int i = ITEM_LINES_START_AT; i <= lastPossibleItemLine; i++) {
-            double quantity = invoiceSheet.getRow(i).getCell(3).getNumericCellValue();
-            String description = invoiceSheet.getRow(i).getCell(4).getStringCellValue();
-            double unitPrice = invoiceSheet.getRow(i).getCell(10).getNumericCellValue();
+            Option<Double> quantity = option(invoiceSheet.getRow(i).getCell(3).getNumericCellValue());
+            Option<String> description = option(invoiceSheet.getRow(i).getCell(4).getStringCellValue());
+            Option<Double> unitPrice = option(invoiceSheet.getRow(i).getCell(10).getNumericCellValue());
             ItemLine itemLine = new ItemLine(quantity, description, unitPrice);
             itemLines = itemLines.append(itemLine);
         }

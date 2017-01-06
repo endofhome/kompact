@@ -27,7 +27,7 @@ public class Invoice {
         if (itemLines.isEmpty()) {
             return 0;
         }
-        return itemLines.map((item -> (item.quantity * item.unitPrice)))
+        return itemLines.map((item -> (item.quantity.getOrElse(0.0) * item.unitPrice.getOrElse(0.0))))
                 .reduce((x, y) -> ((double) x) + y);
     }
 

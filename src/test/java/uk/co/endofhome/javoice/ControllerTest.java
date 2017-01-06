@@ -21,6 +21,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.nio.file.Paths.get;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.co.endofhome.javoice.invoice.ItemLine.itemLine;
 import static uk.co.endofhome.javoice.ledger.AnnualReport.annualReportCustomConfig;
 import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 
@@ -48,7 +49,7 @@ public class ControllerTest {
 
     @Test
     public void can_get_next_invoice_number_when_invoices_already_exist_for_this_month() throws IOException {
-        ItemLine itemLine = new ItemLine(5.0, "Slices of toast", 0.5);
+        ItemLine itemLine = itemLine(5.0, "Slices of toast", 0.5);
         Invoice invoice = new Invoice("1", LocalDate.of(2016, 12, 31), customer, "some ref", sequence(itemLine));
         LedgerEntry ledgerEntry = ledgerEntry(invoice, none(), none(), none());
         annualReport.setNewEntry(ledgerEntry);
@@ -59,7 +60,7 @@ public class ControllerTest {
 
     @Test
     public void can_get_next_invoice_number_when_no_invoices_exist_for_this_month_but_do_exist_for_this_year() throws IOException {
-        ItemLine itemLine = new ItemLine(5.0, "Slices of toast", 0.5);
+        ItemLine itemLine = itemLine(5.0, "Slices of toast", 0.5);
         Invoice invoice = new Invoice("1", LocalDate.of(2016, 3, 1), customer, "some ref", sequence(itemLine));
         LedgerEntry ledgerEntry = ledgerEntry(invoice, none(), none(), none());
         annualReport.setNewEntry(ledgerEntry);
@@ -70,7 +71,7 @@ public class ControllerTest {
 
     @Test
     public void can_get_next_invoice_number_when_last_invoice_exists_for_previous_year() throws IOException, InterruptedException {
-        ItemLine itemLine = new ItemLine(5.0, "Old slices of toast", 0.5);
+        ItemLine itemLine = itemLine(5.0, "Old slices of toast", 0.5);
         Invoice invoice = new Invoice("1", LocalDate.of(2015, 6, 10), customer, "some ref", sequence(itemLine));
         LedgerEntry ledgerEntry = ledgerEntry(invoice, none(), none(), none());
         AnnualReport annualReportPreviousYear = AnnualReport.annualReport(2015);
@@ -82,7 +83,7 @@ public class ControllerTest {
 
     @Test
     public void can_get_next_invoice_number_when_last_invoice_exists_six_years_ago() throws IOException, InterruptedException {
-        ItemLine itemLine = new ItemLine(5.0, "Really old slices of toast", 0.5);
+        ItemLine itemLine = itemLine(5.0, "Really old slices of toast", 0.5);
         Invoice invoice = new Invoice("1", LocalDate.of(2010, 3, 7), customer, "some ref", sequence(itemLine));
         LedgerEntry ledgerEntry = ledgerEntry(invoice, none(), none(), none());
         AnnualReport annualReport2010 = AnnualReport.annualReport(2010);
@@ -94,14 +95,14 @@ public class ControllerTest {
 
     @Test
     public void can_get_correct_invoice_number_when_invoices_exists_for_this_year_and_previous_years() throws IOException, InterruptedException {
-        ItemLine oldItemLine = new ItemLine(5.0, "Really old slices of toast", 0.5);
+        ItemLine oldItemLine = itemLine(5.0, "Really old slices of toast", 0.5);
         Invoice oldInvoice = new Invoice("1", LocalDate.of(2015, 3, 7), customer, "some ref", sequence(oldItemLine));
         LedgerEntry oldLedgerEntry = ledgerEntry(oldInvoice, none(), none(), none());
         AnnualReport annualReport2015 = AnnualReport.annualReport(2015);
         annualReport2015.setNewEntry(oldLedgerEntry);
         annualReport2015.writeFile(pathForTestOutput);
 
-        ItemLine itemLine = new ItemLine(5.0, "Slices of toast", 0.5);
+        ItemLine itemLine = itemLine(5.0, "Slices of toast", 0.5);
         Invoice invoice = new Invoice("2", LocalDate.of(2016, 12, 31), customer, "some ref", sequence(itemLine));
         LedgerEntry ledgerEntry = ledgerEntry(invoice, none(), none(), none());
         annualReport.setNewEntry(ledgerEntry);
@@ -112,7 +113,7 @@ public class ControllerTest {
 
     @Test
     public void ignores_invoice_number_when_last_invoice_exists_in_future_year() throws IOException, InterruptedException {
-        ItemLine itemLine = new ItemLine(5.0, "Super futuristic toast", 0.5);
+        ItemLine itemLine = itemLine(5.0, "Super futuristic toast", 0.5);
         Invoice invoice = new Invoice("1", LocalDate.of(2017, 6, 30), customer, "some ref", sequence(itemLine));
         LedgerEntry ledgerEntry = ledgerEntry(invoice, none(), none(), none());
         AnnualReport annualReport2017 = AnnualReport.annualReport(2017);
@@ -135,11 +136,11 @@ public class ControllerTest {
     @Test
     public void can_create_a_new_invoice_and_write_out_all_files() throws Exception {
         Customer firstCustomer = new Customer("firstCustomer", null, null, null, null, null);
-        ItemLine someItemLine = new ItemLine(3.0, "Baked beans", 0.75);
+        ItemLine someItemLine = itemLine(3.0, "Baked beans", 0.75);
         controller.newInvoice(firstCustomer, "some ref", sequence(someItemLine));
 
         Customer secondCustomer = new Customer("secondCustomer", null, null, null, null, null);
-        ItemLine secondItemLine = new ItemLine(1.0, "Baked beans", 10.20);
+        ItemLine secondItemLine = itemLine(1.0, "Baked beans", 10.20);
         controller.newInvoice(secondCustomer, "another ref", sequence(secondItemLine));
 
         AnnualReport annualReportFromFS = AnnualReport.readFile(get(pathForTestOutput.toString(), "sales" + String.valueOf(LocalDate.now().getYear()) + ".xls"));

@@ -1,6 +1,7 @@
 package uk.co.endofhome.javoice.gui;
 
 import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Sequence;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -10,6 +11,7 @@ import javafx.scene.layout.StackPane;
 import uk.co.endofhome.javoice.Observable;
 import uk.co.endofhome.javoice.Observer;
 import uk.co.endofhome.javoice.customer.Customer;
+import uk.co.endofhome.javoice.invoice.ItemLine;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -17,8 +19,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.googlecode.totallylazy.Option.none;
+import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static uk.co.endofhome.javoice.gui.UiController.mainMenuStackPane;
+import static uk.co.endofhome.javoice.invoice.Invoice.MAX_ITEM_LINES;
 
 public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Observable {
 
@@ -31,6 +36,9 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private TextField addressOneField;
     private TextField addressTwoField;
     private TextField postcodeField;
+    private List<TextField> quantitiyFieldList;
+    private List<TextField> descriptionFieldList;
+    private List<TextField> unitPriceFieldList;
 
     public InvoiceDetails(Option<Customer> customer) {
         this.customer = ensureCustomer(customer);
@@ -76,34 +84,34 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         Label unitPrice = initLabel(invoiceDetailsGrid, "Unit price", 4, 13);
         Label total = initLabel(invoiceDetailsGrid, "Total", 5, 13);
 
-        List<TextField> quantitiyFieldList = new ArrayList<>();
-        for (int i = 0; i <= 16; i++) {
+        quantitiyFieldList = new ArrayList<>();
+        for (int i = 0; i < MAX_ITEM_LINES; i++) {
             quantitiyFieldList.add(new TextField());
             quantitiyFieldList.get(i).setMaxWidth(75);
         }
 
-        List<TextField> descriptionFieldList = new ArrayList<>();
-        for (int i = 0; i <= 16; i++) {
+        descriptionFieldList = new ArrayList<>();
+        for (int i = 0; i < MAX_ITEM_LINES; i++) {
             descriptionFieldList.add(new TextField());
             descriptionFieldList.get(i).setMinWidth(200);
             GridPane.setColumnSpan(descriptionFieldList.get(i), 3);
         }
 
-        List<TextField> unitPriceList = new ArrayList<>();
-        for (int i = 0; i <= 16; i++) {
-            unitPriceList.add(new TextField());
-            unitPriceList.get(i).setMaxWidth(75);
+        unitPriceFieldList = new ArrayList<>();
+        for (int i = 0; i < MAX_ITEM_LINES; i++) {
+            unitPriceFieldList.add(new TextField());
+            unitPriceFieldList.get(i).setMaxWidth(75);
         }
 
         List<TextField> totalList = new ArrayList<>();
-        for (int i = 0; i <= 16; i++) {
+        for (int i = 0; i < MAX_ITEM_LINES; i++) {
             totalList.add(new TextField());
         }
 
-        for (int i = 0; i <= 16; i++) {
+        for (int i = 0; i < MAX_ITEM_LINES; i++) {
             invoiceDetailsGrid.add(quantitiyFieldList.get(i), 0, 14 + i);
             invoiceDetailsGrid.add(descriptionFieldList.get(i), 1, 14 + i);
-            invoiceDetailsGrid.add(unitPriceList.get(i), 4, 14 + i);
+            invoiceDetailsGrid.add(unitPriceFieldList.get(i), 4, 14 + i);
             invoiceDetailsGrid.add(totalList.get(i), 5, 14 + i);
         }
 
@@ -125,12 +133,27 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     }
 
     private void newInvoice() throws IOException {
-        Customer customerFromUI = updateCustomer();
-        // TODO: get the item lines by looping through? Empty sequence for now.
-        observer.newInvoice(customerFromUI, orderNumberField.getText(), sequence());
+        Customer customerFromUI = updatedCustomer();
+        Sequence<ItemLine> itemLines = sequence();
+        for(int i = 0; i < MAX_ITEM_LINES; i++) {
+            ItemLine itemLine = new ItemLine(
+                    doubleOptionOrNone(quantitiyFieldList.get(i).getText()),
+                    option(descriptionFieldList.get(i).getText()),
+                    doubleOptionOrNone(unitPriceFieldList.get(i).getText())
+            );
+            itemLines = itemLines.append(itemLine);
+        }
+        observer.newInvoice(customerFromUI, orderNumberField.getText(), itemLines);
     }
 
-    private Customer updateCustomer() {
+    private Option<Double> doubleOptionOrNone(String text) {
+        if (text.equals("")) {
+            return none();
+        }
+        return option(Double.valueOf(text));
+    }
+
+    private Customer updatedCustomer() {
         return new Customer(
                 nameField.getText(),
                 addressOneField.getText(),

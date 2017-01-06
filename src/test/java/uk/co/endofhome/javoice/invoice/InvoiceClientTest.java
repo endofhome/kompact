@@ -15,10 +15,11 @@ import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static java.nio.file.Paths.get;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.co.endofhome.javoice.invoice.InvoiceClient.invoiceClientCustomConfig;
+import static uk.co.endofhome.javoice.invoice.ItemLine.itemLine;
 
 public class InvoiceClientTest {
     private Customer customer = new Customer("Milford", "Herbalist St.", "New York", "NY-1010", "12345", "ACC-1967");
-    ItemLine itemLine = new ItemLine(3.0, "Green bottles", 10.0);
+    ItemLine itemLine = itemLine(3.0, "Green bottles", 10.0);
     private InvoiceClient invoiceClient;
 
     @Before
@@ -34,7 +35,7 @@ public class InvoiceClientTest {
         assertThat(invoiceFromFileSystem.number, is("INV-001"));
         assertThat(invoiceFromFileSystem.customer.name, is("Milford"));
         assertThat(invoiceFromFileSystem.orderNumber, is("cust ref"));
-        assertThat(invoiceFromFileSystem.itemLines.get(0).description, is("Green bottles"));
+        assertThat(invoiceFromFileSystem.itemLines.get(0).description.get(), is("Green bottles"));
     }
 
     @Test
@@ -76,7 +77,7 @@ public class InvoiceClientTest {
     @Test
     public void can_set_one_item_line() throws IOException {
         HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath(get("src/test/resources/INV-001.xls"), 0);
-        ItemLine singleItemLine = new ItemLine(3.0, "Magic beans", 3.0);
+        ItemLine singleItemLine = itemLine(3.0, "Magic beans", 3.0);
         Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "some customer ref", sequence(singleItemLine));
         HSSFSheet updatedSheet = invoiceClient.setItemLine(invoiceSheet, invoice, 0);
         ItemLine newFirstLine = invoiceClient.getItemLinesFrom(updatedSheet).get(0);
@@ -87,10 +88,10 @@ public class InvoiceClientTest {
     @Test
     public void can_set_multiple_item_lines() throws IOException {
         HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath(get("src/test/resources/INV-001.xls"), 0);
-        ItemLine firstItemLine = new ItemLine(3.0, "Magic beans", 3.0);
-        ItemLine secondItemLine = new ItemLine(1.5, "Golden tickets", 100.0);
-        ItemLine thirdItemLine = new ItemLine(0.5, "Super foods", 19.0);
-        ItemLine fourthItemLine = new ItemLine(3000.0, "Frozen Calamari", 0.15);
+        ItemLine firstItemLine = itemLine(3.0, "Magic beans", 3.0);
+        ItemLine secondItemLine = itemLine(1.5, "Golden tickets", 100.0);
+        ItemLine thirdItemLine = itemLine(0.5, "Super foods", 19.0);
+        ItemLine fourthItemLine = itemLine(3000.0, "Frozen Calamari", 0.15);
         Sequence<ItemLine> actualItemLines = sequence(firstItemLine, secondItemLine, thirdItemLine, fourthItemLine);
         Invoice invoice = new Invoice(
                 "some invoice number",

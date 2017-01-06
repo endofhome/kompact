@@ -1,16 +1,24 @@
 package uk.co.endofhome.javoice.invoice;
 
+import com.googlecode.totallylazy.Option;
+
 import java.util.Objects;
 
-public class ItemLine {
-    public final Double quantity;
-    public final String description;
-    public final Double unitPrice;
+import static com.googlecode.totallylazy.Option.option;
 
-    public ItemLine(Double quantity, String description, Double unitPrice) {
+public class ItemLine {
+    public final Option<Double> quantity;
+    public final Option<String> description;
+    public final Option<Double> unitPrice;
+
+    public ItemLine(Option<Double> quantity, Option<String> description, Option<Double> unitPrice) {
         this.quantity = quantity;
         this.description = description;
         this.unitPrice = unitPrice;
+    }
+
+    public static ItemLine itemLine(double quantity, String description, double unitPrice) {
+        return new ItemLine(option(quantity), option(description), option(unitPrice));
     }
 
     @Override
