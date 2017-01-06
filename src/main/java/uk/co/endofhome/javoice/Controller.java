@@ -80,6 +80,7 @@ public class Controller implements Observer {
                 Option<String> invoiceNumberValue = findNextInvoiceNumberIn(currentAnnualReport, DECEMBER);
                 if (invoiceNumberValue.isDefined()) {
                     result = invoiceNumberValue.get();
+                    break;
                 }
             }
         }

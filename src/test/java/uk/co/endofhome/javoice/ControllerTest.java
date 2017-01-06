@@ -93,6 +93,24 @@ public class ControllerTest {
     }
 
     @Test
+    public void can_get_correct_invoice_number_when_invoices_exists_for_this_year_and_previous_years() throws IOException, InterruptedException {
+        ItemLine oldItemLine = new ItemLine(5.0, "Really old slices of toast", 0.5);
+        Invoice oldInvoice = new Invoice("1", LocalDate.of(2015, 3, 7), customer, "some ref", sequence(oldItemLine));
+        LedgerEntry oldLedgerEntry = ledgerEntry(oldInvoice, none(), none(), none());
+        AnnualReport annualReport2015 = AnnualReport.annualReport(2015);
+        annualReport2015.setNewEntry(oldLedgerEntry);
+        annualReport2015.writeFile(pathForTestOutput);
+
+        ItemLine itemLine = new ItemLine(5.0, "Slices of toast", 0.5);
+        Invoice invoice = new Invoice("2", LocalDate.of(2016, 12, 31), customer, "some ref", sequence(itemLine));
+        LedgerEntry ledgerEntry = ledgerEntry(invoice, none(), none(), none());
+        annualReport.setNewEntry(ledgerEntry);
+        annualReport.writeFile(pathForTestOutput);
+
+        assertThat(controller.nextInvoiceNumber(annualReport), is("3"));
+    }
+
+    @Test
     public void ignores_invoice_number_when_last_invoice_exists_in_future_year() throws IOException, InterruptedException {
         ItemLine itemLine = new ItemLine(5.0, "Super futuristic toast", 0.5);
         Invoice invoice = new Invoice("1", LocalDate.of(2017, 6, 30), customer, "some ref", sequence(itemLine));
