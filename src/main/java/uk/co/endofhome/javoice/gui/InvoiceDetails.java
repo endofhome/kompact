@@ -26,6 +26,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private GuiObserver guiObserver;
     private Observer observer;
     private Customer customer;
+    private TextField nameField;
     private TextField orderNumberField;
 
     public InvoiceDetails(Option<Customer> customer) {
@@ -45,7 +46,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         basicGridSetup(invoiceDetailsGrid, "Invoice details:", 1);
 
         Label nameLabel = initLabel(invoiceDetailsGrid, "Name:", 0, 3);
-        TextField nameField = initTextField(invoiceDetailsGrid, 3, customer.name, 0,4);
+        nameField = initTextField(invoiceDetailsGrid, 3, customer.name, 0,4);
 
         Label addressOne = initLabel(invoiceDetailsGrid, "Address (1):", 0, 5);
         TextField addressField = initTextField(invoiceDetailsGrid, 4, customer.addressOne, 0,6);
@@ -119,8 +120,13 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     }
 
     private void newInvoice() throws IOException {
+        Customer customerFromUI = updateCustomer();
         // TODO: get the item lines by looping through? Empty sequence for now.
-        observer.newInvoice(customer, orderNumberField.getText(), sequence());
+        observer.newInvoice(customerFromUI, orderNumberField.getText(), sequence());
+    }
+
+    private Customer updateCustomer() {
+        return new Customer(nameField.getText(), customer.addressOne, customer.addressTwo, customer.postcode, customer.phoneNumber, customer.accountCode);
     }
 
     private String todaysDate() {
