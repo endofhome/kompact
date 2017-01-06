@@ -62,12 +62,14 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
 
         Label dateLabel = initLabel(invoiceDetailsGrid, "Date:", 5, 3);
         TextField dateField = initTextField(invoiceDetailsGrid, 1, todaysDate(), 5, 4);
+        dateField.setDisable(true);
 
         Label orderNumberLabel = initLabel(invoiceDetailsGrid, "Order Number:", 5, 5);
         orderNumberField = initTextField(invoiceDetailsGrid, 1, "", 5, 6);
 
         Label accountCodeLabel = initLabel(invoiceDetailsGrid, "Account code:", 5, 7);
         TextField accountCodeField = initTextField(invoiceDetailsGrid, 1, customer.accountCode, 5, 8);
+        accountCodeField.setDisable(true);
 
         Label quantity = initLabel(invoiceDetailsGrid, "Quantity", 0, 13);
         Label description = initLabel(invoiceDetailsGrid, "Description", 1, 13);
