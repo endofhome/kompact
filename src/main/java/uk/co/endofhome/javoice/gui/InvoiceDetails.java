@@ -26,7 +26,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private GuiObserver guiObserver;
     private Observer observer;
     private Customer customer;
-    private String fakeOrderNumber = "1053";
+    private TextField orderNumberField;
 
     public InvoiceDetails(Option<Customer> customer) {
         this.customer = ensureCustomer(customer);
@@ -60,7 +60,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         TextField dateField = initTextField(invoiceDetailsGrid, 1, todaysDate(), 5, 4);
 
         Label orderNumberLabel = initLabel(invoiceDetailsGrid, "Order Number:", 5, 5);
-        TextField orderNumberField = initTextField(invoiceDetailsGrid, 1, fakeOrderNumber, 5, 6);
+        orderNumberField = initTextField(invoiceDetailsGrid, 1, "", 5, 6);
 
         Label accountCodeLabel = initLabel(invoiceDetailsGrid, "Account code:", 5, 7);
         TextField accountCodeField = initTextField(invoiceDetailsGrid, 1, customer.accountCode, 5, 8);
@@ -120,8 +120,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
 
     private void newInvoice() throws IOException {
         // TODO: get the item lines by looping through? Empty sequence for now.
-        // TODO: get the correct order number - no need to use a fake one.
-        observer.newInvoice(customer, fakeOrderNumber, sequence());
+        observer.newInvoice(customer, orderNumberField.getText(), sequence());
     }
 
     private String todaysDate() {
