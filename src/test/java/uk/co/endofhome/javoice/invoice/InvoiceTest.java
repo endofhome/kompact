@@ -22,6 +22,14 @@ public class InvoiceTest {
     }
 
     @Test
+    public void can_get_nett_value_when_no_itemLines() {
+        Customer customer = new Customer("", "", "", "", "", "");
+        Invoice invoice = new Invoice("some num", LocalDate.now(), customer, "", sequence());
+
+        assertThat(invoice.nettValue(), is(0.0));
+    }
+
+    @Test
     public void can_get_customer_name() {
         Customer customer = new Customer("Andrew Cyrille", "", "", "", "", "");
         Invoice invoice = new Invoice("", LocalDate.now(), customer, "", sequence());
