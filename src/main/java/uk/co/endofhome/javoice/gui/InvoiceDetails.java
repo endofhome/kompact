@@ -28,6 +28,9 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private Customer customer;
     private TextField nameField;
     private TextField orderNumberField;
+    private TextField addressOneField;
+    private TextField addressTwoField;
+    private TextField postcodeField;
 
     public InvoiceDetails(Option<Customer> customer) {
         this.customer = ensureCustomer(customer);
@@ -49,13 +52,13 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         nameField = initTextField(invoiceDetailsGrid, 3, customer.name, 0,4);
 
         Label addressOne = initLabel(invoiceDetailsGrid, "Address (1):", 0, 5);
-        TextField addressField = initTextField(invoiceDetailsGrid, 4, customer.addressOne, 0,6);
+        addressOneField = initTextField(invoiceDetailsGrid, 4, customer.addressOne, 0,6);
 
         Label addressTwo = initLabel(invoiceDetailsGrid, "Address (2):", 0, 7);
-        TextField addressTwoField = initTextField(invoiceDetailsGrid, 3, customer.addressTwo, 0,8);
+        addressTwoField = initTextField(invoiceDetailsGrid, 3, customer.addressTwo, 0,8);
 
         Label postcodeLabel = initLabel(invoiceDetailsGrid, "Postcode:", 3, 7);
-        TextField postcodeField = initTextField(invoiceDetailsGrid, 1, customer.postcode, 3, 8);
+        postcodeField = initTextField(invoiceDetailsGrid, 1, customer.postcode, 3, 8);
 
         Label dateLabel = initLabel(invoiceDetailsGrid, "Date:", 5, 3);
         TextField dateField = initTextField(invoiceDetailsGrid, 1, todaysDate(), 5, 4);
@@ -126,7 +129,14 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     }
 
     private Customer updateCustomer() {
-        return new Customer(nameField.getText(), customer.addressOne, customer.addressTwo, customer.postcode, customer.phoneNumber, customer.accountCode);
+        return new Customer(
+                nameField.getText(),
+                addressOneField.getText(),
+                addressTwoField.getText(),
+                postcodeField.getText(),
+                customer.phoneNumber,
+                customer.accountCode
+        );
     }
 
     private String todaysDate() {
