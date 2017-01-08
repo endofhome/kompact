@@ -3,10 +3,7 @@ package uk.co.endofhome.javoice.gui;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import javafx.beans.binding.NumberBinding;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -44,6 +41,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private List<SimpleDoubleProperty> quantityPropertyList;
     private List<TextField> descriptionFieldList;
     private List<TextField> unitPriceFieldList;
+    private List<SimpleDoubleProperty> unitPricePropertyList;
     private List<Label> totalLabelList;
 
     public InvoiceDetails(Option<Customer> customer) {
@@ -99,14 +97,14 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
             int i2 = i;
             quantityFieldForLine.textProperty().addListener(
                     (observable, oldValue, newValue) -> {
-                        Double val;
+                        Double validNewValue;
                         try {
-                            val = new Double(newValue);
+                            validNewValue = new Double(newValue);
                         } catch(NumberFormatException e) {
-                            val = 0d;
+                            validNewValue = 0d;
                         }
                         // TODO: blows up if number too large (over limit for Double?)
-                        quantityPropertyList.get(i2).setValue( val );
+                        quantityPropertyList.get(i2).setValue(validNewValue);
                     }
             );
             quantityFieldList.add(quantityFieldForLine);
@@ -121,8 +119,25 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         }
 
         unitPriceFieldList = new ArrayList<>();
+        unitPricePropertyList = new ArrayList<>();
         for (int i = 0; i < MAX_ITEM_LINES; i++) {
-            unitPriceFieldList.add(new TextField());
+            SimpleDoubleProperty unitPricePropertyForLine = new SimpleDoubleProperty();
+            unitPricePropertyList.add(unitPricePropertyForLine);
+            TextField unitPriceFieldForLine = new TextField();
+            int i2 = i;
+            unitPriceFieldForLine.textProperty().addListener(
+                    (observable, oldValue, newValue) -> {
+                        Double validNewValue;
+                        try {
+                            validNewValue = new Double(newValue);
+                        } catch(NumberFormatException e) {
+                            validNewValue = 0d;
+                        }
+                        // TODO: blows up if number too large (over limit for Double?)
+                        unitPricePropertyList.get(i2).setValue( validNewValue );
+                    }
+            );
+            unitPriceFieldList.add(unitPriceFieldForLine);
             unitPriceFieldList.get(i).setMaxWidth(75);
         }
 
@@ -130,7 +145,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         for (int i = 0; i < MAX_ITEM_LINES; i++) {
             SimpleDoubleProperty unitPricePropertyForLine = new SimpleDoubleProperty();
             unitPricePropertyForLine.set(10);
-            NumberBinding totalForLine = quantityPropertyList.get(i).multiply(unitPricePropertyForLine);
+            NumberBinding totalForLine = quantityPropertyList.get(i).multiply(unitPricePropertyList.get(i));
             Label totalLabelForLine = new Label();
             totalForLine.addListener(
                     (observable, oldValue, newValue) -> totalLabelForLine.setText(newValue.toString()));
