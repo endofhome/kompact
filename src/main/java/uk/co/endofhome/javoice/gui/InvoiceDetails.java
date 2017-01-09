@@ -148,7 +148,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
             NumberBinding totalForLine = quantityPropertyList.get(i).multiply(unitPricePropertyList.get(i));
             Label totalLabelForLine = new Label();
             totalForLine.addListener(
-                    (observable, oldValue, newValue) -> totalLabelForLine.setText(newValue.toString()));
+                    (observable, oldValue, newValue) -> totalOrEmptyString(totalLabelForLine, newValue));
             totalLabelList.add(totalLabelForLine);
         }
 
@@ -174,6 +174,14 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         invoiceDetailsStackPane = new StackPane(invoiceDetailsScroll);
         // TODO: this doesn't work, for some reason:
         quantityFieldList.get(0).requestFocus();
+    }
+
+    private void totalOrEmptyString(Label totalLabelForLine, Number newValue) {
+        if (newValue.doubleValue() != 0) {
+            totalLabelForLine.setText(newValue.toString());
+        } else {
+            totalLabelForLine.setText("");
+        }
     }
 
     private void newInvoice() throws IOException {
