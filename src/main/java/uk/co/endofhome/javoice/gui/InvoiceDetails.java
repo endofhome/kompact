@@ -16,6 +16,7 @@ import uk.co.endofhome.javoice.customer.Customer;
 import uk.co.endofhome.javoice.invoice.ItemLine;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private List<TextField> unitPriceFieldList;
     private List<SimpleDoubleProperty> unitPricePropertyList;
     private List<Label> totalLabelList;
+    private DecimalFormat decimalFormatter;
 
     public InvoiceDetails(Option<Customer> customer) {
         this.customer = ensureCustomer(customer);
@@ -57,6 +59,8 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     }
 
     private void initialise() {
+        decimalFormatter = new DecimalFormat("#.00");
+
         GridPane invoiceDetailsGrid = new GridPane();
         basicGridSetup(invoiceDetailsGrid, "Invoice details:", 1);
         addInvoiceHeader(invoiceDetailsGrid);
@@ -154,6 +158,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private void initPropAndFieldListsFor(List<SimpleDoubleProperty> propertyList, List<TextField> fieldList) {
         for (int i = 0; i < MAX_ITEM_LINES; i++) {
             SimpleDoubleProperty unitPricePropertyForLine = new SimpleDoubleProperty();
+            // TODO: add decimal (and right-align?) TextFormatter to this field:
             propertyList.add(unitPricePropertyForLine);
             TextField unitPriceFieldForLine = new TextField();
             int i2 = i;
@@ -184,7 +189,8 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
 
     private void totalOrEmptyString(Label totalLabelForLine, Number newValue) {
         if (newValue.doubleValue() != 0) {
-            totalLabelForLine.setText(newValue.toString());
+            // TODO: add right-align formatter to this?
+            totalLabelForLine.setText(decimalFormatter.format(newValue));
         } else {
             totalLabelForLine.setText("");
         }
