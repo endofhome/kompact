@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.googlecode.totallylazy.Option.none;
-import static com.googlecode.totallylazy.Option.option;
+import static com.googlecode.totallylazy.Option.some;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static uk.co.endofhome.javoice.gui.UiController.mainMenuStackPane;
 import static uk.co.endofhome.javoice.invoice.Invoice.MAX_ITEM_LINES;
@@ -59,7 +59,53 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private void initialise() {
         GridPane invoiceDetailsGrid = new GridPane();
         basicGridSetup(invoiceDetailsGrid, "Invoice details:", 1);
+        addInvoiceHeader(invoiceDetailsGrid);
+        addItemLines(invoiceDetailsGrid);
+        addButtons(invoiceDetailsGrid);
 
+        ScrollPane invoiceDetailsScroll = new ScrollPane(invoiceDetailsGrid);
+        invoiceDetailsScroll.setFitToWidth(true);
+        invoiceDetailsStackPane = new StackPane(invoiceDetailsScroll);
+        // TODO: this doesn't work, for some reason:
+        quantityFieldList.get(0).requestFocus();
+    }
+
+    private void addButtons(GridPane invoiceDetailsGrid) {
+        Button mainMenu = initButton(invoiceDetailsGrid, "Main menu", event -> notifyGuiObserver(mainMenuStackPane), 0, 31);
+
+        Button submitInvoice = initButton(invoiceDetailsGrid, "Submit", event -> {
+            try {
+                newInvoice();
+            } catch (IOException e) {
+                // TODO: fix this mess too. should be throwing this exception somewhere, not swallowing it.
+            }
+        }, 2, 31);
+    }
+
+    private void addItemLines(GridPane invoiceDetailsGrid) {
+        Label quantity = initLabel(invoiceDetailsGrid, "Quantity", 0, 13);
+        Label description = initLabel(invoiceDetailsGrid, "Description", 1, 13);
+        Label unitPrice = initLabel(invoiceDetailsGrid, "Unit price", 4, 13);
+        Label total = initLabel(invoiceDetailsGrid, "Total", 5, 13);
+
+        quantityFieldList = new ArrayList<>();
+        quantityPropertyList = new ArrayList<>();
+        initPropAndFieldListsFor(quantityPropertyList, quantityFieldList);
+
+        descriptionFieldList = new ArrayList<>();
+        initDescriptionFieldList();
+
+        unitPriceFieldList = new ArrayList<>();
+        unitPricePropertyList = new ArrayList<>();
+        initPropAndFieldListsFor(unitPricePropertyList, unitPriceFieldList);
+
+        totalLabelList = new ArrayList<>();
+        initTotalLabelLists();
+
+        addItemLineElementsToGrid(invoiceDetailsGrid);
+    }
+
+    private void addInvoiceHeader(GridPane invoiceDetailsGrid) {
         Label nameLabel = initLabel(invoiceDetailsGrid, "Name:", 0, 3);
         nameField = initTextField(invoiceDetailsGrid, 3, customer.name, 0, 4);
 
@@ -82,98 +128,58 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         Label accountCodeLabel = initLabel(invoiceDetailsGrid, "Account code:", 5, 7);
         TextField accountCodeField = initTextField(invoiceDetailsGrid, 1, customer.accountCode, 5, 8);
         accountCodeField.setDisable(true);
+    }
 
-        Label quantity = initLabel(invoiceDetailsGrid, "Quantity", 0, 13);
-        Label description = initLabel(invoiceDetailsGrid, "Description", 1, 13);
-        Label unitPrice = initLabel(invoiceDetailsGrid, "Unit price", 4, 13);
-        Label total = initLabel(invoiceDetailsGrid, "Total", 5, 13);
-
-        quantityFieldList = new ArrayList<>();
-        quantityPropertyList = new ArrayList<>();
-        for (int i = 0; i < MAX_ITEM_LINES; i++) {
-            SimpleDoubleProperty quantityPropertyForLine = new SimpleDoubleProperty();
-            quantityPropertyList.add(quantityPropertyForLine);
-            TextField quantityFieldForLine = new TextField();
-            int i2 = i;
-            quantityFieldForLine.textProperty().addListener(
-                    (observable, oldValue, newValue) -> {
-                        Double validNewValue;
-                        try {
-                            validNewValue = new Double(newValue);
-                        } catch(NumberFormatException e) {
-                            validNewValue = 0d;
-                        }
-                        // TODO: blows up if number too large (over limit for Double?)
-                        quantityPropertyList.get(i2).setValue(validNewValue);
-                    }
-            );
-            quantityFieldList.add(quantityFieldForLine);
-            quantityFieldList.get(i).setMaxWidth(75);
-        }
-
-        descriptionFieldList = new ArrayList<>();
-        for (int i = 0; i < MAX_ITEM_LINES; i++) {
-            descriptionFieldList.add(new TextField());
-            descriptionFieldList.get(i).setMinWidth(200);
-            GridPane.setColumnSpan(descriptionFieldList.get(i), 3);
-        }
-
-        unitPriceFieldList = new ArrayList<>();
-        unitPricePropertyList = new ArrayList<>();
-        for (int i = 0; i < MAX_ITEM_LINES; i++) {
-            SimpleDoubleProperty unitPricePropertyForLine = new SimpleDoubleProperty();
-            unitPricePropertyList.add(unitPricePropertyForLine);
-            TextField unitPriceFieldForLine = new TextField();
-            int i2 = i;
-            unitPriceFieldForLine.textProperty().addListener(
-                    (observable, oldValue, newValue) -> {
-                        Double validNewValue;
-                        try {
-                            validNewValue = new Double(newValue);
-                        } catch(NumberFormatException e) {
-                            validNewValue = 0d;
-                        }
-                        // TODO: blows up if number too large (over limit for Double?)
-                        unitPricePropertyList.get(i2).setValue( validNewValue );
-                    }
-            );
-            unitPriceFieldList.add(unitPriceFieldForLine);
-            unitPriceFieldList.get(i).setMaxWidth(75);
-        }
-
-        totalLabelList = new ArrayList<>();
-        for (int i = 0; i < MAX_ITEM_LINES; i++) {
-            SimpleDoubleProperty unitPricePropertyForLine = new SimpleDoubleProperty();
-            unitPricePropertyForLine.set(10);
-            NumberBinding totalForLine = quantityPropertyList.get(i).multiply(unitPricePropertyList.get(i));
-            Label totalLabelForLine = new Label();
-            totalForLine.addListener(
-                    (observable, oldValue, newValue) -> totalOrEmptyString(totalLabelForLine, newValue));
-            totalLabelList.add(totalLabelForLine);
-        }
-
+    private void addItemLineElementsToGrid(GridPane invoiceDetailsGrid) {
         for (int i = 0; i < MAX_ITEM_LINES; i++) {
             invoiceDetailsGrid.add(quantityFieldList.get(i), 0, 14 + i);
             invoiceDetailsGrid.add(descriptionFieldList.get(i), 1, 14 + i);
             invoiceDetailsGrid.add(unitPriceFieldList.get(i), 4, 14 + i);
             invoiceDetailsGrid.add(totalLabelList.get(i), 5, 14 + i);
         }
+    }
 
-        Button mainMenu = initButton(invoiceDetailsGrid, "Main menu", event -> notifyGuiObserver(mainMenuStackPane), 0, 31);
+    private void initTotalLabelLists() {
+        for (int i = 0; i < MAX_ITEM_LINES; i++) {
+            SimpleDoubleProperty unitPricePropertyForLine = new SimpleDoubleProperty();
+            unitPricePropertyForLine.set(10);
+            NumberBinding totalForLine = quantityPropertyList.get(i).multiply(unitPricePropertyList.get(i));
+            Label totalLabelForLine = new Label();
+            totalForLine.addListener(
+                (observable, oldValue, newValue) -> totalOrEmptyString(totalLabelForLine, newValue));
+            totalLabelList.add(totalLabelForLine);
+        }
+    }
 
-        Button submitInvoice = initButton(invoiceDetailsGrid, "Submit", event -> {
-            try {
-                newInvoice();
-            } catch (IOException e) {
-                // TODO: fix this mess too. should be throwing this exception somewhere, not swallowing it.
-            }
-        }, 2, 31);
+    private void initPropAndFieldListsFor(List<SimpleDoubleProperty> propertyList, List<TextField> fieldList) {
+        for (int i = 0; i < MAX_ITEM_LINES; i++) {
+            SimpleDoubleProperty unitPricePropertyForLine = new SimpleDoubleProperty();
+            propertyList.add(unitPricePropertyForLine);
+            TextField unitPriceFieldForLine = new TextField();
+            int i2 = i;
+            unitPriceFieldForLine.textProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    Double validNewValue;
+                    try {
+                        validNewValue = new Double(newValue);
+                    } catch (NumberFormatException e) {
+                        validNewValue = 0d;
+                    }
+                    // TODO: blows up if number too large (over limit for Double?)
+                    propertyList.get(i2).setValue(validNewValue);
+                }
+            );
+            fieldList.add(unitPriceFieldForLine);
+            fieldList.get(i).setMaxWidth(75);
+        }
+    }
 
-        ScrollPane invoiceDetailsScroll = new ScrollPane(invoiceDetailsGrid);
-        invoiceDetailsScroll.setFitToWidth(true);
-        invoiceDetailsStackPane = new StackPane(invoiceDetailsScroll);
-        // TODO: this doesn't work, for some reason:
-        quantityFieldList.get(0).requestFocus();
+    private void initDescriptionFieldList() {
+        for (int i = 0; i < MAX_ITEM_LINES; i++) {
+            descriptionFieldList.add(new TextField());
+            descriptionFieldList.get(i).setMinWidth(200);
+            GridPane.setColumnSpan(descriptionFieldList.get(i), 3);
+        }
     }
 
     private void totalOrEmptyString(Label totalLabelForLine, Number newValue) {
@@ -189,30 +195,30 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         Sequence<ItemLine> itemLines = sequence();
         for (int i = 0; i < MAX_ITEM_LINES; i++) {
             ItemLine itemLine = new ItemLine(
-                    doubleOptionOrNone(quantityFieldList.get(i).getText()),
-                    option(descriptionFieldList.get(i).getText()),
-                    doubleOptionOrNone(unitPriceFieldList.get(i).getText())
+                doubleOption(quantityFieldList.get(i).getText()),
+                some(descriptionFieldList.get(i).getText()),
+                doubleOption(unitPriceFieldList.get(i).getText())
             );
             itemLines = itemLines.append(itemLine);
         }
         observer.newInvoice(customerFromUI, orderNumberField.getText(), itemLines);
     }
 
-    private Option<Double> doubleOptionOrNone(String text) {
+    private Option<Double> doubleOption(String text) {
         if (text.equals("")) {
             return none();
         }
-        return option(Double.valueOf(text));
+        return some(Double.valueOf(text));
     }
 
     private Customer updatedCustomer() {
         return new Customer(
-                nameField.getText(),
-                addressOneField.getText(),
-                addressTwoField.getText(),
-                postcodeField.getText(),
-                customer.phoneNumber,
-                customer.accountCode
+            nameField.getText(),
+            addressOneField.getText(),
+            addressTwoField.getText(),
+            postcodeField.getText(),
+            customer.phoneNumber,
+            customer.accountCode
         );
     }
 
