@@ -2,42 +2,31 @@ package uk.co.endofhome.javoice.customer
 
 import com.googlecode.totallylazy.Option
 import com.googlecode.totallylazy.Sequence
-import org.apache.poi.hssf.usermodel.HSSFCell
+import com.googlecode.totallylazy.Sequences.sequence
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator
 import org.apache.poi.hssf.usermodel.HSSFRow
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Sheet
-
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.nio.file.Path
-
-import com.googlecode.totallylazy.Sequences.sequence
-import java.lang.String.format
 import org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING
+import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK
 import uk.co.endofhome.javoice.CellStyler.excelBoldBorderBottomCellStyleFor
 import uk.co.endofhome.javoice.CellStyler.excelBoldCellStyleFor
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.lang.String.format
+import java.nio.file.Path
 
 class CustomerStore {
-    private var customers: Sequence<Customer>? = null
+    private var customers = sequence<Customer>()
+    private val CUSTOMER_STORE_COLUMN_COUNT: Int = 7
 
-    init {
-        this.customers = sequence<Customer>()
-    }
-
-    fun customers(): Sequence<Customer>? {
+    fun customers(): Sequence<Customer> {
         return customers
     }
 
-    @Throws(IOException::class)
     fun writeFile(filePath: Path) {
         try {
             val fileOut = FileOutputStream(format(filePath.toString()))
@@ -46,9 +35,8 @@ class CustomerStore {
             workbook.write(fileOut)
             fileOut.close()
         } catch (e: FileNotFoundException) {
-            throw FileNotFoundException("There was a problem writing your file.")
+            throw RuntimeException("There was a problem writing your file.")
         }
-
     }
 
     private fun createWorkbookWithOneSheet(): HSSFWorkbook {
@@ -74,59 +62,57 @@ class CustomerStore {
         tableHeaders.createCell(4).setCellValue("Postcode")
         tableHeaders.createCell(5).setCellValue("Phone number")
 
-        for (cell in tableHeaders) {
-            cell.cellStyle = excelBoldBorderBottomCellStyleFor(workbook)
+        tableHeaders.map {
+            it.cellStyle = excelBoldBorderBottomCellStyleFor(workbook)
         }
     }
 
     private fun setCustomerLines(workbook: HSSFWorkbook) {
         val sheet = workbook.getSheetAt(0)
-        for (customer in customers!!) {
+        customers.forEach {
             val nextRow = sheet.lastRowNum + 1
             val row = sheet.createRow(nextRow)
-            row.createCell(0).setCellValue(customer.accountCode)
-            row.createCell(1).setCellValue(customer.name)
-            row.createCell(2).setCellValue(customer.addressOne)
-            row.createCell(3).setCellValue(customer.addressTwo)
-            row.createCell(4).setCellValue(customer.postcode)
-            row.createCell(5).setCellValue(customer.phoneNumber)
+            row.createCell(0).setCellValue(it.accountCode)
+            row.createCell(1).setCellValue(it.name)
+            row.createCell(2).setCellValue(it.addressOne)
+            row.createCell(3).setCellValue(it.addressTwo)
+            row.createCell(4).setCellValue(it.postcode)
+            row.createCell(5).setCellValue(it.phoneNumber)
         }
     }
 
     fun addCustomer(customer: Customer) {
-        customers = customers!!.append(customer)
+        customers = customers.append(customer)
     }
 
     fun addCustomers(customerSequence: Sequence<Customer>) {
-        for (customer in customerSequence) {
-            customers = customers!!.append(customer)
+        customerSequence.forEach {
+            customers = customers.append(it)
         }
     }
 
     private fun resizeColumns(workbook: HSSFWorkbook) {
         HSSFFormulaEvaluator.evaluateAllFormulaCells(workbook)
-        for (sheet in workbook) {
-            for (i in 0..7) {
-                sheet.autoSizeColumn(i)
+        workbook.map {
+            sheet -> 0.rangeTo(CUSTOMER_STORE_COLUMN_COUNT).map {
+                sheet.autoSizeColumn(it)
             }
         }
     }
 
     fun search(nameToSearchFor: String): Option<Customer> {
-        return customers!!.find { customer -> customer.name == nameToSearchFor }
+        return customers.find { customer -> customer.name == nameToSearchFor }
     }
 
     fun nextAccountNumber(): String {
-        if (customers!!.size == 0) {
-            return "1"
-        }
-        val lastAccountNumber = Integer.parseInt(customers!!.last().accountCode)
+        if (customers.size == 0) return "1"
+        val lastAccountNumber = Integer.parseInt(customers.last().accountCode)
         return (lastAccountNumber + 1).toString()
     }
 
     companion object {
+        private val FIRST_DATA_ROW: Int = 4
 
-        @Throws(IOException::class)
         fun readFile(filePath: Path, vararg sheetsToGet: Int): CustomerStore {
             if (sheetsToGet.size == 1) {
                 val customerStoreWorkbook = getWorkbookFromPath(filePath)
@@ -141,12 +127,12 @@ class CustomerStore {
 
         private fun getCustomersFrom(customerStoreSheet: HSSFSheet): Sequence<Customer> {
             var customers = sequence<Customer>()
-            val firstRowNum = 4
-            for (i in firstRowNum..customerStoreSheet.lastRowNum) {
-                val row = customerStoreSheet.getRow(i)
+            val customerDataRows = FIRST_DATA_ROW.rangeTo(customerStoreSheet.lastRowNum)
+            customerDataRows.map {
+                val row = customerStoreSheet.getRow(it)
                 setStringCellType(row)
                 val accountCodeCell = row.getCell(0, CREATE_NULL_AS_BLANK)
-                if (accountCodeCell.stringCellValue != "") {
+                if (accountCodeCell.stringCellValue.isNotEmpty()) {
                     val customer = getSingleCustomerFrom(row)
                     customers = customers.append(customer)
                 }
@@ -155,8 +141,8 @@ class CustomerStore {
         }
 
         private fun setStringCellType(row: HSSFRow) {
-            for (cell in row) {
-                cell.cellType = CELL_TYPE_STRING
+            row.map {
+                it.cellType = CELL_TYPE_STRING
             }
         }
 
@@ -170,7 +156,6 @@ class CustomerStore {
             return Customer(name, addressOne, addressTwo, postcode, phoneNumber, accountCode)
         }
 
-        @Throws(IOException::class)
         fun getWorkbookFromPath(filePath: Path): HSSFWorkbook {
             val inputStream = FileInputStream(filePath.toString())
             return HSSFWorkbook(POIFSFileSystem(inputStream))

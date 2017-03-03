@@ -1,33 +1,29 @@
 package uk.co.endofhome.javoice.invoice
 
+import com.googlecode.totallylazy.Option.option
 import com.googlecode.totallylazy.Sequence
+import com.googlecode.totallylazy.Sequences.sequence
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
+import uk.co.endofhome.javoice.CellStyler.excelDateCellStyleFor
 import uk.co.endofhome.javoice.Config
 import uk.co.endofhome.javoice.customer.Customer
-
+import uk.co.endofhome.javoice.invoice.Invoice.Companion.ITEM_LINES_START_AT
+import uk.co.endofhome.javoice.invoice.Invoice.Companion.MAX_ITEM_LINES
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
-import java.io.IOException
+import java.lang.String.format
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
-import com.googlecode.totallylazy.Option.option
-import com.googlecode.totallylazy.Sequences.sequence
-import java.lang.String.format
-import uk.co.endofhome.javoice.CellStyler.excelDateCellStyleFor
-import uk.co.endofhome.javoice.invoice.Invoice.Companion.ITEM_LINES_START_AT
-import uk.co.endofhome.javoice.invoice.Invoice.Companion.MAX_ITEM_LINES
-
-class InvoiceClient private constructor(private var workBook: HSSFWorkbook, private val fileTemplatePath: Path, private val fileOutputPath: Path) {
+class InvoiceClient (private var workBook: HSSFWorkbook, private val fileTemplatePath: Path, private val fileOutputPath: Path) {
 
     fun writeFile(filePath: Path, invoice: Invoice) {
         try {
