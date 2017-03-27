@@ -2,12 +2,11 @@ package uk.co.endofhome.javoice.gui;
 
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
-import javafx.beans.binding.NumberBinding;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import uk.co.endofhome.javoice.Observable;
@@ -21,6 +20,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import static com.googlecode.totallylazy.Option.none;
 import static com.googlecode.totallylazy.Option.some;
@@ -39,10 +39,8 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private TextField addressTwoField;
     private TextField postcodeField;
     private List<TextField> quantityFieldList;
-    private List<SimpleDoubleProperty> quantityPropertyList;
     private List<TextField> descriptionFieldList;
     private List<TextField> unitPriceFieldList;
-    private List<SimpleDoubleProperty> unitPricePropertyList;
     private List<Label> totalLabelList;
     private DecimalFormat decimalFormatter;
 
@@ -89,19 +87,17 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private void addItemLines(GridPane invoiceDetailsGrid) {
         Label quantity = initLabel(invoiceDetailsGrid, "Quantity", 0, 13);
         Label description = initLabel(invoiceDetailsGrid, "Description", 1, 13);
-        Label unitPrice = initLabel(invoiceDetailsGrid, "Unit price", 4, 13);
-        Label total = initLabel(invoiceDetailsGrid, "Total", 5, 13);
+        Label unitPrice = initLabel(invoiceDetailsGrid, "Unit price (£)", 4, 13);
+        Label total = initLabel(invoiceDetailsGrid, "Total (£)", 5, 13);
 
         quantityFieldList = new ArrayList<>();
-        quantityPropertyList = new ArrayList<>();
-        initPropAndFieldListsFor(quantityPropertyList, quantityFieldList);
+        initFieldList(quantityFieldList);
 
         descriptionFieldList = new ArrayList<>();
         initDescriptionFieldList();
 
         unitPriceFieldList = new ArrayList<>();
-        unitPricePropertyList = new ArrayList<>();
-        initPropAndFieldListsFor(unitPricePropertyList, unitPriceFieldList);
+        initFieldList(unitPriceFieldList);
 
         totalLabelList = new ArrayList<>();
         initTotalLabelLists();
@@ -145,38 +141,47 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
 
     private void initTotalLabelLists() {
         for (int i = 0; i < MAX_ITEM_LINES; i++) {
-            SimpleDoubleProperty unitPricePropertyForLine = new SimpleDoubleProperty();
-            unitPricePropertyForLine.set(10);
-            NumberBinding totalForLine = quantityPropertyList.get(i).multiply(unitPricePropertyList.get(i));
             Label totalLabelForLine = new Label();
-            totalForLine.addListener(
-                (observable, oldValue, newValue) -> totalOrEmptyString(totalLabelForLine, newValue));
             totalLabelList.add(totalLabelForLine);
         }
     }
 
-    private void initPropAndFieldListsFor(List<SimpleDoubleProperty> propertyList, List<TextField> fieldList) {
+    private void initFieldList(List<TextField> fieldList) {
         for (int i = 0; i < MAX_ITEM_LINES; i++) {
-            SimpleDoubleProperty unitPricePropertyForLine = new SimpleDoubleProperty();
             // TODO: add decimal (and right-align?) TextFormatter to this field:
-            propertyList.add(unitPricePropertyForLine);
-            TextField unitPriceFieldForLine = new TextField();
+            TextField fieldForLine = new TextField();
+            List<TextField> otherFieldList = otherFieldList(fieldList);
             int i2 = i;
-            unitPriceFieldForLine.textProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    Double validNewValue;
-                    try {
-                        validNewValue = new Double(newValue);
-                    } catch (NumberFormatException e) {
-                        validNewValue = 0d;
+            fieldForLine.textProperty().addListener(
+                    (observable, oldValue, newValue) -> {
+                        TextField otherFieldForLine = otherFieldList.get(i2);
+                        Label totalLabelForLine = totalLabelList.get(i2);
+                        Double newTotalValue = safeDouble(newValue) * safeDouble(otherFieldForLine.getText());
+                        totalOrEmptyString(totalLabelForLine, newTotalValue);
                     }
-                    // TODO: blows up if number too large (over limit for Double?)
-                    propertyList.get(i2).setValue(validNewValue);
-                }
             );
-            fieldList.add(unitPriceFieldForLine);
-            fieldList.get(i).setMaxWidth(75);
+            fieldList.add(fieldForLine);
+            fieldForLine.setMaxWidth(75);
+            fieldForLine.setTextFormatter(new TextFormatter(filter));
         }
+    }
+
+    private List<TextField> otherFieldList(List<TextField> fieldList) {
+        if (fieldList == quantityFieldList) {
+            return unitPriceFieldList;
+        } else {
+            return quantityFieldList;
+        }
+    }
+
+    private Double safeDouble(String newValue) {
+        Double validNewValue;
+        try {
+            validNewValue = new Double(newValue);
+        } catch (NumberFormatException e) {
+            validNewValue = 0d;
+        }
+        return validNewValue;
     }
 
     private void initDescriptionFieldList() {
@@ -195,6 +200,25 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
             totalLabelForLine.setText("");
         }
     }
+
+    private UnaryOperator<TextFormatter.Change> filter = change -> {
+        if (change.isReplaced()) {
+            if (change.getText().matches("[^0-9]")) {
+                change.setText(change.getControlText().substring(change.getRangeStart(), change.getRangeEnd()));
+            }
+        }
+        if (change.isAdded()) {
+            if (change.getControlText().contains(".")) {
+                if (change.getText().matches("[^0-9]")) {
+                    change.setText("");
+                }
+            } else if (change.getText().matches("[^0-9.]")) {
+                change.setText("");
+            }
+        }
+
+        return change;
+    };
 
     private void newInvoice() throws IOException {
         Customer customerFromUI = updatedCustomer();
