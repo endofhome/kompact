@@ -2,6 +2,7 @@ package uk.co.endofhome.javoice.gui;
 
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -42,6 +43,9 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private List<TextField> descriptionFieldList;
     private List<TextField> unitPriceFieldList;
     private List<Label> totalLabelList;
+    private Label subTotal;
+    private Label vat;
+    private Label total;
     private DecimalFormat decimalFormatter;
 
     public InvoiceDetails(Option<Customer> customer) {
@@ -63,6 +67,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         basicGridSetup(invoiceDetailsGrid, "Invoice details:", 1);
         addInvoiceHeader(invoiceDetailsGrid);
         addItemLines(invoiceDetailsGrid);
+        addTotals(invoiceDetailsGrid);
         addButtons(invoiceDetailsGrid);
 
         ScrollPane invoiceDetailsScroll = new ScrollPane(invoiceDetailsGrid);
@@ -72,8 +77,28 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         quantityFieldList.get(0).requestFocus();
     }
 
+    private void addTotals(GridPane invoiceDetailsGrid) {
+        initLabel(invoiceDetailsGrid, "Sub Total", 4, 31);
+        subTotal = initLabel(invoiceDetailsGrid, "", 5, 31);
+        subTotal.textProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    Double newTotalValue = safeDouble(newValue) * 1.2;
+                    totalOrEmptyString(total, newTotalValue);
+
+                    Double newVatValue = safeDouble(newValue) * 0.2;
+                    totalOrEmptyString(vat, newVatValue);
+                }
+        );
+
+        initLabel(invoiceDetailsGrid, "VAT (20%)", 4, 32);
+        vat = initLabel(invoiceDetailsGrid, "", 5, 32);
+
+        initLabel(invoiceDetailsGrid, "TOTAL", 4, 33);
+        total = initLabel(invoiceDetailsGrid, "", 5, 33);
+    }
+
     private void addButtons(GridPane invoiceDetailsGrid) {
-        Button mainMenu = initButton(invoiceDetailsGrid, "Main menu", event -> notifyGuiObserver(mainMenuStackPane), 0, 31);
+        Button mainMenu = initButton(invoiceDetailsGrid, "Main menu", event -> notifyGuiObserver(mainMenuStackPane), 0, 34);
 
         Button submitInvoice = initButton(invoiceDetailsGrid, "Submit", event -> {
             try {
@@ -81,7 +106,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
             } catch (IOException e) {
                 // TODO: fix this mess too. should be throwing this exception somewhere, not swallowing it.
             }
-        }, 2, 31);
+        }, 2, 34);
     }
 
     private void addItemLines(GridPane invoiceDetailsGrid) {
@@ -153,17 +178,27 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
             List<TextField> otherFieldList = otherFieldList(fieldList);
             int i2 = i;
             fieldForLine.textProperty().addListener(
-                    (observable, oldValue, newValue) -> {
+                    (ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
                         TextField otherFieldForLine = otherFieldList.get(i2);
                         Label totalLabelForLine = totalLabelList.get(i2);
                         Double newTotalValue = safeDouble(newValue) * safeDouble(otherFieldForLine.getText());
                         totalOrEmptyString(totalLabelForLine, newTotalValue);
+
+                        Sequence<Double> totals = sequence(totalLabelList).map(label -> safeDouble(label.getText()));
+                        totalOrEmptyString(subTotal, nettValue(totals));
                     }
             );
             fieldList.add(fieldForLine);
             fieldForLine.setMaxWidth(75);
             fieldForLine.setTextFormatter(new TextFormatter(filter));
         }
+    }
+
+    private Double nettValue(Sequence<Double> lineTotals) {
+        if (lineTotals.isEmpty()) {
+            return 0.0;
+        }
+        return lineTotals.reduce((x, y) -> (x) + y);
     }
 
     private List<TextField> otherFieldList(List<TextField> fieldList) {
