@@ -53,11 +53,16 @@ public class InvoiceClient {
     public void writeFile(Path filePath, Invoice invoice) throws IOException {
         try {
             FileOutputStream fileOut = new FileOutputStream(invoiceFilePath(filePath, invoice).toString());
+            removeUnnecessarySheets();
             workBook.write(fileOut);
             fileOut.close();
         } catch (FileNotFoundException e) {
             throw new FileNotFoundException("There was a problem writing your file.");
         }
+    }
+
+    private void removeUnnecessarySheets() {
+        workBook.removeSheetAt(1);
     }
 
     public Path invoiceFilePath(Path filePath, Invoice invoice) {
