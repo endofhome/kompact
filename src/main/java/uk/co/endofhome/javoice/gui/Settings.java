@@ -6,6 +6,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import uk.co.endofhome.javoice.Config;
 
 import java.io.File;
 
@@ -15,14 +16,18 @@ public class Settings extends JavoiceScreen implements GuiObservable {
 
     private GuiObserver guiObserver;
     StackPane settingsStackPane;
-    private File fakeInvoiceTemplateConfig = new File(String.format("%s/Javoice/Templates/invoice-template.xls", System.getProperty("user.home")));;
-    private File fakeInvoiceOutputPathConfig = new File(String.format("%s/Javoice/Invoices", System.getProperty("user.home")));;
-    private File fakeSalesLedgerOutputPathConfig = new File(String.format("%s/Javoice/Sales Ledger", System.getProperty("user.home")));;
-    private File fakeCustomerDataOutputPathConfig = new File(String.format("%s/Javoice/Customer Data/Customers.xls", System.getProperty("user.home")));;
+    private File invoiceTemplateConfig = new File(Config.invoiceFileTemplatePath().toString());
+    private File invoiceXlsOutputPathConfig = new File(Config.invoiceXlsFileOutputPath().toString());
+    private File invoicePdfOutputPathConfig = new File(Config.invoicePdfFileOutputPath().toString());
+    private File salesLedgerOutputPathConfig = new File(Config.salesLedgerFileOutputPath().toString());
+    private File customerDataOutputPathConfig = new File(Config.customerDataFilePath().toString());
+    private File libreOfficePathConfig = new File(Config.libreOfficePath().toString());
     private Button updateInvoiceTemplatePath;
-    private Button updateInvoiceFileOutputPath;
+    private Button updateInvoiceXlsFileOutputPath;
+    private Button updateInvoicePdfFileOutputPath;
     private Button updateSalesLedgerOutputPath;
     private Button updateCustomerLedgerOutputPath;
+    private Button updateLibreOfficePath;
 
     public Settings() {
         initialise();
@@ -33,26 +38,36 @@ public class Settings extends JavoiceScreen implements GuiObservable {
         basicGridSetup(settingsGrid, "Settings", 1);
 
         Label invoiceFileTemplateLabel = initLabel(settingsGrid, "Invoice template file:", 0, 2);
-        FileChooser invoiceTemplatePath = xlsFileChooser(fakeInvoiceTemplateConfig);
-        updateInvoiceTemplatePath = initButton(settingsGrid, fakeInvoiceTemplateConfig.toString(), event -> newFileChoice(invoiceTemplatePath, updateInvoiceTemplatePath), 1, 2);
+        FileChooser invoiceTemplatePath = xlsFileChooser(invoiceTemplateConfig);
+        updateInvoiceTemplatePath = initButton(settingsGrid, invoiceTemplateConfig.toString(), event -> newFileChoice(invoiceTemplatePath, updateInvoiceTemplatePath), 1, 2);
 
-        Label invoiceFileOutputLabel = initLabel(settingsGrid, "Invoice output folder:", 0, 3);
-        DirectoryChooser invoiceFileOutputPath = directoryChooser(fakeInvoiceOutputPathConfig);
-        File initialDirectory = invoiceFileOutputPath.getInitialDirectory();
-        updateInvoiceFileOutputPath = initButton(settingsGrid, initialDirectory.toString(), event -> newDirectoryChoice(invoiceFileOutputPath, updateInvoiceFileOutputPath), 1, 3);
+        Label invoiceXlsFileOutputLabel = initLabel(settingsGrid, "Invoice XLS output folder:", 0, 3);
+        DirectoryChooser invoiceXlsFileOutputPath = directoryChooser(invoiceXlsOutputPathConfig);
+        File initialXlsInvoiceDirectory = invoiceXlsFileOutputPath.getInitialDirectory();
+        updateInvoiceXlsFileOutputPath = initButton(settingsGrid, initialXlsInvoiceDirectory.toString(), event -> newDirectoryChoice(invoiceXlsFileOutputPath, updateInvoiceXlsFileOutputPath), 1, 3);
 
-        Label salesLedgerOutputLabel = initLabel(settingsGrid, "Sales ledger output folder:", 0, 4);
-        DirectoryChooser salesLedgerOutputPath = directoryChooser(fakeSalesLedgerOutputPathConfig);
+        Label invoicePdfFileOutputLabel = initLabel(settingsGrid, "Invoice PDF output folder:", 0, 4);
+        DirectoryChooser invoicePdfFileOutputPath = directoryChooser(invoicePdfOutputPathConfig);
+        File initialPdfInvoiceDirectory = invoicePdfFileOutputPath.getInitialDirectory();
+        updateInvoicePdfFileOutputPath = initButton(settingsGrid, initialPdfInvoiceDirectory.toString(), event -> newDirectoryChoice(invoicePdfFileOutputPath, updateInvoicePdfFileOutputPath), 1, 4);
+
+        Label salesLedgerOutputLabel = initLabel(settingsGrid, "Sales ledger output folder:", 0, 5);
+        DirectoryChooser salesLedgerOutputPath = directoryChooser(salesLedgerOutputPathConfig);
         File initialSalesLedgerDirectory = salesLedgerOutputPath.getInitialDirectory();
-        updateSalesLedgerOutputPath = initButton(settingsGrid, initialSalesLedgerDirectory.toString(), event -> newDirectoryChoice(salesLedgerOutputPath, this.updateSalesLedgerOutputPath), 1, 4);
+        updateSalesLedgerOutputPath = initButton(settingsGrid, initialSalesLedgerDirectory.toString(), event -> newDirectoryChoice(salesLedgerOutputPath, this.updateSalesLedgerOutputPath), 1, 5);
 
-        Label customerDataLabel = initLabel(settingsGrid, "Customer data file:", 0, 5);
-        FileChooser customerDataOutputPath = xlsFileChooser(fakeCustomerDataOutputPathConfig);
-        updateCustomerLedgerOutputPath = initButton(settingsGrid, fakeCustomerDataOutputPathConfig.toString(), event -> newFileChoice(customerDataOutputPath, updateCustomerLedgerOutputPath), 1, 5);
+        Label customerDataLabel = initLabel(settingsGrid, "Customer data file:", 0, 6);
+        FileChooser customerDataOutputPath = xlsFileChooser(customerDataOutputPathConfig);
+        updateCustomerLedgerOutputPath = initButton(settingsGrid, customerDataOutputPathConfig.toString(), event -> newFileChoice(customerDataOutputPath, updateCustomerLedgerOutputPath), 1, 6);
 
-        Button updateSettings = initButton(settingsGrid, "Update", event -> System.out.println("settings updated..."), 0, 7);
+        Label libreOfficeLabel = initLabel(settingsGrid, "LibreOffice ('soffice') installation folder:", 0, 7);
+        DirectoryChooser libreOfficePath = directoryChooser(libreOfficePathConfig);
+        File initialLIbreOfficeDirectory = libreOfficePath.getInitialDirectory();
+        updateLibreOfficePath = initButton(settingsGrid, initialLIbreOfficeDirectory.toString(), event -> newDirectoryChoice(libreOfficePath, this.updateLibreOfficePath), 1, 7);
 
-        Button mainMenu = initButton(settingsGrid, "Main menu", event -> notifyGuiObserver(mainMenuStackPane), 0, 9);
+        Button updateSettings = initButton(settingsGrid, "Update", event -> System.out.println("settings updated..."), 0, 9);
+
+        Button mainMenu = initButton(settingsGrid, "Main menu", event -> notifyGuiObserver(mainMenuStackPane), 0, 11);
 
         settingsStackPane = new StackPane(settingsGrid);
     }
@@ -80,10 +95,10 @@ public class Settings extends JavoiceScreen implements GuiObservable {
     }
 
     private void newDirectoryChoice(DirectoryChooser directoryChooser, Button buttonToUpdate) {
-        fakeInvoiceOutputPathConfig = directoryChooser.showDialog(UiController.fixedScene.getWindow());
-        if (fakeInvoiceOutputPathConfig != null) {
-            directoryChooser.setInitialDirectory(fakeInvoiceOutputPathConfig);
-            buttonToUpdate.setText(fakeInvoiceOutputPathConfig.toString());
+        invoiceXlsOutputPathConfig = directoryChooser.showDialog(UiController.fixedScene.getWindow());
+        if (invoiceXlsOutputPathConfig != null) {
+            directoryChooser.setInitialDirectory(invoiceXlsOutputPathConfig);
+            buttonToUpdate.setText(invoiceXlsOutputPathConfig.toString());
         }
     }
 

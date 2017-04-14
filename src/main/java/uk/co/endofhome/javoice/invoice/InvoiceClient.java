@@ -43,7 +43,7 @@ public class InvoiceClient {
     }
 
     public static InvoiceClient invoiceClient(HSSFWorkbook workbook) {
-        return new InvoiceClient(workbook, Config.invoiceFileTemplatePath(), Config.invoiceFileOutputPath());
+        return new InvoiceClient(workbook, Config.invoiceFileTemplatePath(), Config.invoiceXlsFileOutputPath());
     }
 
     public static InvoiceClient invoiceClientCustomConfig(HSSFWorkbook workbook, Path templatePath, Path outputPath) {
@@ -52,12 +52,16 @@ public class InvoiceClient {
 
     public void writeFile(Path filePath, Invoice invoice) throws IOException {
         try {
-            FileOutputStream fileOut = new FileOutputStream(format("%s/%s.xls", filePath.toString(), invoice.number));
+            FileOutputStream fileOut = new FileOutputStream(invoiceFilePath(filePath, invoice).toString());
             workBook.write(fileOut);
             fileOut.close();
         } catch (FileNotFoundException e) {
             throw new FileNotFoundException("There was a problem writing your file.");
         }
+    }
+
+    public Path invoiceFilePath(Path filePath, Invoice invoice) {
+        return Paths.get(format("%s/%s.xls", filePath.toString(), invoice.number));
     }
 
     public Invoice readFile(String filePath, int... sheetsToGet) throws IOException {

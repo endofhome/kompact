@@ -12,6 +12,7 @@ import uk.co.endofhome.javoice.invoice.ItemLine;
 import uk.co.endofhome.javoice.ledger.AnnualReport;
 import uk.co.endofhome.javoice.ledger.LedgerEntry;
 import uk.co.endofhome.javoice.ledger.MonthlyReport;
+import uk.co.endofhome.javoice.pdf.PdfConvertor;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -26,7 +27,7 @@ import static java.nio.file.Files.notExists;
 import static java.nio.file.Paths.get;
 import static java.time.Month.DECEMBER;
 import static java.time.temporal.ChronoUnit.YEARS;
-import static uk.co.endofhome.javoice.Config.invoiceFileOutputPath;
+import static uk.co.endofhome.javoice.Config.invoiceXlsFileOutputPath;
 import static uk.co.endofhome.javoice.Config.salesLedgerFileOutputPath;
 import static uk.co.endofhome.javoice.invoice.InvoiceClient.invoiceClient;
 import static uk.co.endofhome.javoice.ledger.AnnualReport.annualReport;
@@ -50,6 +51,11 @@ public class Controller implements Observer {
         HSSFSheet invoiceTemplateSheet = getSheetForInvoiceTemplate(invoiceClient);
         createInvoiceOnFS(invoice, invoiceClient, invoiceTemplateSheet);
         updateAnnualReportOnFS(annualReport, invoice);
+        try {
+            PdfConvertor.convert(invoiceClient.invoiceFilePath(invoiceXlsFileOutputPath(), invoice));
+        } catch (Exception e) {
+            throw new RuntimeException("Couldn't write PDF for invoice " + invoice.number + " and path " + invoiceXlsFileOutputPath());
+        }
     }
 
     public void newCustomer(String name, String addressOne, String addressTwo, String postcode, String phoneNum) throws IOException {
@@ -116,7 +122,7 @@ public class Controller implements Observer {
     private void createInvoiceOnFS(Invoice invoice, InvoiceClient invoiceClient, HSSFSheet invoiceSheet) throws IOException {
         invoiceClient.setSections(invoiceSheet, invoice);
         try {
-            invoiceClient.writeFile(invoiceFileOutputPath(), invoice);
+            invoiceClient.writeFile(invoiceXlsFileOutputPath(), invoice);
         } catch (IOException e) {
             throw new IOException("Controller could not write new invoice file.");
         }

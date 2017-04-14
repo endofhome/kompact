@@ -37,7 +37,7 @@ public class ControllerTest {
         pathForTestOutput = get("src/test/resources/functional/controller");
         cleanDirectory(pathForTestOutput);
         Config.setSalesLedgerFileOutputPath(pathForTestOutput);
-        Config.setInvoiceOutputPath(pathForTestOutput);
+        Config.setInvoiceXlsOutputPath(pathForTestOutput);
         Config.setCustomerDataFileOutputPath(get(pathForTestOutput.toString(), "/Customers.xls"));
         customerStore = new CustomerStore();
         customer = new Customer("some customer", null, null, "P05T C0D3", null, "798");
