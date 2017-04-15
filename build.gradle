@@ -1,5 +1,5 @@
 group 'uk.co.endofhome'
-version '1.0-SNAPSHOT'
+version '0.2'
 
 apply plugin: 'java'
 
@@ -18,4 +18,15 @@ dependencies {
     testCompile group: 'org.hamcrest', name: 'hamcrest-core', version: '1.3'
     testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
     testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Javoice',
+                'Implementation-Version': version,
+                'Main-Class': 'uk.co.endofhome.javoice.Main'
+    }
+    baseName = project.name + '-with-deps'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
