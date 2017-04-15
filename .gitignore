@@ -18,3 +18,5 @@ data/
 src/test/resources/*
 !src/test/resources/README.md
 out/
+dist/
+compiled/
