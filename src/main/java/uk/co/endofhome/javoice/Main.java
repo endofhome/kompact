@@ -1,4 +1,4 @@
-import uk.co.endofhome.javoice.App;
+package uk.co.endofhome.javoice;
 
 public class Main {
     public static void main(String[] args) {
