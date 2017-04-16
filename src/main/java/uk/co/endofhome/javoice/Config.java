@@ -66,7 +66,7 @@ public class Config {
     private static Path osSpecificLibreOfficePath() {
         String property = System.getProperty("os.name").toLowerCase();
         if (property.contains("windows")) {
-            return get("C:\\Program Files (x86)\\OpenOffice 5\\program\\");
+            return get("C:\\Program Files (x86)\\LibreOffice 5\\program\\");
         } else if (property.contains("mac os")) {
             return get("/Applications/LibreOffice.app/Contents/MacOS");
         } else if (property.contains("linux")) {
