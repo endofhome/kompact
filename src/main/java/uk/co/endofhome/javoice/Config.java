@@ -5,11 +5,11 @@ import java.nio.file.Path;
 import static java.nio.file.Paths.get;
 
 public class Config {
-    private static Path defaultInvoiceFileTemplatePath = get(String.format("%s/Javoice/Templates/invoice-template.xls", System.getProperty("user.home")));
-    private static Path defaultInvoiceXlsFileOutputPath = get(String.format("%s/Javoice/Invoices/XLS", System.getProperty("user.home")));
-    private static Path defaultInvoicePdfFileOutputPath = get(String.format("%s/Javoice/Invoices/PDF", System.getProperty("user.home")));
-    private static Path defaultSalesLedgerFileOutputPath = get(String.format("%s/Javoice/Sales Ledger", System.getProperty("user.home")));
-    private static Path defaultCustomerDataFilePath = get(String.format("%s/Javoice/Customer Data/Customers.xls", System.getProperty("user.home")));
+    private static Path defaultInvoiceFileTemplatePath = get(System.getProperty("user.home"), "Javoice", "Templates", "invoice-template.xls");
+    private static Path defaultInvoiceXlsFileOutputPath = get(System.getProperty("user.home"), "Javoice", "Invoices", "XLS");
+    private static Path defaultInvoicePdfFileOutputPath = get(System.getProperty("user.home"), "Javoice", "Invoices", "PDF");
+    private static Path defaultSalesLedgerFileOutputPath = get(System.getProperty("user.home"), "Javoice", "Sales Ledger");
+    private static Path defaultCustomerDataFilePath = get(System.getProperty("user.home"), "Javoice", "Customer Data", "Customers.xls");
     private static Path defaultLibreOfficePath = osSpecificLibreOfficePath();
 
     private static Path invoiceFileTemplatePath = defaultInvoiceFileTemplatePath;
@@ -66,11 +66,11 @@ public class Config {
     private static Path osSpecificLibreOfficePath() {
         String property = System.getProperty("os.name").toLowerCase();
         if (property.contains("windows")) {
-            return get("C:\\Program Files (x86)\\LibreOffice 5\\program\\");
+            return get("C:", "Program Files (x86)", "LibreOffice 5", "program");
         } else if (property.contains("mac os")) {
-            return get("/Applications/LibreOffice.app/Contents/MacOS");
+            return get("/Applications", "LibreOffice.app", "Contents", "MacOS");
         } else if (property.contains("linux")) {
-            return get("/usr/lib/libreoffice/program/");
+            return get("usr", "lib", "libreoffice", "program");
         } else {
             throw new RuntimeException("OS not recognised");
         }
