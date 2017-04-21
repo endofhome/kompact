@@ -27,6 +27,7 @@ import static java.nio.file.Files.notExists;
 import static java.nio.file.Paths.get;
 import static java.time.Month.DECEMBER;
 import static java.time.temporal.ChronoUnit.YEARS;
+import static uk.co.endofhome.javoice.Config.invoicePdfFileOutputPath;
 import static uk.co.endofhome.javoice.Config.invoiceXlsFileOutputPath;
 import static uk.co.endofhome.javoice.Config.salesLedgerFileOutputPath;
 import static uk.co.endofhome.javoice.invoice.InvoiceClient.invoiceClient;
@@ -54,7 +55,7 @@ public class Controller implements Observer {
         try {
             PdfConvertor.convert(invoiceClient.invoiceFilePath(invoiceXlsFileOutputPath(), invoice));
         } catch (Exception e) {
-            throw new RuntimeException("Couldn't write PDF for invoice " + invoice.number + " and path " + invoiceXlsFileOutputPath());
+            throw new RuntimeException("Couldn't write PDF for invoice " + invoice.number + " and path " + invoicePdfFileOutputPath() + e);
         }
     }
 

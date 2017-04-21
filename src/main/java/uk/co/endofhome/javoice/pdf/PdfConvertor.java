@@ -20,13 +20,11 @@ public class PdfConvertor {
         );
         builder.directory(new File(Config.libreOfficePath().toString()));
         Process conversion = builder.start();
-        conversion.waitFor(500, TimeUnit.MILLISECONDS);
+        int exitCode = conversion.waitFor();
 
-        if (conversion.exitValue() != 0) {
+        if (exitCode != 0) {
             throw new RuntimeException("There was a problem converting file: " + invoiceFilePath + "and/or saving to: " + Config.invoicePdfFileOutputPath());
         }
-
-        conversion.destroy();
     }
 
     private static void killExistingSofficeProcess() throws InterruptedException {
@@ -40,7 +38,7 @@ public class PdfConvertor {
             Process killed = killer.start();
             killed.waitFor(300, TimeUnit.MILLISECONDS);
         } catch (IOException e) {
-            throw new RuntimeException("Could not kill existing process, not writing out PDF.");
+            throw new RuntimeException("Could not kill existing process, not writing out PDF: " + e);
         }
     }
 
@@ -49,17 +47,19 @@ public class PdfConvertor {
         String libreOfficeProgram = isWindows ? "soffice.exe" : "./soffice";
 
         List<String> command = sequence(
-                libreOfficeProgram,
-                "--headless",
-                "--convert-to",
-                "pdf",
-                invoiceFilePath.toString(),
-                "--outdir",
-                Config.invoicePdfFileOutputPath().toString()
+            libreOfficeProgram,
+            "--headless",
+            "--convert-to",
+            "pdf",
+            invoiceFilePath.toString(),
+            "--outdir",
+            Config.invoicePdfFileOutputPath().toString()
         ).toList();
 
         if (isWindows) {
             command.add(0, "cmd.exe");
+            command.add(1, "/c");
+            command.add(2, "start");
         }
 
         return command;
