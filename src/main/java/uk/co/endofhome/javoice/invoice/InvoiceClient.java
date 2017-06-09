@@ -62,7 +62,9 @@ public class InvoiceClient {
     }
 
     private void removeUnnecessarySheets() {
-        workBook.removeSheetAt(1);
+        if (workBook.getNumberOfSheets() > 1) {
+            workBook.removeSheetAt(1);
+        }
     }
 
     public Path invoiceFilePath(Path filePath, Invoice invoice) {

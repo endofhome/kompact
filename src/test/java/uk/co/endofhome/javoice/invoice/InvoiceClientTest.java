@@ -18,8 +18,8 @@ import static uk.co.endofhome.javoice.invoice.InvoiceClient.invoiceClientCustomC
 import static uk.co.endofhome.javoice.invoice.ItemLine.itemLine;
 
 public class InvoiceClientTest {
-    private Customer customer = new Customer("Milford", "Herbalist St.", "New York", "NY-1010", "12345", "ACC-1967");
-    ItemLine itemLine = itemLine(3.0, "Green bottles", 10.0);
+    private final Customer customer = new Customer("Milford", "Herbalist St.", "New York", "NY-1010", "12345", "ACC-1967");
+    private final ItemLine itemLine = itemLine(3.0, "Green bottles", 10.0);
     private InvoiceClient invoiceClient;
 
     @Before
