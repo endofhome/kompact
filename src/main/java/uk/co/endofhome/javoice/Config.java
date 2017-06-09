@@ -64,12 +64,14 @@ public class Config {
     }
 
     private static Path osSpecificLibreOfficePath() {
-        String property = System.getProperty("os.name").toLowerCase();
-        if (property.contains("windows")) {
+        String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("windows") && osName.contains("xp")) {
+            return get("C:", "Program Files", "LibreOffice 5", "program");
+        } else if (osName.contains("windows")) {
             return get("C:", "Program Files (x86)", "LibreOffice 5", "program");
-        } else if (property.contains("mac os")) {
+        } else if (osName.contains("mac os")) {
             return get("/Applications", "LibreOffice.app", "Contents", "MacOS");
-        } else if (property.contains("linux")) {
+        } else if (osName.contains("linux")) {
             return get("usr", "lib", "libreoffice", "program");
         } else {
             throw new RuntimeException("OS not recognised");
