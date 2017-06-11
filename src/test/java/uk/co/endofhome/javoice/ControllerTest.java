@@ -13,6 +13,7 @@ import uk.co.endofhome.javoice.ledger.MonthlyReport;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 
@@ -35,7 +36,11 @@ public class ControllerTest {
     @Before
     public void set_up() throws IOException {
         pathForTestOutput = get("src/test/resources/functional/controller");
-        cleanDirectory(pathForTestOutput);
+        if (Files.notExists(pathForTestOutput)) {
+            Files.createDirectory(pathForTestOutput);
+        } else {
+            cleanDirectory(pathForTestOutput);
+        }
         Config.setSalesLedgerFileOutputPath(pathForTestOutput);
         Config.setInvoiceXlsOutputPath(pathForTestOutput);
         Config.setCustomerDataFileOutputPath(get(pathForTestOutput.toString(), "/Customers.xls"));
