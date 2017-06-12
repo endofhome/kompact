@@ -37,7 +37,7 @@ public class ControllerTest {
     public void set_up() throws IOException {
         pathForTestOutput = get("src/test/resources/functional/controller");
         if (Files.notExists(pathForTestOutput)) {
-            Files.createDirectory(pathForTestOutput);
+            Files.createDirectories(pathForTestOutput);
         } else {
             cleanDirectory(pathForTestOutput);
         }
