@@ -36,7 +36,7 @@ import static uk.co.endofhome.javoice.ledger.AnnualReport.readFile;
 import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 
 public class Controller implements Observer {
-    private CustomerStore customerStore;
+    private final CustomerStore customerStore;
     public Option<Customer> currentCustomer = none();
 
     Controller(CustomerStore customerStore) {

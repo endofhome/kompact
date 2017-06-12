@@ -16,7 +16,8 @@ gradlew.bat
 releases/
 data/
 src/test/resources/*
-!src/test/resources/README.md
+!src/test/resources/.gitkeep
+!src/test/resources/functional/templates/test-template.xls
 out/
 dist/
 compiled/

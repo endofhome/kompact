@@ -5,12 +5,12 @@ import java.nio.file.Path;
 import static java.nio.file.Paths.get;
 
 public class Config {
-    private static Path defaultInvoiceFileTemplatePath = get(System.getProperty("user.home"), "Javoice", "Templates", "invoice-template.xls");
-    private static Path defaultInvoiceXlsFileOutputPath = get(System.getProperty("user.home"), "Javoice", "Invoices", "XLS");
-    private static Path defaultInvoicePdfFileOutputPath = get(System.getProperty("user.home"), "Javoice", "Invoices", "PDF");
-    private static Path defaultSalesLedgerFileOutputPath = get(System.getProperty("user.home"), "Javoice", "Sales Ledger");
-    private static Path defaultCustomerDataFilePath = get(System.getProperty("user.home"), "Javoice", "Customer Data", "Customers.xls");
-    private static Path defaultLibreOfficePath = osSpecificLibreOfficePath();
+    private static final Path defaultInvoiceFileTemplatePath = get(System.getProperty("user.home"), "Javoice", "Templates", "invoice-template.xls");
+    private static final Path defaultInvoiceXlsFileOutputPath = get(System.getProperty("user.home"), "Javoice", "Invoices", "XLS");
+    private static final Path defaultInvoicePdfFileOutputPath = get(System.getProperty("user.home"), "Javoice", "Invoices", "PDF");
+    private static final Path defaultSalesLedgerFileOutputPath = get(System.getProperty("user.home"), "Javoice", "Sales Ledger");
+    private static final Path defaultCustomerDataFilePath = get(System.getProperty("user.home"), "Javoice", "Customer Data", "Customers.xls");
+    private static final Path defaultLibreOfficePath = osSpecificLibreOfficePath();
 
     private static Path invoiceFileTemplatePath = defaultInvoiceFileTemplatePath;
     private static Path invoiceXlsFileOutputPath = defaultInvoiceXlsFileOutputPath;
@@ -43,9 +43,11 @@ public class Config {
         return libreOfficePath;
     }
 
-    public static Path setInvoiceXlsOutputPath(Path newPath) {
-        return invoiceXlsFileOutputPath = newPath;
+    public static Path setInvoiceFileTemplatePath(Path newPath) {
+        return invoiceFileTemplatePath = newPath;
     }
+
+    public static Path setInvoiceXlsOutputPath(Path newPath) { return invoiceXlsFileOutputPath = newPath; }
 
     public static Path setInvoicePdfOutputPath(Path newPath) {
         return invoicePdfFileOutputPath = newPath;

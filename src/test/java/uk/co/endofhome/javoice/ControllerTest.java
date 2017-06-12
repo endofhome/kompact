@@ -30,12 +30,13 @@ public class ControllerTest {
     private Controller controller;
     private AnnualReport annualReport;
     private Path pathForTestOutput;
-    private CustomerStore customerStore;
     private Customer customer;
 
     @Before
     public void set_up() throws IOException {
         pathForTestOutput = get("src/test/resources/functional/controller");
+        Path pathForTemplateFile = get("src/test/resources/functional/templates/test-template.xls");
+        Config.setInvoiceFileTemplatePath(pathForTemplateFile);
         if (Files.notExists(pathForTestOutput)) {
             Files.createDirectories(pathForTestOutput);
         } else {
@@ -44,7 +45,7 @@ public class ControllerTest {
         Config.setSalesLedgerFileOutputPath(pathForTestOutput);
         Config.setInvoiceXlsOutputPath(pathForTestOutput);
         Config.setCustomerDataFileOutputPath(get(pathForTestOutput.toString(), "/Customers.xls"));
-        customerStore = new CustomerStore();
+        CustomerStore customerStore = new CustomerStore();
         customer = new Customer("some customer", null, null, "P05T C0D3", null, "798");
         customerStore.addCustomer(customer);
         controller = new Controller(customerStore);
