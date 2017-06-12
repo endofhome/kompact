@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ import java.time.Year;
 
 import static com.googlecode.totallylazy.Option.none;
 import static com.googlecode.totallylazy.Option.some;
+import static java.nio.file.Files.notExists;
 import static java.time.Month.JANUARY;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -25,6 +27,9 @@ public class AnnualReportTest {
     @Before
     public void set_up() throws IOException {
         testOutputPath = Paths.get("src/test/resources/functional/annual-report/");
+        if (notExists(testOutputPath)) {
+            Files.createDirectories(testOutputPath);
+        }
         annualReport = AnnualReport.annualReportCustomConfig(1983, testOutputPath);
         annualReport.writeFile(testOutputPath);
     }
