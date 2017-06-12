@@ -55,7 +55,9 @@ public class Controller implements Observer {
         try {
             PdfConvertor.convert(invoiceClient.invoiceFilePath(invoiceXlsFileOutputPath(), invoice));
         } catch (Exception e) {
-            throw new RuntimeException("Couldn't write PDF for invoice " + invoice.number + " and path " + invoicePdfFileOutputPath() + e);
+            if (exists(Config.libreOfficePath())) {
+                throw new RuntimeException("Couldn't write PDF for invoice " + invoice.number + " and path " + invoicePdfFileOutputPath() + e);
+            }
         }
     }
 
