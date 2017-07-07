@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
+import java.util.List;
 
 import static com.googlecode.totallylazy.Option.none;
 import static com.googlecode.totallylazy.Option.option;
@@ -30,7 +31,6 @@ import static java.time.temporal.ChronoUnit.YEARS;
 import static uk.co.endofhome.javoice.Config.invoicePdfFileOutputPath;
 import static uk.co.endofhome.javoice.Config.invoiceXlsFileOutputPath;
 import static uk.co.endofhome.javoice.Config.salesLedgerFileOutputPath;
-import static uk.co.endofhome.javoice.invoice.InvoiceClient.invoiceClient;
 import static uk.co.endofhome.javoice.ledger.AnnualReport.annualReport;
 import static uk.co.endofhome.javoice.ledger.AnnualReport.readFile;
 import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
@@ -43,12 +43,12 @@ public class Controller implements Observer {
         this.customerStore = customerStore;
     }
 
-    public void newInvoice(Customer customer, String orderNumber, Sequence<ItemLine> itemLines) throws IOException {
+    public void newInvoice(Customer customer, String orderNumber, List<ItemLine> itemLines) throws IOException {
         int year = LocalDate.now().getYear();
         ensureAnnualReportForThisYear(year, annualReportFor(year));
         AnnualReport annualReport = AnnualReport.readFile(annualReportFor(year));
         Invoice invoice = new Invoice(nextInvoiceNumber(annualReport), LocalDate.now(), customer, orderNumber, itemLines);
-        InvoiceClient invoiceClient = invoiceClient(new HSSFWorkbook());
+        InvoiceClient invoiceClient = InvoiceClient.Companion.invoiceClient(new HSSFWorkbook());
         HSSFSheet invoiceTemplateSheet = getSheetForInvoiceTemplate(invoiceClient);
         createInvoiceOnFS(invoice, invoiceClient, invoiceTemplateSheet);
         updateAnnualReportOnFS(annualReport, invoice);
@@ -56,7 +56,7 @@ public class Controller implements Observer {
             PdfConvertor.convert(invoiceClient.invoiceFilePath(invoiceXlsFileOutputPath(), invoice));
         } catch (Exception e) {
             if (exists(Config.libreOfficePath())) {
-                throw new RuntimeException("Couldn't write PDF for invoice " + invoice.number + " and path " + invoicePdfFileOutputPath() + e);
+                throw new RuntimeException("Couldn't write PDF for invoice " + invoice.getNumber() + " and path " + invoicePdfFileOutputPath() + e);
             }
         }
     }

@@ -31,6 +31,6 @@ public class LedgerEntry {
     }
 
     public static LedgerEntry ledgerEntry(Invoice invoice, Option<String> crReq, Option<String> allocation, Option<String> notes) {
-        return new LedgerEntry(some(invoice.customerName()), some(invoice.number), some(invoice.nettValue()), crReq, allocation, some(invoice.date), notes);
+        return new LedgerEntry(some(invoice.customerName()), some(invoice.getNumber()), some(invoice.nettValue()), crReq, allocation, some(invoice.getDate()), notes);
     }
 }

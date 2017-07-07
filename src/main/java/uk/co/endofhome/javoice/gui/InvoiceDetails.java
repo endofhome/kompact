@@ -13,6 +13,7 @@ import javafx.scene.layout.StackPane;
 import uk.co.endofhome.javoice.Observable;
 import uk.co.endofhome.javoice.Observer;
 import uk.co.endofhome.javoice.customer.Customer;
+import uk.co.endofhome.javoice.invoice.Invoice;
 import uk.co.endofhome.javoice.invoice.ItemLine;
 
 import java.io.IOException;
@@ -23,11 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-import static com.googlecode.totallylazy.Option.none;
-import static com.googlecode.totallylazy.Option.some;
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static java.util.Collections.emptyList;
 import static uk.co.endofhome.javoice.gui.UiController.mainMenuStackPane;
-import static uk.co.endofhome.javoice.invoice.Invoice.MAX_ITEM_LINES;
 
 public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Observable {
     StackPane invoiceDetailsStackPane;
@@ -163,7 +162,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     }
 
     private void addItemLineElementsToGrid(GridPane invoiceDetailsGrid) {
-        for (int i = 0; i < MAX_ITEM_LINES; i++) {
+        for (int i = 0; i < Invoice.Companion.getMAX_ITEM_LINES(); i++) {
             invoiceDetailsGrid.add(quantityFieldList.get(i), 0, 14 + i);
             invoiceDetailsGrid.add(descriptionFieldList.get(i), 1, 14 + i);
             invoiceDetailsGrid.add(unitPriceFieldList.get(i), 4, 14 + i);
@@ -172,14 +171,14 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     }
 
     private void initTotalLabelLists() {
-        for (int i = 0; i < MAX_ITEM_LINES; i++) {
+        for (int i = 0; i < Invoice.Companion.getMAX_ITEM_LINES(); i++) {
             Label totalLabelForLine = new Label();
             totalLabelList.add(totalLabelForLine);
         }
     }
 
     private void initFieldList(List<TextField> fieldList) {
-        for (int i = 0; i < MAX_ITEM_LINES; i++) {
+        for (int i = 0; i < Invoice.Companion.getMAX_ITEM_LINES(); i++) {
             // TODO: add decimal (and right-align?) TextFormatter to this field:
             TextField fieldForLine = new TextField();
             List<TextField> otherFieldList = otherFieldList(fieldList);
@@ -227,7 +226,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     }
 
     private void initDescriptionFieldList() {
-        for (int i = 0; i < MAX_ITEM_LINES; i++) {
+        for (int i = 0; i < Invoice.Companion.getMAX_ITEM_LINES(); i++) {
             descriptionFieldList.add(new TextField());
             descriptionFieldList.get(i).setMinWidth(200);
             GridPane.setColumnSpan(descriptionFieldList.get(i), 3);
@@ -264,23 +263,23 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
 
     private void newInvoice() throws IOException {
         Customer customerFromUI = updatedCustomer();
-        Sequence<ItemLine> itemLines = sequence();
-        for (int i = 0; i < MAX_ITEM_LINES; i++) {
+        List<ItemLine> itemLines = emptyList();
+        for (int i = 0; i < Invoice.Companion.getMAX_ITEM_LINES(); i++) {
             ItemLine itemLine = new ItemLine(
-                doubleOption(quantityFieldList.get(i).getText()),
-                some(descriptionFieldList.get(i).getText()),
-                doubleOption(unitPriceFieldList.get(i).getText())
+                doubleOrNull(quantityFieldList.get(i).getText()),
+                descriptionFieldList.get(i).getText(),
+                doubleOrNull(unitPriceFieldList.get(i).getText())
             );
-            itemLines = itemLines.append(itemLine);
+            itemLines.add(itemLine);
         }
         observer.newInvoice(customerFromUI, orderNumberField.getText(), itemLines);
     }
 
-    private Option<Double> doubleOption(String text) {
+    private Double doubleOrNull(String text) {
         if (text.equals("")) {
-            return none();
+            return null;
         }
-        return some(Double.valueOf(text));
+        return Double.valueOf(text);
     }
 
     private Customer updatedCustomer() {
