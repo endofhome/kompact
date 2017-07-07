@@ -20,14 +20,14 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
-class InvoiceClient private constructor(private var workBook: HSSFWorkbook?, private val fileTemplatePath: Path, private val fileOutputPath: Path) {
+class InvoiceClient private constructor(private var workBook: HSSFWorkbook, private val fileTemplatePath: Path, private val fileOutputPath: Path) {
 
     @Throws(IOException::class)
     fun writeFile(filePath: Path, invoice: Invoice) {
         try {
             val fileOut = FileOutputStream(invoiceFilePath(filePath, invoice).toString())
             removeUnnecessarySheets()
-            workBook!!.write(fileOut)
+            workBook.write(fileOut)
             fileOut.close()
         } catch (e: FileNotFoundException) {
             throw FileNotFoundException("There was a problem writing your file.")
@@ -36,8 +36,8 @@ class InvoiceClient private constructor(private var workBook: HSSFWorkbook?, pri
     }
 
     private fun removeUnnecessarySheets() {
-        if (workBook!!.numberOfSheets > 1) {
-            workBook!!.removeSheetAt(1)
+        if (workBook.numberOfSheets > 1) {
+            workBook.removeSheetAt(1)
         }
     }
 
@@ -62,7 +62,7 @@ class InvoiceClient private constructor(private var workBook: HSSFWorkbook?, pri
     fun getSingleSheetFromPath(filePath: Path, sheetNum: Int): HSSFSheet {
         val inputStream = FileInputStream(filePath.toString())
         workBook = HSSFWorkbook(POIFSFileSystem(inputStream))
-        return workBook!!.getSheetAt(sheetNum)
+        return workBook.getSheetAt(sheetNum)
     }
 
     fun setCustomerSection(invoiceSheet: HSSFSheet, invoice: Invoice): HSSFSheet {
