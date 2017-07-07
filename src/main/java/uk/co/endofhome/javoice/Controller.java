@@ -53,7 +53,7 @@ public class Controller implements Observer {
         createInvoiceOnFS(invoice, invoiceClient, invoiceTemplateSheet);
         updateAnnualReportOnFS(annualReport, invoice);
         try {
-            PdfConvertor.convert(invoiceClient.invoiceFilePath(invoiceXlsFileOutputPath(), invoice));
+            PdfConvertor.Companion.convert(invoiceClient.invoiceFilePath(invoiceXlsFileOutputPath(), invoice));
         } catch (Exception e) {
             if (exists(Config.libreOfficePath())) {
                 throw new RuntimeException("Couldn't write PDF for invoice " + invoice.getNumber() + " and path " + invoicePdfFileOutputPath() + e);
