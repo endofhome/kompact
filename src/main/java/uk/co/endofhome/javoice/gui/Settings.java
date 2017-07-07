@@ -16,12 +16,12 @@ public class Settings extends JavoiceScreen implements GuiObservable {
 
     private GuiObserver guiObserver;
     StackPane settingsStackPane;
-    private File invoiceTemplateConfig = new File(Config.invoiceFileTemplatePath().toString());
-    private File invoiceXlsOutputPathConfig = new File(Config.invoiceXlsFileOutputPath().toString());
-    private File invoicePdfOutputPathConfig = new File(Config.invoicePdfFileOutputPath().toString());
-    private File salesLedgerOutputPathConfig = new File(Config.salesLedgerFileOutputPath().toString());
-    private File customerDataOutputPathConfig = new File(Config.customerDataFilePath().toString());
-    private File libreOfficePathConfig = new File(Config.libreOfficePath().toString());
+    private File invoiceTemplateConfig = new File(Config.Companion.invoiceFileTemplatePath().toString());
+    private File invoiceXlsOutputPathConfig = new File(Config.Companion.invoiceXlsFileOutputPath().toString());
+    private File invoicePdfOutputPathConfig = new File(Config.Companion.invoicePdfFileOutputPath().toString());
+    private File salesLedgerOutputPathConfig = new File(Config.Companion.salesLedgerFileOutputPath().toString());
+    private File customerDataOutputPathConfig = new File(Config.Companion.customerDataFilePath().toString());
+    private File libreOfficePathConfig = new File(Config.Companion.libreOfficePath().toString());
     private Button updateInvoiceTemplatePath;
     private Button updateInvoiceXlsFileOutputPath;
     private Button updateInvoicePdfFileOutputPath;

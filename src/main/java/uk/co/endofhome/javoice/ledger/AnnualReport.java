@@ -62,7 +62,7 @@ public class AnnualReport {
     }
 
     public static AnnualReport annualReport(int isoReportYear) {
-        AnnualReport annualReport = new AnnualReport(new HSSFWorkbook(), Year.of(isoReportYear), sequence(), Config.salesLedgerFileOutputPath());
+        AnnualReport annualReport = new AnnualReport(new HSSFWorkbook(), Year.of(isoReportYear), sequence(), Config.Companion.salesLedgerFileOutputPath());
         annualReport.createDefaultReports();
         annualReport.createDefaultSheets();
         annualReport.setMonthlyReportHeaders();
@@ -83,7 +83,7 @@ public class AnnualReport {
             HSSFSheet sheet = workbook.getSheetAt(i);
             monthlyReports = monthlyReports.append(getMonthlyReportFrom(sheet));
         }
-        Path outputPath = Config.salesLedgerFileOutputPath();
+        Path outputPath = Config.Companion.salesLedgerFileOutputPath();
         return new AnnualReport(workbook, year, monthlyReports, outputPath);
     }
 

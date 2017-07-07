@@ -14,10 +14,10 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
         CustomerStore customerStore;
-        PdfConvertor pdfConvertor = new PdfConvertor();;
-        if (Files.exists(Config.customerDataFilePath())) {
+        PdfConvertor pdfConvertor = new PdfConvertor();
+        if (Files.exists(Config.Companion.customerDataFilePath())) {
             try {
-                customerStore = CustomerStore.Companion.readFile(Config.customerDataFilePath(), 1);
+                customerStore = CustomerStore.Companion.readFile(Config.Companion.customerDataFilePath(), 1);
             } catch (IOException e) {
                 throw new IOException("There was a problem reading existing customer store" + e);
             }

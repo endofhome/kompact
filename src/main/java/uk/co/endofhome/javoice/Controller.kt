@@ -2,7 +2,9 @@ package uk.co.endofhome.javoice
 
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
-import uk.co.endofhome.javoice.Config.*
+import uk.co.endofhome.javoice.Config.Companion.invoicePdfFileOutputPath
+import uk.co.endofhome.javoice.Config.Companion.invoiceXlsFileOutputPath
+import uk.co.endofhome.javoice.Config.Companion.salesLedgerFileOutputPath
 import uk.co.endofhome.javoice.customer.Customer
 import uk.co.endofhome.javoice.customer.CustomerStore
 import uk.co.endofhome.javoice.invoice.*
