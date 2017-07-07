@@ -1,6 +1,5 @@
 package uk.co.endofhome.javoice.invoice;
 
-import com.googlecode.totallylazy.Sequence;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.junit.Before;
@@ -42,7 +41,7 @@ public class InvoiceClientTest {
         HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath(get("src/test/resources/INV-001.xls"), 0);
         Invoice invoice = new Invoice("some invoice number", LocalDate.now(), customer, "anything", asList(itemLine));
         HSSFSheet updatedSheet = invoiceClient.setCustomerSection(invoiceSheet, invoice);
-        Sequence<String> customerDetails = invoiceClient.getCustomerSectionFrom(updatedSheet);
+        List<String> customerDetails = invoiceClient.getCustomerSectionFrom(updatedSheet);
 
         assertThat(customerDetails.get(0), is("Milford"));
         assertThat(customerDetails.get(1), is("Herbalist St."));
@@ -56,7 +55,7 @@ public class InvoiceClientTest {
         HSSFSheet invoiceSheet = invoiceClient.getSingleSheetFromPath(get("src/test/resources/INV-001.xls"), 0);
         Invoice invoice = new Invoice("some invoice number", LocalDate.of(2017, 3, 19), customer, "Bob", asList(itemLine));
         HSSFSheet updatedSheet = invoiceClient.setOrderRefsSection(invoiceSheet, invoice);
-        Sequence<String> orderRefsDetails = invoiceClient.getOrderRefsSectionFrom(updatedSheet);
+        List<String> orderRefsDetails = invoiceClient.getOrderRefsSectionFrom(updatedSheet);
 
         assertThat(orderRefsDetails.get(0), is("19/03/2017"));
         assertThat(orderRefsDetails.get(1), is("Bob"));
@@ -99,7 +98,7 @@ public class InvoiceClientTest {
                 "some customer ref",
                 actualItemLines
         );
-        Sequence<ItemLine> updatedItemLines = invoiceClient.setItemLines(invoiceSheet, invoice);
+        List<ItemLine> updatedItemLines = invoiceClient.setItemLines(invoiceSheet, invoice);
 
         assertThat(updatedItemLines, is(actualItemLines));
     }

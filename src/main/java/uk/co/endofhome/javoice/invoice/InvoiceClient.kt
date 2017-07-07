@@ -1,7 +1,5 @@
 package uk.co.endofhome.javoice.invoice
 
-import com.googlecode.totallylazy.Sequence
-import com.googlecode.totallylazy.Sequences.sequence
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
@@ -103,14 +101,14 @@ class InvoiceClient private constructor(private var workBook: HSSFWorkbook?, pri
         return invoiceSheet
     }
 
-    fun setItemLines(invoiceSheet: HSSFSheet, invoice: Invoice): Sequence<ItemLine> {
-        var itemLines = sequence<ItemLine>()
+    fun setItemLines(invoiceSheet: HSSFSheet, invoice: Invoice): List<ItemLine> {
+        var itemLines = mutableListOf<ItemLine>()
         val lastItemLine = Invoice.ITEM_LINES_START_AT + invoice.itemLines.size - 1
         if (invoice.itemLines.size <= Invoice.MAX_ITEM_LINES) {
             for (i in Invoice.ITEM_LINES_START_AT..lastItemLine) {
                 val itemLineNumber = i - Invoice.ITEM_LINES_START_AT
                 setItemLine(invoiceSheet, invoice, itemLineNumber)
-                itemLines = itemLines.append(invoice.itemLines[itemLineNumber])
+                itemLines.add(invoice.itemLines[itemLineNumber])
             }
         } else {
             throw RuntimeException(format("Too many lines for invoice number %s", invoice.number))
@@ -125,22 +123,22 @@ class InvoiceClient private constructor(private var workBook: HSSFWorkbook?, pri
         setItemLines(invoiceSheet, invoice)
     }
 
-    fun getCustomerSectionFrom(invoiceSheet: HSSFSheet): Sequence<String> {
+    fun getCustomerSectionFrom(invoiceSheet: HSSFSheet): List<String> {
         val customerName = invoiceSheet.getRow(11).getCell(4).stringCellValue
         val addressOne = invoiceSheet.getRow(12).getCell(4).stringCellValue
         val addressTwo = invoiceSheet.getRow(13).getCell(4).stringCellValue
         val postcode = invoiceSheet.getRow(13).getCell(8).stringCellValue
         val phoneNumber = invoiceSheet.getRow(14).getCell(4).stringCellValue
-        return sequence(customerName, addressOne, addressTwo, postcode, phoneNumber)
+        return listOf(customerName, addressOne, addressTwo, postcode, phoneNumber)
     }
 
-    fun getOrderRefsSectionFrom(invoiceSheet: HSSFSheet): Sequence<String> {
+    fun getOrderRefsSectionFrom(invoiceSheet: HSSFSheet): List<String> {
         val date = invoiceSheet.getRow(11).getCell(11).dateCellValue
         val formatter = SimpleDateFormat("dd/MM/yyyy")
         val invoiceDate = formatter.format(date)
         val orderNumber = invoiceSheet.getRow(12).getCell(11).stringCellValue
         val accountCode = invoiceSheet.getRow(13).getCell(11).stringCellValue
-        return sequence(invoiceDate, orderNumber, accountCode)
+        return listOf(invoiceDate, orderNumber, accountCode)
     }
 
     fun getInvoiceNumberFrom(invoiceSheet: HSSFSheet): String {
@@ -160,11 +158,11 @@ class InvoiceClient private constructor(private var workBook: HSSFWorkbook?, pri
         return itemLines
     }
 
-    private fun buildInvoice(invoiceNumber: String, customerDetails: Sequence<String>, orderRefs: Sequence<String>, itemLines: List<ItemLine>): Invoice {
+    private fun buildInvoice(invoiceNumber: String, customerDetails: List<String>, orderRefs: List<String>, itemLines: List<ItemLine>): Invoice {
         val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy").withLocale(Locale.getDefault())
-        val invoiceDate = LocalDate.parse(orderRefs.get(0), formatter)
-        val customer = Customer(customerDetails.get(0), customerDetails.get(1), customerDetails.get(2), customerDetails.get(3), customerDetails.get(4), "")
-        return Invoice(invoiceNumber, invoiceDate, customer, orderRefs.get(1), itemLines)
+        val invoiceDate = LocalDate.parse(orderRefs[0], formatter)
+        val customer = Customer(customerDetails[0], customerDetails[1], customerDetails[2], customerDetails[3], customerDetails[4], "")
+        return Invoice(invoiceNumber, invoiceDate, customer, orderRefs[1], itemLines)
     }
 
     fun fileTemplatePath(): Path {
