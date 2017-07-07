@@ -11,6 +11,7 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import uk.co.endofhome.javoice.CellStyler;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,8 +24,6 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
-import static uk.co.endofhome.javoice.CellStyler.excelBoldBorderBottomCellStyleFor;
-import static uk.co.endofhome.javoice.CellStyler.excelBoldCellStyleFor;
 
 public class CustomerStore {
     private Sequence<Customer> customers;
@@ -74,7 +73,7 @@ public class CustomerStore {
 
         HSSFCell topHeaderCell = sheet.createRow(1).createCell(0);
         topHeaderCell.setCellValue("Customers");
-        topHeaderCell.setCellStyle(excelBoldCellStyleFor(workbook));
+        topHeaderCell.setCellStyle(CellStyler.Companion.excelBoldCellStyleFor(workbook));
 
         HSSFRow tableHeaders = sheet.createRow(3);
         tableHeaders.createCell(0).setCellValue("Account code");
@@ -85,7 +84,7 @@ public class CustomerStore {
         tableHeaders.createCell(5).setCellValue("Phone number");
 
         for (Cell cell : tableHeaders) {
-            cell.setCellStyle(excelBoldBorderBottomCellStyleFor(workbook));
+            cell.setCellStyle(CellStyler.Companion.excelBoldBorderBottomCellStyleFor(workbook));
         }
     }
 
@@ -134,7 +133,7 @@ public class CustomerStore {
         return new Customer(name, addressOne, addressTwo, postcode, phoneNumber, accountCode);
     }
 
-    public static HSSFWorkbook getWorkbookFromPath(Path filePath) throws IOException {
+    private static HSSFWorkbook getWorkbookFromPath(Path filePath) throws IOException {
         InputStream inputStream = new FileInputStream(filePath.toString());
         return new HSSFWorkbook(new POIFSFileSystem(inputStream));
     }

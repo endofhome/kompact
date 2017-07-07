@@ -3,7 +3,7 @@ package uk.co.endofhome.javoice.invoice
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
-import uk.co.endofhome.javoice.CellStyler.excelDateCellStyleFor
+import uk.co.endofhome.javoice.CellStyler
 import uk.co.endofhome.javoice.Config
 import uk.co.endofhome.javoice.customer.Customer
 import java.io.FileInputStream
@@ -81,7 +81,7 @@ class InvoiceClient private constructor(private var workBook: HSSFWorkbook, priv
         val customer = invoice.customer
         val dateCell = invoiceSheet.getRow(11).getCell(11)
         dateCell.setCellValue(date)
-        dateCell.setCellStyle(excelDateCellStyleFor(workBook, dateCell))
+        dateCell.setCellStyle(CellStyler.Companion.excelDateCellStyleFor(workBook, dateCell))
         invoiceSheet.getRow(12).getCell(11).setCellValue(invoice.orderNumber)
         invoiceSheet.getRow(13).getCell(11).setCellValue(customer.accountCode)
         return invoiceSheet

@@ -8,6 +8,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Sheet;
+import uk.co.endofhome.javoice.CellStyler;
 import uk.co.endofhome.javoice.Config;
 
 import java.io.FileInputStream;
@@ -35,11 +36,6 @@ import static java.time.format.TextStyle.SHORT;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
-import static uk.co.endofhome.javoice.CellStyler.excelBoldBorderBottomCellStyleFor;
-import static uk.co.endofhome.javoice.CellStyler.excelBoldCellStyleFor;
-import static uk.co.endofhome.javoice.CellStyler.excelDateCellStyleFor;
-import static uk.co.endofhome.javoice.CellStyler.excelGeneralCellStyleFor;
-import static uk.co.endofhome.javoice.CellStyler.excelSterlingCellStyleFor;
 
 public class AnnualReport {
     private static final int LEDGER_ENTRIES_START_AT = MonthlyReport.Companion.getLEDGER_ENTRIES_START_AT();
@@ -184,18 +180,18 @@ public class AnnualReport {
         rowToSet.createCell(0).setCellValue(emptyStringIfNull(ledgerEntry.getCustomerName()));
         rowToSet.createCell(1).setCellValue(emptyStringIfNull(ledgerEntry.getInvoiceNumber()));
         rowToSet.createCell(2).setCellValue(zeroDoubleIfNull(ledgerEntry.getValueNett()));
-        rowToSet.getCell(2).setCellStyle(excelSterlingCellStyleFor(workbook));
+        rowToSet.getCell(2).setCellStyle(CellStyler.Companion.excelSterlingCellStyleFor(workbook));
         rowToSet.createCell(3).setCellFormula(String.format("SUM(C%s*0.2)", rowToSet.getRowNum() + 1));
-        rowToSet.getCell(3).setCellStyle(excelSterlingCellStyleFor(workbook));
+        rowToSet.getCell(3).setCellStyle(CellStyler.Companion.excelSterlingCellStyleFor(workbook));
         rowToSet.createCell(4).setCellFormula((String.format("SUM(C%1$s:D%1$s)", rowToSet.getRowNum() + 1)));
-        rowToSet.getCell(4).setCellStyle(excelSterlingCellStyleFor(workbook));
+        rowToSet.getCell(4).setCellStyle(CellStyler.Companion.excelSterlingCellStyleFor(workbook));
         rowToSet.createCell(5).setCellValue(emptyStringIfNull(ledgerEntry.getCrReq()));
         rowToSet.createCell(6).setCellValue(emptyStringIfNull(ledgerEntry.getAllocation()));
         rowToSet.createCell(8).setCellValue(emptyStringIfNull(ledgerEntry.getNotes()));
         HSSFCell dateCell = rowToSet.createCell(7);
         if (ledgerEntry.getDate() != null) {
             dateCell.setCellValue(dateFrom(ledgerEntry.getDate()));
-            dateCell.setCellStyle(excelDateCellStyleFor(workbook, dateCell));
+            dateCell.setCellStyle(CellStyler.Companion.excelDateCellStyleFor(workbook, dateCell));
         } else {
             dateCell.setCellValue(CELL_TYPE_BLANK);
         }
@@ -263,10 +259,10 @@ public class AnnualReport {
             createRowsForMonthlyReportHeaders(sheet);
             HSSFRow titleRow = sheet.getRow(1);
             titleRow.createCell(0).setCellValue(capitalise(monthlyReport.getMonth().toString().toLowerCase()));
-            titleRow.getCell(0).setCellStyle(excelBoldCellStyleFor(workbook));
+            titleRow.getCell(0).setCellStyle(CellStyler.Companion.excelBoldCellStyleFor(workbook));
             HSSFCell dateCell = titleRow.createCell(1);
             dateCell.setCellValue(year.getValue());
-            dateCell.setCellStyle(excelGeneralCellStyleFor(workbook));
+            dateCell.setCellStyle(CellStyler.Companion.excelGeneralCellStyleFor(workbook));
             HSSFRow tableHeadersRow = sheet.getRow(3);
             setTableHeaders(tableHeadersRow);
             setCellStyleForTableHeaders(tableHeadersRow);
@@ -282,7 +278,7 @@ public class AnnualReport {
 
     private void setCellStyleForTableHeaders(HSSFRow tableHeadersRow) {
         for(int j = 0; j < 9; j++) {
-            tableHeadersRow.getCell(j).setCellStyle(excelBoldBorderBottomCellStyleFor(workbook));
+            tableHeadersRow.getCell(j).setCellStyle(CellStyler.Companion.excelBoldBorderBottomCellStyleFor(workbook));
         }
     }
 
@@ -323,9 +319,9 @@ public class AnnualReport {
                 footerRowTwo.createCell(k).setCellValue(emptyStringIfNull(footerMap.get("rowTwo").get(k)));
             }
         }
-        footerRowTwo.getCell(2).setCellStyle(excelSterlingCellStyleFor(workbook));
-        footerRowTwo.getCell(3).setCellStyle(excelSterlingCellStyleFor(workbook));
-        footerRowTwo.getCell(4).setCellStyle(excelSterlingCellStyleFor(workbook));
+        footerRowTwo.getCell(2).setCellStyle(CellStyler.Companion.excelSterlingCellStyleFor(workbook));
+        footerRowTwo.getCell(3).setCellStyle(CellStyler.Companion.excelSterlingCellStyleFor(workbook));
+        footerRowTwo.getCell(4).setCellStyle(CellStyler.Companion.excelSterlingCellStyleFor(workbook));
         return sheet;
     }
 
