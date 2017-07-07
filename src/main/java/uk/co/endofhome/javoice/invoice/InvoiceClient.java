@@ -91,11 +91,11 @@ public class InvoiceClient {
 
     public HSSFSheet setCustomerSection(HSSFSheet invoiceSheet, Invoice invoice) {
         Customer customer = invoice.customer;
-        invoiceSheet.getRow(11).getCell(4).setCellValue(customer.name);
-        invoiceSheet.getRow(12).getCell(4).setCellValue(customer.addressOne);
-        invoiceSheet.getRow(13).getCell(4).setCellValue(customer.addressTwo);
-        invoiceSheet.getRow(13).getCell(8).setCellValue(customer.postcode);
-        invoiceSheet.getRow(14).getCell(4).setCellValue(customer.phoneNumber);
+        invoiceSheet.getRow(11).getCell(4).setCellValue(customer.getName());
+        invoiceSheet.getRow(12).getCell(4).setCellValue(customer.getAddressOne());
+        invoiceSheet.getRow(13).getCell(4).setCellValue(customer.getAddressTwo());
+        invoiceSheet.getRow(13).getCell(8).setCellValue(customer.getPostcode());
+        invoiceSheet.getRow(14).getCell(4).setCellValue(customer.getPhoneNumber());
         return invoiceSheet;
     }
 
@@ -107,7 +107,7 @@ public class InvoiceClient {
         dateCell.setCellValue(date);
         dateCell.setCellStyle(excelDateCellStyleFor(workBook, dateCell));
         invoiceSheet.getRow(12).getCell(11).setCellValue(invoice.orderNumber);
-        invoiceSheet.getRow(13).getCell(11).setCellValue(customer.accountCode);
+        invoiceSheet.getRow(13).getCell(11).setCellValue(customer.getAccountCode());
         return invoiceSheet;
     }
 

@@ -57,7 +57,14 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         if (customer.isDefined()) {
             return this.customer = customer.get();
         }
-        return this.customer = new FakeCustomer();
+        return this.customer = new Customer(
+            "Bob",
+            "10 Littlehaven Lane",
+            "Horsham",
+            "RH12 ???",
+            "01403 034552",
+            "50"
+        );
     }
 
     private void initialise() {
@@ -132,16 +139,16 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
 
     private void addInvoiceHeader(GridPane invoiceDetailsGrid) {
         Label nameLabel = initLabel(invoiceDetailsGrid, "Name:", 0, 3);
-        nameField = initTextField(invoiceDetailsGrid, 3, customer.name, 0, 4);
+        nameField = initTextField(invoiceDetailsGrid, 3, customer.getName(), 0, 4);
 
         Label addressOne = initLabel(invoiceDetailsGrid, "Address (1):", 0, 5);
-        addressOneField = initTextField(invoiceDetailsGrid, 4, customer.addressOne, 0, 6);
+        addressOneField = initTextField(invoiceDetailsGrid, 4, customer.getAddressOne(), 0, 6);
 
         Label addressTwo = initLabel(invoiceDetailsGrid, "Address (2):", 0, 7);
-        addressTwoField = initTextField(invoiceDetailsGrid, 3, customer.addressTwo, 0, 8);
+        addressTwoField = initTextField(invoiceDetailsGrid, 3, customer.getAddressTwo(), 0, 8);
 
         Label postcodeLabel = initLabel(invoiceDetailsGrid, "Postcode:", 3, 7);
-        postcodeField = initTextField(invoiceDetailsGrid, 1, customer.postcode, 3, 8);
+        postcodeField = initTextField(invoiceDetailsGrid, 1, customer.getPostcode(), 3, 8);
 
         Label dateLabel = initLabel(invoiceDetailsGrid, "Date:", 5, 3);
         TextField dateField = initTextField(invoiceDetailsGrid, 1, todaysDate(), 5, 4);
@@ -151,7 +158,7 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
         orderNumberField = initTextField(invoiceDetailsGrid, 1, "", 5, 6);
 
         Label accountCodeLabel = initLabel(invoiceDetailsGrid, "Account code:", 5, 7);
-        TextField accountCodeField = initTextField(invoiceDetailsGrid, 1, customer.accountCode, 5, 8);
+        TextField accountCodeField = initTextField(invoiceDetailsGrid, 1, customer.getAccountCode(), 5, 8);
         accountCodeField.setDisable(true);
     }
 
@@ -282,8 +289,8 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
             addressOneField.getText(),
             addressTwoField.getText(),
             postcodeField.getText(),
-            customer.phoneNumber,
-            customer.accountCode
+            customer.getPhoneNumber(),
+            customer.getAccountCode()
         );
     }
 

@@ -141,11 +141,11 @@ public class ControllerTest {
 
     @Test
     public void can_create_a_new_invoice_and_write_out_all_files() throws Exception {
-        Customer firstCustomer = new Customer("firstCustomer", null, null, null, null, null);
+        Customer firstCustomer = new Customer("firstCustomer", null, null, null, null, "ACC-01");
         ItemLine someItemLine = itemLine(3.0, "Baked beans", 0.75);
         controller.newInvoice(firstCustomer, "some ref", sequence(someItemLine));
 
-        Customer secondCustomer = new Customer("secondCustomer", null, null, null, null, null);
+        Customer secondCustomer = new Customer("secondCustomer", null, null, null, null, "ACC-02");
         ItemLine secondItemLine = itemLine(1.0, "Baked beans", 10.20);
         controller.newInvoice(secondCustomer, "another ref", sequence(secondItemLine));
 
@@ -167,18 +167,18 @@ public class ControllerTest {
         CustomerStore updatedCustomerStoreFromFS = CustomerStore.readFile(get(pathForTestOutput + "/Customers.xls"), 0);
         Customer customerUnderTest = updatedCustomerStoreFromFS.customers().last();
 
-        assertThat(customerUnderTest.name, is("Friendly Customer"));
-        assertThat(customerUnderTest.postcode, is("a postcode"));
-        assertThat(customerUnderTest.accountCode, is("799"));
+        assertThat(customerUnderTest.getName(), is("Friendly Customer"));
+        assertThat(customerUnderTest.getPostcode(), is("a postcode"));
+        assertThat(customerUnderTest.getAccountCode(), is("799"));
     }
 
     @Test
     public void can_find_customer_using_exact_name() throws Exception {
         Option<Customer> foundCustomer = controller.findCustomer("some customer");
 
-        assertThat(foundCustomer.get().name, is("some customer"));
-        assertThat(foundCustomer.get().postcode, is("P05T C0D3"));
-        assertThat(foundCustomer.get().accountCode, is("798"));
+        assertThat(foundCustomer.get().getName(), is("some customer"));
+        assertThat(foundCustomer.get().getPostcode(), is("P05T C0D3"));
+        assertThat(foundCustomer.get().getAccountCode(), is("798"));
     }
 
     @Test

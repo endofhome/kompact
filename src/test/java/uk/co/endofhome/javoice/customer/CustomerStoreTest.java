@@ -27,7 +27,7 @@ public class CustomerStoreTest {
         customerStore.addCustomer(customer);
 
         assertThat(customerStore.customers().size(), is(1));
-        assertThat(customerStore.customers().get(0).name, is("Kevin Shea"));
+        assertThat(customerStore.customers().get(0).getName(), is("Kevin Shea"));
     }
 
     @Test
@@ -39,8 +39,8 @@ public class CustomerStoreTest {
         customerStore.addCustomers(twoCustomers);
 
         assertThat(customerStore.customers().size(), is(2));
-        assertThat(customerStore.customers().get(0).name, is("Kevin Shea"));
-        assertThat(customerStore.customers().get(1).name, is("Kevin Cascell"));
+        assertThat(customerStore.customers().get(0).getName(), is("Kevin Shea"));
+        assertThat(customerStore.customers().get(1).getName(), is("Kevin Cascell"));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class CustomerStoreTest {
         Option<Customer> shouldBeFound = customerStore.search("Donald");
         Option<Customer> shouldNotBeFound = customerStore.search("Bilbo");
 
-        assertThat(shouldBeFound.get().postcode, is("TRUMP"));
+        assertThat(shouldBeFound.get().getPostcode(), is("TRUMP"));
         assertThat(shouldNotBeFound, is(none()));
     }
 

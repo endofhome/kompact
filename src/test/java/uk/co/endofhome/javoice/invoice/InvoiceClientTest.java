@@ -33,7 +33,7 @@ public class InvoiceClientTest {
 
         assertThat(invoiceFromFileSystem.date, is(LocalDate.now()));
         assertThat(invoiceFromFileSystem.number, is("INV-001"));
-        assertThat(invoiceFromFileSystem.customer.name, is("Milford"));
+        assertThat(invoiceFromFileSystem.customer.getName(), is("Milford"));
         assertThat(invoiceFromFileSystem.orderNumber, is("cust ref"));
         assertThat(invoiceFromFileSystem.itemLines.get(0).description.get(), is("Green bottles"));
     }

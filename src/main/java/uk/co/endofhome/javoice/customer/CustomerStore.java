@@ -94,12 +94,12 @@ public class CustomerStore {
         for (Customer customer : customers) {
             int nextRow = sheet.getLastRowNum() + 1;
             HSSFRow row = sheet.createRow(nextRow);
-            row.createCell(0).setCellValue(customer.accountCode);
-            row.createCell(1).setCellValue(customer.name);
-            row.createCell(2).setCellValue(customer.addressOne);
-            row.createCell(3).setCellValue(customer.addressTwo);
-            row.createCell(4).setCellValue(customer.postcode);
-            row.createCell(5).setCellValue(customer.phoneNumber);
+            row.createCell(0).setCellValue(customer.getAccountCode());
+            row.createCell(1).setCellValue(customer.getName());
+            row.createCell(2).setCellValue(customer.getAddressOne());
+            row.createCell(3).setCellValue(customer.getAddressTwo());
+            row.createCell(4).setCellValue(customer.getPostcode());
+            row.createCell(5).setCellValue(customer.getPhoneNumber());
         }
     }
 
@@ -159,14 +159,14 @@ public class CustomerStore {
     }
 
     public Option<Customer> search(String nameToSearchFor) {
-        return customers.find(customer -> customer.name.equals(nameToSearchFor));
+        return customers.find(customer -> customer.getName().equals(nameToSearchFor));
     }
 
     public String nextAccountNumber() {
         if (customers.size() == 0) {
             return "1";
         }
-        int lastAccountNumber = Integer.parseInt(customers.last().accountCode);
+        int lastAccountNumber = Integer.parseInt(customers.last().getAccountCode());
         return String.valueOf(lastAccountNumber + 1);
     }
 }
