@@ -12,13 +12,10 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.Year;
 
-import static com.googlecode.totallylazy.Option.none;
-import static com.googlecode.totallylazy.Option.some;
 import static java.nio.file.Files.notExists;
 import static java.time.Month.JANUARY;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 
 public class AnnualReportTest {
     private AnnualReport annualReport;
@@ -38,31 +35,31 @@ public class AnnualReportTest {
     public void can_set_a_new_entry_in_ledger() throws IOException {
         HSSFSheet monthlyReportSheet = annualReport.sheetAt(1);
         MonthlyReport monthlyReport = annualReport.monthlyReports().get(0);
-        LedgerEntry ledgerEntry = ledgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), some(LocalDate.now()), none());
+        LedgerEntry ledgerEntry = LedgerEntry.Companion.ledgerEntry("Carla Azar", "INV-808", 10.0, null, null, LocalDate.now(), null);
         HSSFSheet updatedLedgerMonthlySheet = annualReport.setNewEntry(monthlyReportSheet, monthlyReport, ledgerEntry);
         MonthlyReport updatedMonthlyReport = AnnualReport.getMonthlyReportFrom(updatedLedgerMonthlySheet);
 
-        assertThat(updatedMonthlyReport.entries.get(0).customerName.getOrElse(""), is(ledgerEntry.customerName.get()));
-        assertThat(updatedMonthlyReport.entries.get(0).invoiceNumber.getOrElse(""), is(ledgerEntry.invoiceNumber.get()));
-        assertThat(updatedMonthlyReport.entries.get(0).valueNett.getOrElse(0.0), is(ledgerEntry.valueNett.get()));
-        assertThat(updatedMonthlyReport.entries.get(0).date.get(), is(LocalDate.now()));
+        assertThat(updatedMonthlyReport.entries.get(0).getCustomerName(), is(ledgerEntry.getCustomerName()));
+        assertThat(updatedMonthlyReport.entries.get(0).getInvoiceNumber(), is(ledgerEntry.getInvoiceNumber()));
+        assertThat(updatedMonthlyReport.entries.get(0).getValueNett(), is(ledgerEntry.getValueNett()));
+        assertThat(updatedMonthlyReport.entries.get(0).getDate(), is(LocalDate.now()));
     }
 
     @Test
     public void can_set_a_new_entry_in_ledger_from_LedgerEntry_only() throws IOException {
-        LedgerEntry ledgerEntry = ledgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), some(LocalDate.of(1983,11,10)), none());
+        LedgerEntry ledgerEntry = LedgerEntry.Companion.ledgerEntry("Carla Azar", "INV-808", 10.0, null, null, LocalDate.of(1983,11,10), null);
         annualReport.setNewEntry(ledgerEntry);
         MonthlyReport novemberReport = annualReport.monthlyReports().get(10);
 
-        assertThat(novemberReport.entries.get(0).customerName.getOrElse(""), is(ledgerEntry.customerName.get()));
-        assertThat(novemberReport.entries.get(0).invoiceNumber.getOrElse(""), is(ledgerEntry.invoiceNumber.get()));
-        assertThat(novemberReport.entries.get(0).valueNett.getOrElse(0.0), is(ledgerEntry.valueNett.get()));
-        assertThat(novemberReport.entries.get(0).date.get(), is(LocalDate.of(1983,11,10)));
+        assertThat(novemberReport.entries.get(0).getCustomerName(), is(ledgerEntry.getCustomerName()));
+        assertThat(novemberReport.entries.get(0).getInvoiceNumber(), is(ledgerEntry.getInvoiceNumber()));
+        assertThat(novemberReport.entries.get(0).getValueNett(), is(ledgerEntry.getValueNett()));
+        assertThat(novemberReport.entries.get(0).getDate(), is(LocalDate.of(1983,11,10)));
     }
 
     @Test(expected = RuntimeException.class)
     public void blows_up_if_ledger_entry_added_to_workbook_for_different_year() throws IOException {
-        LedgerEntry ledgerEntry = ledgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), some(LocalDate.of(1978,11,10)), none());
+        LedgerEntry ledgerEntry = LedgerEntry.Companion.ledgerEntry("Carla Azar", "INV-808", 10.0, null, null, LocalDate.of(1978,11,10), null);
         annualReport.setNewEntry(ledgerEntry);
     }
 
@@ -70,9 +67,9 @@ public class AnnualReportTest {
     public void can_set_footer() throws IOException {
         HSSFSheet monthlyReportSheet = annualReport.sheetAt(1);
         MonthlyReport monthlyReport = annualReport.monthlyReports().get(0);
-        LedgerEntry firstLedgerEntry = ledgerEntry(some("Carla Azar"), some("INV-808"), some(10.0), none(), none(), some(LocalDate.now()), none());
-        LedgerEntry secondLedgerEntry = ledgerEntry(some("Chris Corsano"), some("INV-909"), some(11.0), none(), none(), some(LocalDate.now()), none());
-        LedgerEntry thirdLedgerEntry = ledgerEntry(some("Drumbo Drums"), some("INV-101"), some(1.0), none(), none(), some(LocalDate.now()), none());
+        LedgerEntry firstLedgerEntry = LedgerEntry.Companion.ledgerEntry("Carla Azar", "INV-808", 10.0, null, null, LocalDate.now(), null);
+        LedgerEntry secondLedgerEntry = LedgerEntry.Companion.ledgerEntry("Chris Corsano", "INV-909", 11.0, null, null, LocalDate.now(), null);
+        LedgerEntry thirdLedgerEntry = LedgerEntry.Companion.ledgerEntry("Drumbo Drums", "INV-101", 1.0, null, null, LocalDate.now(), null);
 
         HSSFSheet sheetWithOneAdded = annualReport.setNewEntry(monthlyReportSheet, monthlyReport, firstLedgerEntry);
         HSSFSheet sheetWithTwoAdded = annualReport.setNewEntry(sheetWithOneAdded, monthlyReport, secondLedgerEntry);
@@ -93,7 +90,7 @@ public class AnnualReportTest {
         annualReport = AnnualReport.annualReportCustomConfig(1984, Paths.get("src/test/resources"));
         HSSFSheet januaryReportSheet = annualReport.sheetAt(1);
         MonthlyReport monthlyReport = annualReport.monthlyReports().get(0);
-        LedgerEntry newLedgerEntry = ledgerEntry(some("Buddy Rich"), some("INV-909"), some(3.0), none(), none(), some(LocalDate.now()), none());
+        LedgerEntry newLedgerEntry = LedgerEntry.Companion.ledgerEntry("Buddy Rich", "INV-909", 3.0, null, null, LocalDate.now(), null);
         annualReport.setNewEntry(januaryReportSheet, monthlyReport, newLedgerEntry);
         annualReport.writeFile(testOutputPath);
 
@@ -102,7 +99,7 @@ public class AnnualReportTest {
 
         assertThat(reportToTest.month, is(JANUARY));
         assertThat(reportToTest.year, is(Year.of(1984)));
-        assertThat(reportToTest.entries.get(0).customerName.get(), is("Buddy Rich"));
-        assertThat(reportToTest.entries.get(0).invoiceNumber.get(), is("INV-909"));
+        assertThat(reportToTest.entries.get(0).getCustomerName(), is("Buddy Rich"));
+        assertThat(reportToTest.entries.get(0).getInvoiceNumber(), is("INV-909"));
     }
 }

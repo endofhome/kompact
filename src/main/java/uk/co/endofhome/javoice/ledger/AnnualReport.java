@@ -26,8 +26,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.googlecode.totallylazy.Option.none;
-import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Strings.capitalise;
 import static java.lang.Integer.parseInt;
@@ -41,7 +39,6 @@ import static uk.co.endofhome.javoice.CellStyler.excelBoldCellStyleFor;
 import static uk.co.endofhome.javoice.CellStyler.excelDateCellStyleFor;
 import static uk.co.endofhome.javoice.CellStyler.excelGeneralCellStyleFor;
 import static uk.co.endofhome.javoice.CellStyler.excelSterlingCellStyleFor;
-import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.LEDGER_ENTRIES_START_AT;
 import static uk.co.endofhome.javoice.ledger.MonthlyReport.TOTAL_FOOTER_ROWS;
 
@@ -98,16 +95,16 @@ public class AnnualReport {
         Sequence<LedgerEntry> entries = sequence();
         for (int i = LEDGER_ENTRIES_START_AT; i < monthlyReportSheet.getLastRowNum() - 1; i++) {
             HSSFRow rowToExtract = monthlyReportSheet.getRow(i);
-            LedgerEntry ledgerEntry = ledgerEntry(
-                    stringOptionCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK)),
-                    // TODO: below blows up if manually entered as it's not a string.
-                    // TODO: Enforcing string cell type in stringOptionCellValueFor, as a fix (may be temporary):
-                    stringOptionCellValueFor(rowToExtract.getCell(1, CREATE_NULL_AS_BLANK)),
-                    numericOptionCellValueFor(rowToExtract.getCell(2, CREATE_NULL_AS_BLANK)),
-                    stringOptionCellValueFor(rowToExtract.getCell(5, CREATE_NULL_AS_BLANK)),
-                    stringOptionCellValueFor(rowToExtract.getCell(6, CREATE_NULL_AS_BLANK)),
-                    dateOptionCellValueFor(rowToExtract.getCell(7, CREATE_NULL_AS_BLANK)),
-                    stringOptionCellValueFor(rowToExtract.getCell(8, CREATE_NULL_AS_BLANK))
+            LedgerEntry ledgerEntry = LedgerEntry.Companion.ledgerEntry(
+                stringOrNullCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK)),
+                // TODO: below blows up if manually entered as it's not a string.
+                // TODO: Enforcing string cell type in stringOptionCellValueFor, as a fix (may be temporary):
+                stringOrNullCellValueFor(rowToExtract.getCell(1, CREATE_NULL_AS_BLANK)),
+                rowToExtract.getCell(2, CREATE_NULL_AS_BLANK).getNumericCellValue(),
+                stringOrNullCellValueFor(rowToExtract.getCell(5, CREATE_NULL_AS_BLANK)),
+                stringOrNullCellValueFor(rowToExtract.getCell(6, CREATE_NULL_AS_BLANK)),
+                dateOrNullCellValueFor(rowToExtract.getCell(7, CREATE_NULL_AS_BLANK)),
+                stringOrNullCellValueFor(rowToExtract.getCell(8, CREATE_NULL_AS_BLANK))
             );
             entries = entries.append(ledgerEntry);
         }
@@ -135,38 +132,24 @@ public class AnnualReport {
         }
     }
 
-    static Option<String> stringOptionCellValueFor(HSSFCell cell) {
-        Option<String> optionString;
+    private static String stringOrNullCellValueFor(HSSFCell cell) {
         if (cell != null) {
             // TODO: Write a test for enforcing string cell type:
             if (cell.getCellType() != CELL_TYPE_STRING) {
                 cell.setCellType(CELL_TYPE_STRING);
             }
-            optionString = option(cell.getStringCellValue());
+            return cell.getStringCellValue();
         } else {
-            optionString = none();
+            return null;
         }
-        return optionString;
     }
 
-    static Option<Double> numericOptionCellValueFor(HSSFCell cell) {
-        Option<Double> optionDouble;
-        if (cell != null) {
-            optionDouble = option(cell.getNumericCellValue());
-        } else {
-            optionDouble = none();
-        }
-        return optionDouble;
-    }
-
-    static Option<LocalDate> dateOptionCellValueFor(HSSFCell cell) {
-        Option<LocalDate> optionLocalDate;
+    private static LocalDate dateOrNullCellValueFor(HSSFCell cell) {
         if (cell != null && cell.getCellType() == 0) {
-            optionLocalDate = option(cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+            return cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         } else {
-            optionLocalDate = none();
+            return null;
         }
-        return optionLocalDate;
     }
 
     private static HSSFWorkbook workbookFromPath(Path filePath) throws IOException {
@@ -197,20 +180,20 @@ public class AnnualReport {
     public HSSFSheet setNewEntry(HSSFSheet monthlyReportSheet, MonthlyReport monthlyReport, LedgerEntry ledgerEntry) {
         HSSFSheet monthlyReportSheetNoFooter = removeFooterFrom(monthlyReportSheet);
         HSSFRow rowToSet = getNextRow(monthlyReportSheetNoFooter);
-        rowToSet.createCell(0).setCellValue(ledgerEntry.customerName.getOrElse(""));
-        rowToSet.createCell(1).setCellValue(ledgerEntry.invoiceNumber.getOrElse(""));
-        rowToSet.createCell(2).setCellValue(ledgerEntry.valueNett.getOrElse(0.0));
+        rowToSet.createCell(0).setCellValue(emptyStringIfNull(ledgerEntry.getCustomerName()));
+        rowToSet.createCell(1).setCellValue(emptyStringIfNull(ledgerEntry.getInvoiceNumber()));
+        rowToSet.createCell(2).setCellValue(zeroDoubleIfNull(ledgerEntry.getValueNett()));
         rowToSet.getCell(2).setCellStyle(excelSterlingCellStyleFor(workbook));
         rowToSet.createCell(3).setCellFormula(String.format("SUM(C%s*0.2)", rowToSet.getRowNum() + 1));
         rowToSet.getCell(3).setCellStyle(excelSterlingCellStyleFor(workbook));
         rowToSet.createCell(4).setCellFormula((String.format("SUM(C%1$s:D%1$s)", rowToSet.getRowNum() + 1)));
         rowToSet.getCell(4).setCellStyle(excelSterlingCellStyleFor(workbook));
-        rowToSet.createCell(5).setCellValue(ledgerEntry.crReq.getOrElse(""));
-        rowToSet.createCell(6).setCellValue(ledgerEntry.allocation.getOrElse(""));
-        rowToSet.createCell(8).setCellValue(ledgerEntry.notes.getOrElse(""));
+        rowToSet.createCell(5).setCellValue(emptyStringIfNull(ledgerEntry.getCrReq()));
+        rowToSet.createCell(6).setCellValue(emptyStringIfNull(ledgerEntry.getAllocation()));
+        rowToSet.createCell(8).setCellValue(emptyStringIfNull(ledgerEntry.getNotes()));
         HSSFCell dateCell = rowToSet.createCell(7);
-        if (ledgerEntry.date.isDefined()) {
-            dateCell.setCellValue(dateFrom(ledgerEntry.date.get()));
+        if (ledgerEntry.getDate() != null) {
+            dateCell.setCellValue(dateFrom(ledgerEntry.getDate()));
             dateCell.setCellStyle(excelDateCellStyleFor(workbook, dateCell));
         } else {
             dateCell.setCellValue(CELL_TYPE_BLANK);
@@ -219,7 +202,10 @@ public class AnnualReport {
     }
 
     public void setNewEntry(LedgerEntry ledgerEntry) {
-        LocalDate dateOfEntry = ledgerEntry.date.getOrThrow(new DateTimeException("Ledger entry has no date"));
+        LocalDate dateOfEntry = ledgerEntry.getDate();
+        if (dateOfEntry == null) {
+            throw new DateTimeException("Ledger entry has no date");
+        }
         if (dateOfEntry.getYear() != year.getValue()) {
             throw new RuntimeException("Wrong ledger for entry.");
         }
@@ -338,6 +324,22 @@ public class AnnualReport {
         footerRowTwo.getCell(3).setCellStyle(excelSterlingCellStyleFor(workbook));
         footerRowTwo.getCell(4).setCellStyle(excelSterlingCellStyleFor(workbook));
         return sheet;
+    }
+
+    private String emptyStringIfNull(String string) {
+        if (string == null) {
+            return "";
+        } else {
+            return string;
+        }
+    }
+
+    private Double zeroDoubleIfNull(Double number) {
+        if (number == null) {
+            return 0.0;
+        } else {
+            return number;
+        }
     }
 
     private HSSFRow getNextRow(HSSFSheet monthlyReportSheet) {

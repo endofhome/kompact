@@ -33,7 +33,6 @@ import static uk.co.endofhome.javoice.Config.invoiceXlsFileOutputPath;
 import static uk.co.endofhome.javoice.Config.salesLedgerFileOutputPath;
 import static uk.co.endofhome.javoice.ledger.AnnualReport.annualReport;
 import static uk.co.endofhome.javoice.ledger.AnnualReport.readFile;
-import static uk.co.endofhome.javoice.ledger.LedgerEntry.ledgerEntry;
 
 public class Controller implements Observer {
     private final CustomerStore customerStore;
@@ -100,9 +99,9 @@ public class Controller implements Observer {
             for (int i = month.getValue(); i >= 1; i--) {
                 MonthlyReport monthlyReport = annualReport.monthlyReports().get(i - 1);
                 Sequence<LedgerEntry> reversedEntries = monthlyReport.entries.reverse();
-                Option<LedgerEntry> lastInvoiceEntryOption = reversedEntries.find(entry -> entry.invoiceNumber.isDefined());
+                Option<LedgerEntry> lastInvoiceEntryOption = reversedEntries.find(entry -> entry.getInvoiceNumber() != null);
                 if (lastInvoiceEntryOption.isDefined()) {
-                    Option<Integer> invoiceNumberOption = parseIntOption(lastInvoiceEntryOption.get().invoiceNumber.get());
+                    Option<Integer> invoiceNumberOption = parseIntOption(lastInvoiceEntryOption.get().getInvoiceNumber());
                     if (invoiceNumberOption.isDefined()) {
                         Integer invoiceNumber = invoiceNumberOption.get();
                         return option(String.valueOf(++invoiceNumber));
@@ -113,7 +112,7 @@ public class Controller implements Observer {
     }
 
     private void updateAnnualReportOnFS(AnnualReport annualReport, Invoice invoice) throws IOException {
-        LedgerEntry ledgerEntry = ledgerEntry(invoice, none(), none(), none());
+        LedgerEntry ledgerEntry = LedgerEntry.Companion.ledgerEntry(invoice, null, null, null);
         annualReport.setNewEntry(ledgerEntry);
         annualReport.writeFile(salesLedgerFileOutputPath());
     }
