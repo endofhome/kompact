@@ -10,7 +10,7 @@ interface Observer {
 
     fun findCustomer(name: String): Customer?
 
-    fun setCurrentCustomer(customer: Customer)
+    fun updateCurrentCustomer(customer: Customer)
 
     @Throws(IOException::class)
     fun newInvoice(customer: Customer, orderNumber: String, itemLines: List<ItemLine>)

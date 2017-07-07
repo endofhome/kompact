@@ -60,7 +60,7 @@ public class NewInvoice extends JavoiceScreen implements GuiObservable, Observab
     public void searchForCustomer(String name) {
         Customer customer = observer.findCustomer(name);
         if (customer != null) {
-            observer.setCurrentCustomer(customer);
+            observer.updateCurrentCustomer(customer);
             guiObserver.updateInvoiceDetails();
             notifyGuiObserver(invoiceDetailsStackPane);
         } else {

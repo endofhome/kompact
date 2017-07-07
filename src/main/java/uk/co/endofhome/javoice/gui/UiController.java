@@ -60,7 +60,7 @@ public class UiController implements GuiObserver {
 
     @Override
     public void updateInvoiceDetails() {
-        InvoiceDetails invoiceDetails = new InvoiceDetails(controller.currentCustomer);
+        InvoiceDetails invoiceDetails = new InvoiceDetails(controller.getCurrentCustomer());
         invoiceDetails.registerGuiObserver(this);
         invoiceDetails.registerObserver(controller);
         invoiceDetailsStackPane = invoiceDetails.invoiceDetailsStackPane;
