@@ -66,12 +66,12 @@ class InvoiceClient private constructor(private var workBook: HSSFWorkbook?, pri
     }
 
     fun setCustomerSection(invoiceSheet: HSSFSheet, invoice: Invoice): HSSFSheet {
-        val customer = invoice.customer
-        invoiceSheet.getRow(11).getCell(4).setCellValue(customer.name)
-        invoiceSheet.getRow(12).getCell(4).setCellValue(customer.addressOne)
-        invoiceSheet.getRow(13).getCell(4).setCellValue(customer.addressTwo)
-        invoiceSheet.getRow(13).getCell(8).setCellValue(customer.postcode)
-        invoiceSheet.getRow(14).getCell(4).setCellValue(customer.phoneNumber)
+        val (name, addressOne, addressTwo, postcode, phoneNumber) = invoice.customer
+        invoiceSheet.getRow(11).getCell(4).setCellValue(name)
+        invoiceSheet.getRow(12).getCell(4).setCellValue(addressOne)
+        invoiceSheet.getRow(13).getCell(4).setCellValue(addressTwo)
+        invoiceSheet.getRow(13).getCell(8).setCellValue(postcode)
+        invoiceSheet.getRow(14).getCell(4).setCellValue(phoneNumber)
         return invoiceSheet
     }
 
@@ -102,18 +102,18 @@ class InvoiceClient private constructor(private var workBook: HSSFWorkbook?, pri
     }
 
     fun setItemLines(invoiceSheet: HSSFSheet, invoice: Invoice): List<ItemLine> {
-        var itemLines = mutableListOf<ItemLine>()
         val lastItemLine = Invoice.ITEM_LINES_START_AT + invoice.itemLines.size - 1
+
         if (invoice.itemLines.size <= Invoice.MAX_ITEM_LINES) {
-            for (i in Invoice.ITEM_LINES_START_AT..lastItemLine) {
-                val itemLineNumber = i - Invoice.ITEM_LINES_START_AT
+            return (Invoice.ITEM_LINES_START_AT..lastItemLine).map {
+                val itemLineNumber = it - Invoice.ITEM_LINES_START_AT
                 setItemLine(invoiceSheet, invoice, itemLineNumber)
-                itemLines.add(invoice.itemLines[itemLineNumber])
-            }
+                invoice.itemLines[itemLineNumber]
+            }.toList()
+
         } else {
             throw RuntimeException(format("Too many lines for invoice number %s", invoice.number))
         }
-        return itemLines
     }
 
     fun setSections(invoiceSheet: HSSFSheet, invoice: Invoice) {
