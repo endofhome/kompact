@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import uk.co.endofhome.javoice.customer.CustomerStore;
 import uk.co.endofhome.javoice.gui.UiController;
+import uk.co.endofhome.javoice.pdf.PdfConvertor;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,6 +14,7 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
         CustomerStore customerStore;
+        PdfConvertor pdfConvertor = new PdfConvertor();;
         if (Files.exists(Config.customerDataFilePath())) {
             try {
                 customerStore = CustomerStore.Companion.readFile(Config.customerDataFilePath(), 1);
@@ -22,7 +24,7 @@ public class App extends Application {
         } else {
             customerStore = new CustomerStore();
         }
-        Controller controller = new Controller(customerStore);
+        Controller controller = new Controller(customerStore, pdfConvertor);
         UiController uiController = new UiController(controller);
         uiController.setTheStage(primaryStage);
     }

@@ -37,10 +37,12 @@ import static uk.co.endofhome.javoice.ledger.AnnualReport.readFile;
 
 public class Controller implements Observer {
     private final CustomerStore customerStore;
+    private final PdfConvertor pdfConvertor;
     public Customer currentCustomer = null;
 
-    Controller(CustomerStore customerStore) {
+    Controller(CustomerStore customerStore, PdfConvertor pdfConvertor) {
         this.customerStore = customerStore;
+        this.pdfConvertor = pdfConvertor;
     }
 
     public void newInvoice(Customer customer, String orderNumber, List<ItemLine> itemLines) throws IOException {
@@ -53,7 +55,7 @@ public class Controller implements Observer {
         createInvoiceOnFS(invoice, invoiceClient, invoiceTemplateSheet);
         updateAnnualReportOnFS(annualReport, invoice);
         try {
-            PdfConvertor.Companion.convert(invoiceClient.invoiceFilePath(invoiceXlsFileOutputPath(), invoice));
+            pdfConvertor.convert(invoiceClient.invoiceFilePath(invoiceXlsFileOutputPath(), invoice));
         } catch (Exception e) {
             if (exists(Config.libreOfficePath())) {
                 throw new RuntimeException("Couldn't write PDF for invoice " + invoice.getNumber() + " and path " + invoicePdfFileOutputPath() + e);

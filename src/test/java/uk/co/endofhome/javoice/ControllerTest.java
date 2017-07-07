@@ -9,6 +9,7 @@ import uk.co.endofhome.javoice.invoice.ItemLine;
 import uk.co.endofhome.javoice.ledger.AnnualReport;
 import uk.co.endofhome.javoice.ledger.LedgerEntry;
 import uk.co.endofhome.javoice.ledger.MonthlyReport;
+import uk.co.endofhome.javoice.pdf.PdfConvertor;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,9 +45,10 @@ public class ControllerTest {
         Config.setInvoiceXlsOutputPath(pathForTestOutput);
         Config.setCustomerDataFileOutputPath(get(pathForTestOutput.toString(), "/Customers.xls"));
         CustomerStore customerStore = new CustomerStore();
+        PdfConvertor pdfConvertor = new PdfConvertor();
         customer = new Customer("some customer", null, null, "P05T C0D3", null, "798");
         customerStore.addCustomer(customer);
-        controller = new Controller(customerStore);
+        controller = new Controller(customerStore, pdfConvertor);
         annualReport = annualReportCustomConfig(2016, pathForTestOutput);
         annualReport.writeFile(pathForTestOutput);
     }
