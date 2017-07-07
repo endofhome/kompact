@@ -102,18 +102,14 @@ class InvoiceClient private constructor(private var workBook: HSSFWorkbook, priv
     }
 
     fun setItemLines(invoiceSheet: HSSFSheet, invoice: Invoice): List<ItemLine> {
+        require(invoice.itemLines.size <= Invoice.MAX_ITEM_LINES) { "Too many lines for invoice number ${invoice.number}" }
+
         val lastItemLine = Invoice.ITEM_LINES_START_AT + invoice.itemLines.size - 1
-
-        if (invoice.itemLines.size <= Invoice.MAX_ITEM_LINES) {
-            return (Invoice.ITEM_LINES_START_AT..lastItemLine).map {
-                val itemLineNumber = it - Invoice.ITEM_LINES_START_AT
-                setItemLine(invoiceSheet, invoice, itemLineNumber)
-                invoice.itemLines[itemLineNumber]
-            }.toList()
-
-        } else {
-            throw RuntimeException(format("Too many lines for invoice number %s", invoice.number))
-        }
+        return (Invoice.ITEM_LINES_START_AT..lastItemLine).map {
+            val itemLineNumber = it - Invoice.ITEM_LINES_START_AT
+            setItemLine(invoiceSheet, invoice, itemLineNumber)
+            invoice.itemLines[itemLineNumber]
+        }.toList()
     }
 
     fun setSections(invoiceSheet: HSSFSheet, invoice: Invoice) {
