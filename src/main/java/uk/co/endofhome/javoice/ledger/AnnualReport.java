@@ -1,6 +1,5 @@
 package uk.co.endofhome.javoice.ledger;
 
-import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
@@ -22,7 +21,9 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -39,14 +40,14 @@ import static uk.co.endofhome.javoice.CellStyler.excelBoldCellStyleFor;
 import static uk.co.endofhome.javoice.CellStyler.excelDateCellStyleFor;
 import static uk.co.endofhome.javoice.CellStyler.excelGeneralCellStyleFor;
 import static uk.co.endofhome.javoice.CellStyler.excelSterlingCellStyleFor;
-import static uk.co.endofhome.javoice.ledger.MonthlyReport.LEDGER_ENTRIES_START_AT;
-import static uk.co.endofhome.javoice.ledger.MonthlyReport.TOTAL_FOOTER_ROWS;
 
 public class AnnualReport {
-    public final HSSFWorkbook workbook;
+    private static final int LEDGER_ENTRIES_START_AT = MonthlyReport.Companion.getLEDGER_ENTRIES_START_AT();
+    private static final int TOTAL_FOOTER_ROWS = MonthlyReport.Companion.getTOTAL_FOOTER_ROWS();
+    private final HSSFWorkbook workbook;
     public final Year year;
+    private final Path fileOutputPath;
     private Sequence<MonthlyReport> monthlyReports;
-    private Path fileOutputPath;
 
     private AnnualReport(HSSFWorkbook reportWorkbook, Year reportYear, Sequence<MonthlyReport> monthReports, Path outputPath) {
         workbook = reportWorkbook;
@@ -92,8 +93,8 @@ public class AnnualReport {
 
     public static MonthlyReport getMonthlyReportFrom(HSSFSheet monthlyReportSheet) {
         MonthlyReport monthlyReport = new MonthlyReport(yearFrom(monthlyReportSheet), monthFrom(monthlyReportSheet));
-        Sequence<LedgerEntry> entries = sequence();
-        for (int i = LEDGER_ENTRIES_START_AT; i < monthlyReportSheet.getLastRowNum() - 1; i++) {
+        List<LedgerEntry> entries = new ArrayList<>();
+        for (int i = LEDGER_ENTRIES_START_AT ; i < monthlyReportSheet.getLastRowNum() - 1; i++) {
             HSSFRow rowToExtract = monthlyReportSheet.getRow(i);
             LedgerEntry ledgerEntry = LedgerEntry.Companion.ledgerEntry(
                 stringOrNullCellValueFor(rowToExtract.getCell(0, CREATE_NULL_AS_BLANK)),
@@ -106,9 +107,9 @@ public class AnnualReport {
                 dateOrNullCellValueFor(rowToExtract.getCell(7, CREATE_NULL_AS_BLANK)),
                 stringOrNullCellValueFor(rowToExtract.getCell(8, CREATE_NULL_AS_BLANK))
             );
-            entries = entries.append(ledgerEntry);
+            entries.add(ledgerEntry);
         }
-        monthlyReport.entries = entries;
+        monthlyReport.setEntries(entries);
         return monthlyReport;
     }
 
@@ -198,7 +199,7 @@ public class AnnualReport {
         } else {
             dateCell.setCellValue(CELL_TYPE_BLANK);
         }
-        return setFooter(monthlyReportSheetNoFooter, monthlyReport.footer);
+        return setFooter(monthlyReportSheetNoFooter, monthlyReport.getFooter());
     }
 
     public void setNewEntry(LedgerEntry ledgerEntry) {
@@ -210,14 +211,16 @@ public class AnnualReport {
             throw new RuntimeException("Wrong ledger for entry.");
         }
         int entryMonthValue = dateOfEntry.getMonthValue();
-        MonthlyReport monthlyReport = this.monthlyReports.get(entryMonthValue - 1);
+        MonthlyReport monthlyReport = monthlyReports.get(entryMonthValue - 1);
         HSSFSheet reportSheet = workbook.getSheetAt(entryMonthValue);
 
-        monthlyReport.entries = monthlyReport.entries.append(ledgerEntry);
+        List<LedgerEntry> entries = new ArrayList<>(monthlyReport.getEntries());
+        entries.add(ledgerEntry);
+        monthlyReport.setEntries(entries);
         setNewEntry(reportSheet, monthlyReport, ledgerEntry);
     }
 
-    public HSSFSheet removeFooterFrom(HSSFSheet monthlyReportSheet) {
+    private HSSFSheet removeFooterFrom(HSSFSheet monthlyReportSheet) {
         //TODO: Don't use MonthlyReport constants.
 
         for (int i = 0; i < TOTAL_FOOTER_ROWS; i++) {
@@ -249,7 +252,7 @@ public class AnnualReport {
     private void createDefaultSheets() {
         workbook.createSheet("Overview");
         for (MonthlyReport monthlyReport : monthlyReports) {
-            workbook.createSheet(monthlyReport.month.getDisplayName(SHORT, Locale.getDefault()));
+            workbook.createSheet(monthlyReport.getMonth().getDisplayName(SHORT, Locale.getDefault()));
         }
     }
 
@@ -259,7 +262,7 @@ public class AnnualReport {
             MonthlyReport monthlyReport = monthlyReports.get(i);
             createRowsForMonthlyReportHeaders(sheet);
             HSSFRow titleRow = sheet.getRow(1);
-            titleRow.createCell(0).setCellValue(capitalise(monthlyReport.month.toString().toLowerCase()));
+            titleRow.createCell(0).setCellValue(capitalise(monthlyReport.getMonth().toString().toLowerCase()));
             titleRow.getCell(0).setCellStyle(excelBoldCellStyleFor(workbook));
             HSSFCell dateCell = titleRow.createCell(1);
             dateCell.setCellValue(year.getValue());
@@ -298,26 +301,26 @@ public class AnnualReport {
     private void setMonthlyReportFooters() {
         for (int i = 0; i < workbook.getNumberOfSheets() - 1; i++) {
             HSSFSheet sheet = workbook.getSheetAt(i + 1);
-            Map<String, Sequence<Option<String>>> footerMap = monthlyReports.get(i).footer;
+            Map<String, List<String>> footerMap = monthlyReports.get(i).getFooter();
 
             setFooter(sheet, footerMap);
         }
     }
 
-    private HSSFSheet setFooter(HSSFSheet sheet, Map<String, Sequence<Option<String>>> footerMap) {
+    private HSSFSheet setFooter(HSSFSheet sheet, Map<String, List<String>> footerMap) {
         HSSFRow footerRowOne = getNextRow(sheet);
         for (int j = 0; j < footerMap.get("rowOne").size(); j++) {
-            footerRowOne.createCell(j).setCellValue(footerMap.get("rowOne").get(j).getOrElse(""));
+            footerRowOne.createCell(j).setCellValue(emptyStringIfNull(footerMap.get("rowOne").get(j)));
         }
 
         HSSFRow footerRowTwo = getNextRow(sheet);
         for (int k = 0; k < footerMap.get("rowTwo").size(); k++) {
-            String cellContents = footerMap.get("rowTwo").get(k).getOrElse("");
+            String cellContents = emptyStringIfNull(footerMap.get("rowTwo").get(k));
             if (k >= 2 && k <= 4) {
                 cellContents = footerFormulas(sheet, cellContents);
                 footerRowTwo.createCell(k).setCellFormula(cellContents);
             } else {
-                footerRowTwo.createCell(k).setCellValue(footerMap.get("rowTwo").get(k).getOrElse(""));
+                footerRowTwo.createCell(k).setCellValue(emptyStringIfNull(footerMap.get("rowTwo").get(k)));
             }
         }
         footerRowTwo.getCell(2).setCellStyle(excelSterlingCellStyleFor(workbook));

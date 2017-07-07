@@ -150,7 +150,7 @@ public class ControllerTest {
         AnnualReport annualReportFromFS = AnnualReport.readFile(get(pathForTestOutput.toString(), "sales" + String.valueOf(LocalDate.now().getYear()) + ".xls"));
         int thisMonth = LocalDate.now().getMonthValue() -1;
         MonthlyReport monthlyReport = annualReportFromFS.monthlyReports().get(thisMonth);
-        LedgerEntry lastEntry = monthlyReport.entries.last();
+        LedgerEntry lastEntry = monthlyReport.getEntries().get(monthlyReport.getEntries().size() -1);
 
         assertThat(lastEntry.getInvoiceNumber(), is("2"));
         assertThat(lastEntry.getDate(), is(LocalDate.now()));

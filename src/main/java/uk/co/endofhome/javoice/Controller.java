@@ -23,6 +23,7 @@ import java.util.List;
 
 import static com.googlecode.totallylazy.Option.none;
 import static com.googlecode.totallylazy.Option.option;
+import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.notExists;
 import static java.nio.file.Paths.get;
@@ -96,17 +97,17 @@ public class Controller implements Observer {
     }
 
     private Option<String> findNextInvoiceNumberIn(AnnualReport annualReport, Month month) {
-            for (int i = month.getValue(); i >= 1; i--) {
-                MonthlyReport monthlyReport = annualReport.monthlyReports().get(i - 1);
-                Sequence<LedgerEntry> reversedEntries = monthlyReport.entries.reverse();
-                Option<LedgerEntry> lastInvoiceEntryOption = reversedEntries.find(entry -> entry.getInvoiceNumber() != null);
-                if (lastInvoiceEntryOption.isDefined()) {
-                    Option<Integer> invoiceNumberOption = parseIntOption(lastInvoiceEntryOption.get().getInvoiceNumber());
-                    if (invoiceNumberOption.isDefined()) {
-                        Integer invoiceNumber = invoiceNumberOption.get();
-                        return option(String.valueOf(++invoiceNumber));
-                    }
+        for (int i = month.getValue(); i >= 1; i--) {
+            MonthlyReport monthlyReport = annualReport.monthlyReports().get(i - 1);
+            Sequence<LedgerEntry> reversedEntries = sequence(monthlyReport.getEntries()).reverse();
+            Option<LedgerEntry> lastInvoiceEntryOption = reversedEntries.find(entry -> entry.getInvoiceNumber() != null);
+            if (lastInvoiceEntryOption.isDefined()) {
+                Option<Integer> invoiceNumberOption = parseIntOption(lastInvoiceEntryOption.get().getInvoiceNumber());
+                if (invoiceNumberOption.isDefined()) {
+                    Integer invoiceNumber = invoiceNumberOption.get();
+                    return option(String.valueOf(++invoiceNumber));
                 }
+            }
         }
         return none();
     }

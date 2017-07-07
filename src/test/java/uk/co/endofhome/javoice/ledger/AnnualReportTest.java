@@ -39,10 +39,10 @@ public class AnnualReportTest {
         HSSFSheet updatedLedgerMonthlySheet = annualReport.setNewEntry(monthlyReportSheet, monthlyReport, ledgerEntry);
         MonthlyReport updatedMonthlyReport = AnnualReport.getMonthlyReportFrom(updatedLedgerMonthlySheet);
 
-        assertThat(updatedMonthlyReport.entries.get(0).getCustomerName(), is(ledgerEntry.getCustomerName()));
-        assertThat(updatedMonthlyReport.entries.get(0).getInvoiceNumber(), is(ledgerEntry.getInvoiceNumber()));
-        assertThat(updatedMonthlyReport.entries.get(0).getValueNett(), is(ledgerEntry.getValueNett()));
-        assertThat(updatedMonthlyReport.entries.get(0).getDate(), is(LocalDate.now()));
+        assertThat(updatedMonthlyReport.getEntries().get(0).getCustomerName(), is(ledgerEntry.getCustomerName()));
+        assertThat(updatedMonthlyReport.getEntries().get(0).getInvoiceNumber(), is(ledgerEntry.getInvoiceNumber()));
+        assertThat(updatedMonthlyReport.getEntries().get(0).getValueNett(), is(ledgerEntry.getValueNett()));
+        assertThat(updatedMonthlyReport.getEntries().get(0).getDate(), is(LocalDate.now()));
     }
 
     @Test
@@ -51,10 +51,10 @@ public class AnnualReportTest {
         annualReport.setNewEntry(ledgerEntry);
         MonthlyReport novemberReport = annualReport.monthlyReports().get(10);
 
-        assertThat(novemberReport.entries.get(0).getCustomerName(), is(ledgerEntry.getCustomerName()));
-        assertThat(novemberReport.entries.get(0).getInvoiceNumber(), is(ledgerEntry.getInvoiceNumber()));
-        assertThat(novemberReport.entries.get(0).getValueNett(), is(ledgerEntry.getValueNett()));
-        assertThat(novemberReport.entries.get(0).getDate(), is(LocalDate.of(1983,11,10)));
+        assertThat(novemberReport.getEntries().get(0).getCustomerName(), is(ledgerEntry.getCustomerName()));
+        assertThat(novemberReport.getEntries().get(0).getInvoiceNumber(), is(ledgerEntry.getInvoiceNumber()));
+        assertThat(novemberReport.getEntries().get(0).getValueNett(), is(ledgerEntry.getValueNett()));
+        assertThat(novemberReport.getEntries().get(0).getDate(), is(LocalDate.of(1983,11,10)));
     }
 
     @Test(expected = RuntimeException.class)
@@ -97,9 +97,9 @@ public class AnnualReportTest {
         AnnualReport annualReport = AnnualReport.readFile(Paths.get(testOutputPath + "/sales1984.xls"));
         MonthlyReport reportToTest = annualReport.monthlyReports().get(0);
 
-        assertThat(reportToTest.month, is(JANUARY));
-        assertThat(reportToTest.year, is(Year.of(1984)));
-        assertThat(reportToTest.entries.get(0).getCustomerName(), is("Buddy Rich"));
-        assertThat(reportToTest.entries.get(0).getInvoiceNumber(), is("INV-909"));
+        assertThat(reportToTest.getMonth(), is(JANUARY));
+        assertThat(reportToTest.getYear(), is(Year.of(1984)));
+        assertThat(reportToTest.getEntries().get(0).getCustomerName(), is("Buddy Rich"));
+        assertThat(reportToTest.getEntries().get(0).getInvoiceNumber(), is("INV-909"));
     }
 }
