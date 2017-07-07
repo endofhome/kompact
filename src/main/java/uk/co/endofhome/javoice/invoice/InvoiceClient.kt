@@ -146,16 +146,14 @@ class InvoiceClient private constructor(private var workBook: HSSFWorkbook, priv
     }
 
     fun getItemLinesFrom(invoiceSheet: HSSFSheet): List<ItemLine> {
-        var itemLines: MutableList<ItemLine> = mutableListOf()
         val lastPossibleItemLine = Invoice.ITEM_LINES_START_AT + Invoice.MAX_ITEM_LINES - 1
-        for (i in Invoice.ITEM_LINES_START_AT..lastPossibleItemLine) {
-            val quantity: Double? = invoiceSheet.getRow(i).getCell(3).numericCellValue
-            val description: String? = invoiceSheet.getRow(i).getCell(4).stringCellValue
-            val unitPrice: Double? = invoiceSheet.getRow(i).getCell(10).numericCellValue
-            val itemLine = ItemLine(quantity, description, unitPrice)
-            itemLines.add(itemLine)
-        }
-        return itemLines
+
+        return (Invoice.ITEM_LINES_START_AT..lastPossibleItemLine).map {
+            val quantity: Double? = invoiceSheet.getRow(it).getCell(3).numericCellValue
+            val description: String? = invoiceSheet.getRow(it).getCell(4).stringCellValue
+            val unitPrice: Double? = invoiceSheet.getRow(it).getCell(10).numericCellValue
+            ItemLine(quantity, description, unitPrice)
+        }.toList()
     }
 
     private fun buildInvoice(invoiceNumber: String, customerDetails: List<String>, orderRefs: List<String>, itemLines: List<ItemLine>): Invoice {
