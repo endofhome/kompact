@@ -37,7 +37,7 @@ import static uk.co.endofhome.javoice.ledger.AnnualReport.readFile;
 
 public class Controller implements Observer {
     private final CustomerStore customerStore;
-    public Option<Customer> currentCustomer = none();
+    public Customer currentCustomer = null;
 
     Controller(CustomerStore customerStore) {
         this.customerStore = customerStore;
@@ -67,12 +67,12 @@ public class Controller implements Observer {
         customerStore.writeFile(Config.customerDataFilePath());
     }
 
-    public Option<Customer> findCustomer(String customerName) {
+    public Customer findCustomer(String customerName) {
         return customerStore.search(customerName);
     }
 
     @Override
-    public void setCurrentCustomer(Option<Customer> customer) {
+    public void setCurrentCustomer(Customer customer) {
         currentCustomer = customer;
     }
 

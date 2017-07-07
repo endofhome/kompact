@@ -15,7 +15,7 @@ public class App extends Application {
         CustomerStore customerStore;
         if (Files.exists(Config.customerDataFilePath())) {
             try {
-                customerStore = CustomerStore.readFile(Config.customerDataFilePath(), 1);
+                customerStore = CustomerStore.Companion.readFile(Config.customerDataFilePath(), 1);
             } catch (IOException e) {
                 throw new IOException("There was a problem reading existing customer store" + e);
             }

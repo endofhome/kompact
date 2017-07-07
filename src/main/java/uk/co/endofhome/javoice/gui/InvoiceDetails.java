@@ -1,6 +1,5 @@
 package uk.co.endofhome.javoice.gui;
 
-import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Button;
@@ -47,14 +46,14 @@ public class InvoiceDetails extends JavoiceScreen implements GuiObservable, Obse
     private Label total;
     private DecimalFormat decimalFormatter;
 
-    public InvoiceDetails(Option<Customer> customer) {
+    public InvoiceDetails(Customer customer) {
         this.customer = ensureCustomer(customer);
         initialise();
     }
 
-    private Customer ensureCustomer(Option<Customer> customer) {
-        if (customer.isDefined()) {
-            return this.customer = customer.get();
+    private Customer ensureCustomer(Customer customer) {
+        if (customer != null) {
+            return this.customer = customer;
         }
         return this.customer = new Customer(
             "Bob",

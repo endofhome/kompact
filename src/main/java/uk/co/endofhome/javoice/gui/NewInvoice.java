@@ -1,6 +1,5 @@
 package uk.co.endofhome.javoice.gui;
 
-import com.googlecode.totallylazy.Option;
 import javafx.geometry.HPos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -59,8 +58,8 @@ public class NewInvoice extends JavoiceScreen implements GuiObservable, Observab
 
     @Override
     public void searchForCustomer(String name) {
-        Option<Customer> customer = observer.findCustomer(name);
-        if (customer.isDefined()) {
+        Customer customer = observer.findCustomer(name);
+        if (customer != null) {
             observer.setCurrentCustomer(customer);
             guiObserver.updateInvoiceDetails();
             notifyGuiObserver(invoiceDetailsStackPane);

@@ -1,6 +1,5 @@
 package uk.co.endofhome.javoice;
 
-import com.googlecode.totallylazy.Option;
 import org.junit.Before;
 import org.junit.Test;
 import uk.co.endofhome.javoice.customer.Customer;
@@ -16,11 +15,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.List;
 
-import static com.googlecode.totallylazy.Option.none;
 import static java.nio.file.Paths.get;
 import static java.util.Arrays.asList;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static uk.co.endofhome.javoice.ledger.AnnualReport.annualReportCustomConfig;
 
@@ -162,8 +162,9 @@ public class ControllerTest {
     public void can_add_new_customer_to_existing_customer_DB() throws Exception {
         controller.newCustomer("Friendly Customer", "first bit of address", "second bit of address", "a postcode", "45632");
 
-        CustomerStore updatedCustomerStoreFromFS = CustomerStore.readFile(get(pathForTestOutput + "/Customers.xls"), 0);
-        Customer customerUnderTest = updatedCustomerStoreFromFS.customers().last();
+        CustomerStore updatedCustomerStoreFromFS = CustomerStore.Companion.readFile(get(pathForTestOutput + "/Customers.xls"), 0);
+        List<Customer> customers = updatedCustomerStoreFromFS.getCustomers();
+        Customer customerUnderTest = customers.get(customers.size() -1);
 
         assertThat(customerUnderTest.getName(), is("Friendly Customer"));
         assertThat(customerUnderTest.getPostcode(), is("a postcode"));
@@ -172,18 +173,18 @@ public class ControllerTest {
 
     @Test
     public void can_find_customer_using_exact_name() throws Exception {
-        Option<Customer> foundCustomer = controller.findCustomer("some customer");
+        Customer foundCustomer = controller.findCustomer("some customer");
 
-        assertThat(foundCustomer.get().getName(), is("some customer"));
-        assertThat(foundCustomer.get().getPostcode(), is("P05T C0D3"));
-        assertThat(foundCustomer.get().getAccountCode(), is("798"));
+        assertThat(foundCustomer.getName(), is("some customer"));
+        assertThat(foundCustomer.getPostcode(), is("P05T C0D3"));
+        assertThat(foundCustomer.getAccountCode(), is("798"));
     }
 
     @Test
     public void cannot_find_any_customers_if_customer_name_does_not_match_exactly() throws Exception {
-        Option<Customer> missingCustomer = controller.findCustomer("I don't exist");
+        Customer missingCustomer = controller.findCustomer("I don't exist");
 
-        assertThat(missingCustomer, is(none()));
+        assertNull(missingCustomer);
     }
 
     private void cleanDirectory(Path pathForTestOutput) {
