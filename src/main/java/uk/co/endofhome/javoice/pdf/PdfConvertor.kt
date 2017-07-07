@@ -1,6 +1,5 @@
 package uk.co.endofhome.javoice.pdf
 
-import com.googlecode.totallylazy.Sequences.sequence
 import uk.co.endofhome.javoice.Config
 import java.io.File
 import java.io.IOException
@@ -44,7 +43,7 @@ class PdfConvertor {
         val isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
         val libreOfficeProgram = if (isWindows) "soffice.exe" else "./soffice"
 
-        val command = sequence(
+        val command = mutableListOf(
             libreOfficeProgram,
             "--headless",
             "--convert-to",
@@ -52,7 +51,7 @@ class PdfConvertor {
             invoiceFilePath.toString(),
             "--outdir",
             Config.invoicePdfFileOutputPath().toString()
-        ).toList()
+        )
 
         if (isWindows) {
             command.add(0, "cmd.exe")
