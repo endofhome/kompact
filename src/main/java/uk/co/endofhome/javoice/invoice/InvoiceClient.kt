@@ -47,15 +47,15 @@ class InvoiceClient private constructor(private var workBook: HSSFWorkbook, priv
 
     @Throws(IOException::class)
     fun readFile(filePath: String, vararg sheetsToGet: Int): Invoice {
-        if (sheetsToGet.size == 1) {
-            val invoiceSheet = getSingleSheetFromPath(Paths.get(filePath), sheetsToGet[0])
-            val customerDetails = getCustomerSectionFrom(invoiceSheet)
-            val orderRefs = getOrderRefsSectionFrom(invoiceSheet)
-            val invoiceNumber = getInvoiceNumberFrom(invoiceSheet)
-            val itemLines = getItemLinesFrom(invoiceSheet)
-            return buildInvoice(invoiceNumber, customerDetails, orderRefs, itemLines)
+        require(sheetsToGet.size == 1) { "Sorry, simultaneously reading in multiple sheets from one file is not yet supported." }
+
+        return getSingleSheetFromPath(Paths.get(filePath), sheetsToGet[0]).let {
+            val customerDetails = getCustomerSectionFrom(it)
+            val orderRefs = getOrderRefsSectionFrom(it)
+            val invoiceNumber = getInvoiceNumberFrom(it)
+            val itemLines = getItemLinesFrom(it)
+            buildInvoice(invoiceNumber, customerDetails, orderRefs, itemLines)
         }
-        throw RuntimeException("Sorry, simultaneously reading in multiple sheets from one file is not yet supported.")
     }
 
     @Throws(IOException::class)
