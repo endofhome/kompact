@@ -2,6 +2,11 @@
 
 # Kompact
 
+__Abandoned__
+
+I was writing this with a specific user in mind who no longer had time to test it, so made a decision to abandon the project.
+
+
 A work-in-progress bookkeeping package originally written in Java (and leaning on the [TotallyLazy](https://github.com/bodar/totallylazy) functional library), but now being ported to Kotlin.
 
 I started writing this as a way to learn how to write a 'large' application, to cement my understanding of Java, TotallyLazy (which I was using at work), to experiment with design patterns, approaches to testing etc. The fact that it would take the form of a native application (running on the Java 8 runtime) and I would learn a bit JavaFX was appealing but not essential. Though I didn't know what I was doing when I started out, I figured that the worst thing that would happen is that I would generate a big ball of legacy code that I could spend future hours refactoring (and therefore honing those skills), which is more or less what has happened.
